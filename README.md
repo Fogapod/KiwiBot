@@ -1,0 +1,2 @@
+# BotMyBot
+A discord bot
