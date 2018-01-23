@@ -1,6 +1,6 @@
 from commands.commandbase import CommandBase
 
-from utils import PREFIXES, ACCESS_LEVEL_NAMES
+from utils.constants import PREFIXES, ACCESS_LEVEL_NAMES
 
 import random
 
@@ -13,11 +13,14 @@ class Command(CommandBase):
 
     name = 'help'
     keywords = (name, )
-    arguments_required = 1
+    arguments_required = 0
     protection = 0
 
     async def on_call(self, message):
     	args = message.content.split()
+
+    	if len(args) == 1:
+    		return 'Available commands `' + ', '.join(sorted(list(self.bot.cm.commands))) + '`'
 
     	command = None
 
@@ -30,7 +33,7 @@ class Command(CommandBase):
 
     	help_text = await command.on_doc_request()
 
-    	if help_text:
+    	if help_text is not None:
     		return help_text
 
     	return await self.fornmat_help(command.__doc__, command)

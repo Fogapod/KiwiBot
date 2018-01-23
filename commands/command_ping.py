@@ -15,8 +15,15 @@ class Command(CommandBase):
     protection = 0
 
     async def on_call(self, message):
-        delta = time.time() - time.mktime(message.timestamp.timetuple())
-        result = 'Pong, it took `' + str(int(round(delta / 1000))) + 'ms`'
+        start_time = time.time()
+
+        ping_message = await self.bot.send_message(
+            message.channel, 'Pinging ...')
+
+        delta = int(round((time.time() - start_time) * 1000))
+        result = 'Pong, it took `' + str(delta) + 'ms`'
+
         args = message.content.strip().split(' ')
         result += ' to ping `' + ' '.join(args[1:]) + '`' if args[1:] else ''
-        return result
+
+        await self.bot.edit_message(ping_message, result)

@@ -1,9 +1,8 @@
 from commands.commandbase import CommandBase
 
-from io import StringIO
+from utils.formatters import format_response
 
-import traceback
-import sys
+import asyncio
 
 
 class Command(CommandBase):
@@ -15,33 +14,43 @@ class Command(CommandBase):
     name = 'eval'
     keywords = (name, 'exec')
     arguments_required = 0
-    protection = 3
+    protection = 2
 
     async def on_call(self, message):
-        command = ' '.join(message.content.strip().split(' ')[1:])
+        program = ' '.join(message.content.strip().split(' ')[1:])
+        command = ['python', '-c', program]
 
-        if not command:
-            return '❗ Empty command'
-
-        error = ''
-
-        sys.stdout = StringIO()
-
-        try:
-            exec(command)
-        except:
-            error = traceback.format_exc()
-
-        response = sys.stdout.getvalue()
-
-        sys.stdout.close()
-        sys.stdout = sys.__stdout__
-
-        if error:
-            response += '\nSTDERR: ' + error
-
+        couroutine = self.run_command(message, *command)
+        task = self.bot.loop.create_task(couroutine)
+        response, eval_message = await task
 
         if not response.strip():
             response = 'Evaluated'
+        else:
+            response = await format_response(response, message, self.bot)
 
-        return '```\n' + response + '```'
+        await self.bot.edit_message(eval_message, '```\n' + response + '```')
+
+        return 
+
+
+    async def run_command(self, message, *args):
+        process = await asyncio.create_subprocess_exec(
+            *args, stdout=asyncio.subprocess.PIPE,
+                   stderr=asyncio.subprocess.PIPE
+        )
+
+        print('Started task:', args, '(pid = ' + str(process.pid) + ')')
+        eval_message = await self.bot.send_message(
+            message.channel, 'Started task with pid `' + str(process.pid) + '`')
+
+        stdout, stderr = await process.communicate()
+
+        print('Completed:', args, '(pid = ' + str(process.pid) + ')')
+
+        result = stdout.decode().strip()
+
+        if process.returncode != 0:
+            result += '\n' + stderr.decode()
+
+        return result, eval_message
