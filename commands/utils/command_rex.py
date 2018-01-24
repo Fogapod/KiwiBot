@@ -97,9 +97,9 @@ class Command(CommandBase):
 
     async def on_call(self, msg):
         params = {
-            'LanguageChoice': 24,
-            'Program': '',
-            'CompilerArgs': ''
+            'LanguageChoice': '',
+            'Program':        '',
+            'CompilerArgs':   ''
         }
 
         args = msg.content.split(' ')
@@ -118,12 +118,14 @@ class Command(CommandBase):
             return result.strip()
 
         if args[1].isdigit():
-            params['LanguageChoice'] = int(args[1])
+            lang_code = int(args[1])
+            if lang_code in LANG_CODES.values():
+                params['LanguageChoice'] = lang_code
         else:
             params['LanguageChoice'] = LANG_CODES.get(args[1].lower(), '')
 
-            if not params['LanguageChoice']:
-                return '❗ Invalid language'
+        if not params['LanguageChoice']:
+            return '❗ Invalid language'
 
         params['CompilerArgs'] = COMPILE_OPTIONS.get(params['LanguageChoice'], '')
 

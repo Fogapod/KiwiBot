@@ -1,8 +1,9 @@
 from commands.commandbase import CommandBase
 
-from utils.formatters import format_response
-
+import io
+import sys
 import asyncio
+import traceback
 
 
 class Command(CommandBase):
@@ -12,45 +13,39 @@ class Command(CommandBase):
     {protection} or higher permission level required to use"""
 
     name = 'eval'
-    keywords = (name, 'exec')
+    keywords = (name, )
     arguments_required = 0
     protection = 2
 
     async def on_call(self, message):
         program = ' '.join(message.content.strip().split(' ')[1:])
-        command = ['python', '-c', program]
+        
+        result = await self.bot.loop.run_in_executor(
+            None, self.exec_code, program, message)
 
-        couroutine = self.run_command(message, *command)
-        task = self.bot.loop.create_task(couroutine)
-        response, eval_message = await task
+        return '```\n' + (result if result else 'Evaluated') + '```'
 
-        if not response.strip():
-            response = 'Evaluated'
-        else:
-            response = await format_response(response, message, self.bot)
+    def exec_code(self, code, message):
+        try:
+            sys.stdout = fake_stdout = io.StringIO()
 
-        await self.bot.edit_message(eval_message, '```\n' + response + '```')
+            try:
+                exec(code)
+            except:
+                tb = traceback.format_exc()
+            else:
+                tb = ''
 
-        return 
+            stdout_text = fake_stdout.getvalue()
 
+            response = stdout_text
 
-    async def run_command(self, message, *args):
-        process = await asyncio.create_subprocess_exec(
-            *args, stdout=asyncio.subprocess.PIPE,
-                   stderr=asyncio.subprocess.PIPE
-        )
+            if tb:
+                response += '\n' + tb
 
-        print('Started task:', args, '(pid = ' + str(process.pid) + ')')
-        eval_message = await self.bot.send_message(
-            message.channel, 'Started task with pid `' + str(process.pid) + '`')
+            sys.stdout.close()
 
-        stdout, stderr = await process.communicate()
+        finally:
+            sys.stdout = sys.__stdout__
 
-        print('Completed:', args, '(pid = ' + str(process.pid) + ')')
-
-        result = stdout.decode().strip()
-
-        if process.returncode != 0:
-            result += '\n' + stderr.decode()
-
-        return result, eval_message
+        return response

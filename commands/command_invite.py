@@ -13,4 +13,4 @@ class Command(CommandBase):
     protection = 0
 
     async def on_call(self, message):
-    	return 'Invite me to your server by this link: https://discordapp.com/api/oauth2/authorize?client_id=394793577160376320&permissions=8&scope=bot\nContact developar: https://discord.gg/TNXn8R7'
+    	return 'Invite me to your server by this link: https://discordapp.com/api/oauth2/authorize?client_id=394793577160376320&permissions=1141172288&scope=bot\nContact developar: https://discord.gg/TNXn8R7'

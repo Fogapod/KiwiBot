@@ -21,7 +21,9 @@ class Command(CommandBase):
         target = args[1].lower()
 
         reload_message = await self.bot.send_message(
-            message.channel, 'Reloading `' + target + '` ...')
+            message.channel, 'Reloading `' + target + '` ...',
+            response_to=message
+        )
 
         if target == 'all':
             await self.bot.edit_message(reload_message, '[WIP]')

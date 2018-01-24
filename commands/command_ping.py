@@ -18,7 +18,7 @@ class Command(CommandBase):
         start_time = time.time()
 
         ping_message = await self.bot.send_message(
-            message.channel, 'Pinging ...')
+            message.channel, 'Pinging ...', response_to=message)
 
         delta = int(round((time.time() - start_time) * 1000))
         result = 'Pong, it took `' + str(delta) + 'ms`'

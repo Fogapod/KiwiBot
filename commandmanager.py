@@ -26,11 +26,13 @@ class CommandManager(object):
 
     	for command_path in commands_found:
     		command_name = command_path[command_path.rfind(os.sep) + 9:-3]
-    		self.commands[command_name], self._modules[command_name] = self.load_command(command_path)
+    		self.commands[command_name], self._modules[command_name] = \
+    			self.load_command(command_path)
     		self.commands[command_name].on_load()
 
     def load_command(self, command_path):
-    	module = __import__(command_path.replace(os.sep, '.')[:-3], fromlist=['Command'])
+    	module = __import__(
+    		command_path.replace(os.sep, '.')[:-3], fromlist=['Command'])
     	return getattr(module, 'Command')(self.bot), module
 
     def reload_commands(self):

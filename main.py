@@ -1,4 +1,5 @@
 import time
+import asyncio
 import traceback
 
 from discord import Client
@@ -21,6 +22,7 @@ class BotMyBot(Client):
         self.cm.load_commands()
 
         self.recieved_messages_queue = {}
+        self.loop.create_task(self.recieved_messages_queue_background_cleaner())
 
     def run(self, token=None):
         if token is None:
@@ -42,9 +44,11 @@ class BotMyBot(Client):
             return
 
         if message.server is None:
-            await self.send_message(message.channel, 'Personal messages are not supported yet')
+            await self.send_message(
+                message.channel, 'Personal messages are not supported yet')
 
-        self.recieved_messages_queue[message.id] = (None, 5)
+        if message.id not in self.recieved_messages_queue:
+            self.recieved_messages_queue[message.id] = [None, 5]
 
         lower_content = message.content.lower()
 
@@ -57,19 +61,61 @@ class BotMyBot(Client):
         command_response = await self.cm.check_commands(message)
 
         if command_response:
-            command_response = await format_response(command_response, message, self)
+            command_response = await format_response(
+                command_response, message, self)
 
         if command_response:
-            await self.send_message(message.channel, command_response)
+            await self.send_message(
+                message.channel, command_response, response_to=message)
 
-    async def send_message(self, destination, *args, **kwargs):
+    async def on_message_edit(self, before, after):
+        if before.id in self.recieved_messages_queue:
+            if self.recieved_messages_queue[before.id][0] is not None:
+                await self.delete_message(
+                    self.recieved_messages_queue[before.id][0])
+                self.recieved_messages_queue[before.id][0] = None
+            await self.on_message(after)
+
+    async def on_message_delete(self, message):
+        if message.id in self.recieved_messages_queue:
+            if self.recieved_messages_queue[message.id][0] is not None:
+                await self.delete_message(
+                    self.recieved_messages_queue[message.id][0])
+                self.recieved_messages_queue[message.id][0] = None
+
+
+    async def send_message(self, destination, *args, response_to=None, **kwargs):
         try:
-            return await super(BotMyBot, self).send_message(destination, *args, **kwargs)
+            message = await super(BotMyBot, self).send_message(
+                destination, *args, **kwargs)
         except Exception:
             exception = traceback.format_exc()
             exception = '\n'.join(exception.split('\n')[-4:])
             exception = '❗ Message delivery failed\n```\n' + exception + '```'
-            return await super(BotMyBot, self).send_message(destination, exception)
+            message = await super(BotMyBot, self).send_message(
+                destination, exception)
+        finally:
+            if response_to is not None:
+                await self.register_response(response_to, message)
+
+            return message
+
+    async def register_response(self, request, response):
+        if request.id in self.recieved_messages_queue:
+            self.recieved_messages_queue[request.id][0] = response
+        else:
+            print('Request outdated, not registering')
+
+    async def recieved_messages_queue_background_cleaner(self):
+        await self.wait_until_ready()
+        while not self.is_closed:
+            for mid, [response, timer] in self.recieved_messages_queue.copy().items():
+                if timer == 0:
+                    del self.recieved_messages_queue[mid]
+                else:
+                    self.recieved_messages_queue[mid][1] -= 1
+
+            await asyncio.sleep(60)
 
 
 if __name__ == '__main__':
