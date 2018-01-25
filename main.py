@@ -100,7 +100,7 @@ class BotMyBot(Client):
 
     async def track_message(self, message):
         self.tracked_messages[message.id] = None
-        self.loop.call_later(10, self.release_tracked_message, message.id)
+        self.loop.call_later(300, self.release_tracked_message, message.id)
 
     def release_tracked_message(self, message_id):
         del self.tracked_messages[message_id]
