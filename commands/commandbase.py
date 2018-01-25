@@ -18,7 +18,7 @@ class CommandBase(object):
 
     @property
     def permission_denied_text(self):
-        return '{error} Access demied. Minimum access level to use command is `' + self.name + '`'
+        return '{error} Access demied. Minimum access level to use command is `' + self.protection + '`'
 
     def on_load(self):
         pass
