@@ -21,8 +21,7 @@ class BotMyBot(Client):
         self.cm = CommandManager(self)
         self.cm.load_commands()
 
-        self.recieved_messages_queue = {}
-        self.loop.create_task(self.recieved_messages_queue_background_cleaner())
+        self.tracked_messages = {}
 
     def run(self, token=None):
         if token is None:
@@ -39,7 +38,7 @@ class BotMyBot(Client):
         if previous_status:
             await self.change_presence(game=Game(name=previous_status))
 
-    async def on_message(self, message):
+    async def on_message(self, message, from_edit=False):
         if message.author.bot:
             return
 
@@ -47,8 +46,8 @@ class BotMyBot(Client):
             await self.send_message(
                 message.channel, 'Personal messages are not supported yet')
 
-        if message.id not in self.recieved_messages_queue:
-            self.recieved_messages_queue[message.id] = [None, 5]
+        if not from_edit:
+            await self.track_message(message)
 
         lower_content = message.content.lower()
 
@@ -69,19 +68,18 @@ class BotMyBot(Client):
                 message.channel, command_response, response_to=message)
 
     async def on_message_edit(self, before, after):
-        if before.id in self.recieved_messages_queue:
-            if self.recieved_messages_queue[before.id][0] is not None:
-                await self.delete_message(
-                    self.recieved_messages_queue[before.id][0])
-                self.recieved_messages_queue[before.id][0] = None
-            await self.on_message(after)
+        if before.id in self.tracked_messages:
+            if self.tracked_messages[before.id] is not None:
+                await self.delete_message(self.tracked_messages[before.id])
+                self.tracked_messages[before.id] = None
+
+            await self.on_message(after, from_edit=True)
 
     async def on_message_delete(self, message):
-        if message.id in self.recieved_messages_queue:
-            if self.recieved_messages_queue[message.id][0] is not None:
-                await self.delete_message(
-                    self.recieved_messages_queue[message.id][0])
-                self.recieved_messages_queue[message.id][0] = None
+        if message.id in self.tracked_messages:
+            if self.tracked_messages[message.id] is not None:
+                await self.delete_message(self.tracked_messages[message.id])
+                self.tracked_messages[message.id] = None
 
 
     async def send_message(self, destination, *args, response_to=None, **kwargs):
@@ -100,22 +98,18 @@ class BotMyBot(Client):
 
             return message
 
+    async def track_message(self, message):
+        self.tracked_messages[message.id] = None
+        self.loop.call_later(10, self.release_tracked_message, message.id)
+
+    def release_tracked_message(self, message_id):
+        del self.tracked_messages[message_id]
+
     async def register_response(self, request, response):
-        if request.id in self.recieved_messages_queue:
-            self.recieved_messages_queue[request.id][0] = response
+        if request.id in self.tracked_messages:
+            self.tracked_messages[request.id] = response
         else:
             print('Request outdated, not registering')
-
-    async def recieved_messages_queue_background_cleaner(self):
-        await self.wait_until_ready()
-        while not self.is_closed:
-            for mid, [response, timer] in self.recieved_messages_queue.copy().items():
-                if timer == 0:
-                    del self.recieved_messages_queue[mid]
-                else:
-                    self.recieved_messages_queue[mid][1] -= 1
-
-            await asyncio.sleep(60)
 
 
 if __name__ == '__main__':
