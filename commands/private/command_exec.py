@@ -26,7 +26,7 @@ class Command(CommandBase):
         response, eval_message = await task
 
         if not response.strip():
-            response = 'Evaluated'
+            response = 'Executed'
         else:
             response = await format_response(response, message, self.bot)
 
