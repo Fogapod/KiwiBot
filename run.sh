@@ -9,7 +9,7 @@ while true; do
         break
     fi
 
-    # git reset --hard
+    git reset --hard
     git pull origin master
 
     for second in {10..1}
