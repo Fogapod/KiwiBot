@@ -1,6 +1,4 @@
 async def format_response(response, message, bot):
-    response = response.replace(bot.token, 'my-token')
-
     format_dict = {}
 
     if '{warning}' in response:

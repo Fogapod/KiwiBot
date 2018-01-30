@@ -1,6 +1,8 @@
 AUTHOR_ID = '253384991940149249'
 BOT_ID    = '394793577160376320'
 
-PREFIXES = ('+', 'w!', '<@' + BOT_ID + '>')
+PREFIXES = ('+', 'w!', '<@' + BOT_ID + '>', '<!@' + BOT_ID + '>')
 
 ACCESS_LEVEL_NAMES = {2: 'BOT_OWNER', 1: 'SERVER_ADMIN', 0: 'USER'}
+
+STOP_EXIT_CODE = 2

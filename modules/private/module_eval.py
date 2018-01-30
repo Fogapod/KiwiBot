@@ -1,4 +1,4 @@
-from commands.commandbase import CommandBase
+from modules.modulebase import ModuleBase
 
 import io
 import sys
@@ -8,7 +8,7 @@ import traceback
 import textwrap
 from contextlib import redirect_stdout
 
-class Command(CommandBase):
+class Module(ModuleBase):
     """{prefix}{keywords} <code>
     
     Eval python code.
@@ -19,13 +19,14 @@ class Command(CommandBase):
     arguments_required = 0
     protection = 2
 
-    def on_load(self):
+    async def on_load(self):
         self._last_result = None
 
-    async def on_call(self, message):
-        program = ' '.join(message.content.strip().split(' ')[1:])
+    async def on_call(self, message, *args):
+        program = message.content[message.content.index(args[0]) + len(args[0]):].strip()
 
         glob = {
+            'self': self,
             'bot': self.bot,
             'message': message,
             '_': self._last_result

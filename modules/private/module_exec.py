@@ -1,4 +1,4 @@
-from commands.commandbase import CommandBase
+from modules.modulebase import ModuleBase
 
 from utils.formatters import format_response
 
@@ -6,7 +6,7 @@ import asyncio
 import shlex
 
 
-class Command(CommandBase):
+class Module(ModuleBase):
     """{prefix}{keywords} <code>
     
     Exec terminal command.
@@ -17,9 +17,9 @@ class Command(CommandBase):
     arguments_required = 0
     protection = 2
 
-    async def on_call(self, message):
-        if message.content.startswith('exec2'):
-            command = message.content[5:]
+    async def on_call(self, message, *args):
+        if args[0].lower() == 'exec2':
+            command = ' '.join(args[1:])
             process, pid = await self.create_subprocess_shell(command)
         else:
             command = shlex.split(message.content)[1:]
