@@ -101,10 +101,11 @@ class BotMyBot(discord.Client):
                 self.tracked_messages[message.id] = None
 
 
-    async def send_message(self, destination, text, *args, response_to=None, **kwargs):
+    async def send_message(self, destination, text, *args, response_to=None, parse_content=True, **kwargs):
         text = text.replace(self.token, 'my-token')
-        text = text.replace('@everyone', '@\u200beveryone')
-        text = text.replace('@here', '@\u200bhere')
+        if parse_content:
+            text = text.replace('@everyone', '@\u200beveryone')
+            text = text.replace('@here', '@\u200bhere')
 
         try:
             message = await super(BotMyBot, self).send_message(
@@ -121,10 +122,11 @@ class BotMyBot(discord.Client):
 
             return message
 
-    async def edit_message(self, message, text, *args, **kwargs):
+    async def edit_message(self, message, text, *args, parse_content=True, **kwargs):
         message.content = message.content.replace(self.token, 'my-token')
-        message.content = message.content.replace('@everyone', '@\u200beveryone')
-        message.content = message.content.replace('@here', '@\u200bhere')
+        if parse_content:
+            message.content = message.content.replace('@everyone', '@\u200beveryone')
+            message.content = message.content.replace('@here', '@\u200bhere')
 
         try:
             return await super(BotMyBot, self).edit_message(

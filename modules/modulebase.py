@@ -16,7 +16,7 @@ class ModuleBase(object):
 
     @property
     def not_enough_arguments_text(self):
-        return '{warning} Not enough arguments to call ' 
+        return '{warning} Not enough arguments to call ' + self.name
 
     @property
     def permission_denied_text(self):
