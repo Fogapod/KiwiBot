@@ -27,6 +27,7 @@ class Module(ModuleBase):
         response += '{0}y '.format(int(years)) if years else ''
         response += '{0}mon '.format(int(months)) if months else ''
         response += '{0}d '.format(int(days)) if days else ''
+        response += '{0}h '.format(int(hours)) if hours else ''
         response += '{0}m '.format(int(minutes)) if minutes else ''
         response += '{0}s**'.format(int(seconds))
 
