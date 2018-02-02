@@ -26,7 +26,7 @@ class Module(ModuleBase):
             process, pid = await self.create_subprocess_exec(*command)
         
         start_message = await self.bot.send_message(
-            message.channel, 'Started task with pid `' + pid + '`',
+            message, 'Started task with pid `' + pid + '`',
             response_to=message
         )
 
@@ -44,7 +44,8 @@ class Module(ModuleBase):
         else:
             response = await format_response(result, message, self.bot)
 
-        await self.bot.edit_message(start_message, '```\n' + response + '```')
+        await self.bot.edit_message(
+            start_message, content='```\n' + response + '```')
 
     async def create_subprocess_shell(self, program):
         process = await asyncio.create_subprocess_shell(

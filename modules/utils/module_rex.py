@@ -1,6 +1,6 @@
 from modules.modulebase import ModuleBase
 
-import aiohttp
+from aiohttp import ClientSession
 
 REX_API_URL = 'http://rextester.com/rundotnet/api'
 
@@ -130,7 +130,7 @@ class Module(ModuleBase):
         params['CompilerArgs'] = COMPILE_OPTIONS.get(params['LanguageChoice'], '')
         params['Program'] = msg.content[msg.content.find(args[1]) + len(args[1]):].strip()
 
-        async with self.bot.session as s:
+        async with ClientSession() as s:
             async with s.post(REX_API_URL, params=params) as r:
                 if r.status == 200:
                     result_json = await r.json()

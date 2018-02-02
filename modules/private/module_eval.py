@@ -16,7 +16,7 @@ class Module(ModuleBase):
 
     name = 'eval'
     keywords = (name, )
-    arguments_required = 0
+    arguments_required = 1
     protection = 2
 
     async def on_load(self):

@@ -3,23 +3,20 @@ import asyncio
 import time
 import sys
 
-from aiohttp import ClientSession
-
 import discord
 
 from modulemanager import ModuleManager
 
-from utils.constants import PREFIXES
+from utils.constants import PREFIXES, STOP_EXIT_CODE
 from utils.formatters import format_response
 from utils.config import Config
 
 
 class BotMyBot(discord.Client):
 
-    def __init__(self, start_time, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(BotMyBot, self).__init__(*args, **kwargs)
-        self.start_time = start_time
-        self.session = ClientSession()
+        self.start_time = 0
 
         self.config = Config('config.json', loop=self.loop)
         self.token = self.config['token']
@@ -38,24 +35,26 @@ class BotMyBot(discord.Client):
     async def restart(self):
         await self.stop(0)
 
-    async def stop(self, exit_code=0):
+    async def stop(self, exit_code=STOP_EXIT_CODE):
         await self.close()
         sys.exit(exit_code)
 
     async def on_ready(self):
         await self.mm.load_modules()
         print('Loaded modules: [%s]' % ' '.join(self.mm.modules.keys()))
+        self.start_time = time.time()
         print('Ready')
 
     async def close(self):
         await super(BotMyBot, self).close()
+        self.mm.unload_modules()
         print('Closed')
 
     async def on_message(self, message, from_edit=False):
         if message.author.bot:
             return
 
-        if message.server is None:
+        if message.guild is None:
             await self.send_message(
                 message.channel, 'Personal messages are not supported yet')
 
@@ -81,7 +80,7 @@ class BotMyBot(discord.Client):
 
         if module_response:
             await self.send_message(
-                message.channel, module_response, response_to=message)
+                message, module_response, response_to=message)
 
     async def on_message_edit(self, before, after):
         if before.content == after.content:
@@ -101,36 +100,33 @@ class BotMyBot(discord.Client):
                 self.tracked_messages[message.id] = None
 
 
-    async def send_message(self, destination, text, *args, response_to=None, parse_content=True, **kwargs):
+    async def send_message(self, msg, text, response_to=None, parse_content=True, **kwargs):
         text = text.replace(self.token, 'my-token')
         if parse_content:
             text = text.replace('@everyone', '@\u200beveryone')
             text = text.replace('@here', '@\u200bhere')
 
         try:
-            message = await super(BotMyBot, self).send_message(
-                destination, text, *args, **kwargs)
+            message = await msg.channel.send(text, **kwargs)
         except Exception:
             exception = traceback.format_exc()
             exception = '\n'.join(exception.split('\n')[-4:])
             exception = '❗ Message delivery failed\n```\n' + exception + '```'
-            message = await super(BotMyBot, self).send_message(
-                destination, exception)
+            message = await msg.channel.send(exception)
         finally:
             if response_to is not None:
                 await self.register_response(response_to, message)
 
             return message
 
-    async def edit_message(self, message, text, *args, parse_content=True, **kwargs):
+    async def edit_message(self, message, parse_content=True, **fields):
         message.content = message.content.replace(self.token, 'my-token')
         if parse_content:
             message.content = message.content.replace('@everyone', '@\u200beveryone')
             message.content = message.content.replace('@here', '@\u200bhere')
 
         try:
-            return await super(BotMyBot, self).edit_message(
-                message, text, *args, **kwargs)
+            return await message.edit(**fields)
         except discord.errors.NotFound:
             print('edit_message: message not found')
             return
@@ -138,12 +134,11 @@ class BotMyBot(discord.Client):
             exception = traceback.format_exc()
             exception = '\n'.join(exception.split('\n')[-4:])
             exception = '❗ Message edit failed\n```\n' + exception + '```'
-            return await super(BotMyBot, self).edit_message(
-                message, exception, *args, **kwargs)
+            return await message.edit(exception)
     
-    async def delete_message(self, *args, **kwargs):
+    async def delete_message(self, message):
         try:
-            return await super(BotMyBot, self).delete_message(*args, **kwargs)
+            return await message.delete()
         except discord.errors.NotFound:
             print('delete_message: message not found')
             return
@@ -163,4 +158,4 @@ class BotMyBot(discord.Client):
 
 
 if __name__ == '__main__':
-    BotMyBot(time.time()).run()
+    BotMyBot().run()

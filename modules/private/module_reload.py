@@ -7,7 +7,7 @@ class Module(ModuleBase):
     Reload parts of the bot.
 
     Targets:
-        bot: restarts bot [WIP]
+        bot: restarts bot
         modules: reloads all modules
         <command_name>: reload selected module
 
@@ -22,13 +22,13 @@ class Module(ModuleBase):
         target = args[1].lower()
 
         reload_message = await self.bot.send_message(
-            message.channel, 'Reloading `' + target + '` ...',
+            message, 'Reloading `' + target + '` ...',
             response_to=message
         )
 
         if target == 'bot':
-            await self.bot.edit_message(reload_message, '[WIP]')
-            return
+            await messge.add_reaction('✅')
+            await self.bot.restart()
 
         elif target == 'modules':
             await self.bot.mm.reload_modules()
@@ -38,8 +38,8 @@ class Module(ModuleBase):
 
         else:
             await self.bot.edit_message(
-                reload_message, 'Unknown target `' + target + '`!')
+                reload_message, content='Unknown target `' + target + '`!')
             return
 
         await self.bot.edit_message(
-            reload_message, 'Reloading `' + target + '` completed')
+            reload_message, content='Reloading `' + target + '` completed')

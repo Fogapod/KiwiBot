@@ -14,16 +14,16 @@ class Module(ModuleBase):
     arguments_required = 0
     protection = 0
 
-    async def on_call(self, message, *args):
+    async def on_call(self, msg, *args):
         await self.bot.send_message(
-            message.channel,
+            msg,
             await format_response(
-                'Hello, {nick}. Please, send digit', message, self.bot),
-            response_to=message)
+                'Hello, {nick}. Please, send number', msg, self.bot),
+            response_to=msg)
 
-        user_answer = await self.bot.wait_for_message(
-            timeout=30,
-            author=message.author, check=lambda x: x.content.isdigit())
+        user_answer = await self.bot.wait_for(
+            'message', timeout=20,
+            check=lambda m: m.content.isdigit() and m.author == msg.author)
 
         if user_answer is None:
             return 'Answer took too long'

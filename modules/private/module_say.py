@@ -15,6 +15,6 @@ class Module(ModuleBase):
 
     async def on_call(self, message, *args):
         await self.bot.send_message(
-            message.channel, message.content[len(args[0]):].strip(),
+            message, message.content[len(args[0]):].strip(),
             parse_content=False
         )
