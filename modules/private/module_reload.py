@@ -27,7 +27,7 @@ class Module(ModuleBase):
         )
 
         if target == 'bot':
-            await messge.add_reaction('✅')
+            await message.add_reaction('✅')
             await self.bot.restart()
 
         elif target == 'modules':
