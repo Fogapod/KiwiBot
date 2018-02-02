@@ -59,6 +59,12 @@ class ModuleManager(object):
             self._modules[name] = reloaded
             self.modules[name] = module
 
+    async def unload_modules(self):
+        pass
+
+    async def unload_module(self, name):
+        pass
+        
     async def check_modules(self, message):
         args = message.content.split()
 

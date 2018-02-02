@@ -47,7 +47,7 @@ class BotMyBot(discord.Client):
 
     async def close(self):
         await super(BotMyBot, self).close()
-        self.mm.unload_modules()
+        await self.mm.unload_modules()
         print('Closed')
 
     async def on_message(self, message, from_edit=False):
