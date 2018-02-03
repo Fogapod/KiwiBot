@@ -12,8 +12,9 @@ class Module(ModuleBase):
     name = 'stop'
     keywords = (name, 'die')
     protection = 2
+    hidden = True
 
     async def on_call(self, message, *args):
         await message.add_reaction('✅')
         exit_code = args[1] if len(args) == 2 else STOP_EXIT_CODE
-        await self.bot.stop(exit_code)
+        self.bot.stop(exit_code)

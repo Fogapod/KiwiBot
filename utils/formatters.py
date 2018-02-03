@@ -6,7 +6,7 @@ async def format_response(response, message, bot):
     if '{error}' in response:
         format_dict['error'] = '⛔'
     if '{server}' in response:
-        format_dict['server'] = message.server.name
+        format_dict['server'] = message.guild.name
     if '{channel}' in response:
         format_dict['channel'] = message.channel.name
     if '{channel_name}' in response:

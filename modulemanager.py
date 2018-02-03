@@ -26,8 +26,12 @@ class ModuleManager(object):
                     modules_found.append(path + os.sep + f)
 
         for module_path in modules_found:
-            module_name = module_path[module_path.rfind(os.sep) + 9:-3]
-            await self.load_module(module_path)
+            module_name = module_path[module_path.rfind(os.sep) + 8:-3]
+            try:
+                await self.load_module(module_path)
+            except Exception:
+                await self.unload_module(module_name)
+                raise ModuleLoadingException(module_name, module_path)
 
     async def load_module(self, module_path):
         try:
@@ -36,9 +40,7 @@ class ModuleManager(object):
             module = getattr(imported, 'Module')(self.bot)
             await module.on_load()
         except Exception:
-            print('Error loading module %s (%s)' % (
-                module_path[module_path.rfind(os.sep) + 8:-3], module_path))
-            print(traceback.format_exc())
+            raise ModuleLoadingException(module_path[module_path.rfind(os.sep) + 8:-3], module_path)
         else:
             self.modules[module.name] = module
             self._modules[module.name] = imported
@@ -48,23 +50,20 @@ class ModuleManager(object):
             await self.reload_module(name)
 
     async def reload_module(self, name):
-        try:
-            reloaded = reload(self._modules[name])
-            module = getattr(reloaded, 'Module')(self.bot)
-            await module.on_load()
-        except Exception:
-            print('Error reloading module %s' % name)
-            print(traceback.format_exc())
-        else:
-            self._modules[name] = reloaded
-            self.modules[name] = module
+        reloaded = reload(self._modules[name])
+        module = getattr(reloaded, 'Module')(self.bot)
+
+        await module.on_load()
+
+        self._modules[name] = reloaded
+        self.modules[name] = module
 
     async def unload_modules(self):
         pass
 
     async def unload_module(self, name):
         pass
-        
+
     async def check_modules(self, message):
         args = message.content.split()
 
@@ -72,7 +71,7 @@ class ModuleManager(object):
             if not await module.check_message(message, *args):
                 continue
 
-            if not await self.check_argument_count(module, len(args)):
+            if not self.check_argument_count(module, len(args)):
                 return module.not_enough_arguments_text
 
             if not await self.check_permissions(module, message):
@@ -80,8 +79,18 @@ class ModuleManager(object):
 
             return await module.on_call(message, *args)
 
-    async def check_argument_count(self, module, argc):
+    def check_argument_count(self, module, argc):
     	return argc - 1 >= module.arguments_required
 
     async def check_permissions(self, module, message):
     	return await get_user_access_level(message) >= module.protection
+
+
+class ModuleLoadingException(Exception):
+    def __init__(self, module_name, module_path):
+        self.module_name = module_name
+        self.module_path = module_path
+        super(ModuleLoadingException, self).__init__(self)
+
+    def __str__(self):
+        return 'Failed to load module {0} ({1})'.format(self.module_name, self.module_path)

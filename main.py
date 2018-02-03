@@ -11,6 +11,8 @@ from utils.constants import PREFIXES, STOP_EXIT_CODE
 from utils.formatters import format_response
 from utils.config import Config
 
+# import logging
+# logging.basicConfig(level=logging.DEBUG)
 
 class BotMyBot(discord.Client):
 
@@ -32,11 +34,11 @@ class BotMyBot(discord.Client):
 
         super(BotMyBot, self).run(token, reconnect=True)
 
-    async def restart(self):
-        await self.stop(0)
+    def restart(self):
+        self.stop(0)
 
-    async def stop(self, exit_code=STOP_EXIT_CODE):
-        await self.close()
+    def stop(self, exit_code=STOP_EXIT_CODE):
+        self.loop.stop()
         sys.exit(exit_code)
 
     async def on_ready(self):
@@ -134,7 +136,7 @@ class BotMyBot(discord.Client):
             exception = traceback.format_exc()
             exception = '\n'.join(exception.split('\n')[-4:])
             exception = '❗ Message edit failed\n```\n' + exception + '```'
-            return await message.edit(exception)
+            return await message.edit(content=exception)
     
     async def delete_message(self, message):
         try:

@@ -18,7 +18,12 @@ class Module(ModuleBase):
 
     async def on_call(self, message, *args):
         if len(args) == 1:
-            return 'Available modules are: `%s`' % ', '.join(sorted(list(self.bot.mm.modules)))
+            module_list = []
+            for name, module in self.bot.mm.modules.items():
+                if not module.hidden:
+                    module_list.append(name)
+
+            return 'Available modules are: `%s`' % ', '.join(module_list)
 
         module = None
 
