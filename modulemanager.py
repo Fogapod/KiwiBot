@@ -25,13 +25,22 @@ class ModuleManager(object):
                 if f.startswith('module_') and f.endswith('.py'):
                     modules_found.append(path + os.sep + f)
 
+        loaded_modules  = []
+        ignored_modules = []
+
         for module_path in modules_found:
             module_name = module_path[module_path.rfind(os.sep) + 8:-3]
             try:
                 await self.load_module(module_path)
-            except Exception:
-                await self.unload_module(module_name)
-                raise ModuleLoadingException(module_name, module_path)
+                loaded_modules.append(module_name)
+            except ModuleLoadingException:
+                try:
+                    await self.unload_module(module_name)
+                except Exception:
+                    pass
+
+                ignored_modules.append(module_name)
+        return loaded_modules, ignored_modules
 
     async def load_module(self, module_path):
         try:
@@ -41,19 +50,35 @@ class ModuleManager(object):
             await module.on_load()
         except Exception:
             raise ModuleLoadingException(module_path[module_path.rfind(os.sep) + 8:-3], module_path)
-        else:
-            self.modules[module.name] = module
-            self._modules[module.name] = imported
+
+        self.modules[module.name]  = module
+        self._modules[module.name] = imported
 
     async def reload_modules(self):
-        for name in self._modules:
-            await self.reload_module(name)
+        loaded_modules  = []
+        ignored_modules = []
+
+        for module_name in self.modules:
+            try:
+                await self.reload_module(module_name)
+                loaded_modules.append(module_name)
+            except ModuleLoadingException:
+                try:
+                    await self.unload_module(module_name)
+                except Exception:
+                    pass
+
+                ignored_modules.append(module_name)
+        return loaded_modules, ignored_modules
 
     async def reload_module(self, name):
-        reloaded = reload(self._modules[name])
-        module = getattr(reloaded, 'Module')(self.bot)
+        try:
+            reloaded = reload(self._modules[name])
+            module = getattr(reloaded, 'Module')(self.bot)
 
-        await module.on_load()
+            await module.on_load()
+        except Exception:
+            raise ModuleLoadingException(name, self._modules[name].__file__)
 
         self._modules[name] = reloaded
         self.modules[name] = module

@@ -8,7 +8,7 @@ import discord
 from modulemanager import ModuleManager
 
 from utils.constants import PREFIXES, STOP_EXIT_CODE
-from utils.formatters import format_response
+from utils.formatters import format_response, trim_message
 from utils.config import Config
 
 # import logging
@@ -107,6 +107,7 @@ class BotMyBot(discord.Client):
         if parse_content:
             text = text.replace('@everyone', '@\u200beveryone')
             text = text.replace('@here', '@\u200bhere')
+            text = trim_message(text)
 
         try:
             message = await msg.channel.send(text, **kwargs)
@@ -126,6 +127,7 @@ class BotMyBot(discord.Client):
         if parse_content:
             message.content = message.content.replace('@everyone', '@\u200beveryone')
             message.content = message.content.replace('@here', '@\u200bhere')
+            message.content = trim_message(message.content)
 
         try:
             return await message.edit(**fields)

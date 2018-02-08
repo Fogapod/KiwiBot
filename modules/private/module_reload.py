@@ -32,7 +32,6 @@ class Module(ModuleBase):
             message = await channel.get_message(bot_reload_message_id)
 
             await message.edit(content='Bot restarted')
-        #raise Exception(1)
 
     async def on_call(self, msg, *args):
         target = args[1].lower()
@@ -48,14 +47,18 @@ class Module(ModuleBase):
             self.bot.restart()
 
         elif target == 'modules':
-            await self.bot.mm.reload_modules()
+            loaded_modules, ignored_modules = await self.bot.mm.reload_modules()
+            await self.bot.edit_message(
+                reload_message, content='Reloaded {0} modules [{1}]\nCould not reload {2} modules [{3}]'.format(len(loaded_modules), ', '.join(loaded_modules), len(ignored_modules), ', '.join(ignored_modules)))
+            return
 
         elif target in self.bot.mm.modules:
             try:
                 await self.bot.mm.reload_module(target)
             except Exception:
                 await self.bot.edit_message(
-                reload_message, content='Failed to reload module `' + target + '`. Exception:```py\n' + traceback.format_exc() + '```')
+                    reload_message,
+                    content='Failed to reload module `' + target + '`. Exception:```py\n' + traceback.format_exc() + '```')
                 return
 
         else:

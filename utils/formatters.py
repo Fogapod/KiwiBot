@@ -27,6 +27,14 @@ async def format_response(response, message, bot):
     return lazy_format(response, **format_dict)
 
 
+def trim_message(text):
+    MAX_LEN = 2000
+    if len(text) > MAX_LEN:
+        return text[:997] + '\n...\n' + text[-998:]
+
+    return text
+
+
 def lazy_format(s, *args, **kwargs):
   while True:
     try:
