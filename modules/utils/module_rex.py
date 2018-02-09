@@ -97,12 +97,6 @@ class Module(ModuleBase):
     protection = 0
 
     async def on_call(self, msg, *args):
-        params = {
-            'LanguageChoice': '',
-            'Program':        '',
-            'CompilerArgs':   ''
-        }
-
         result = ''
 
         if args[1].lower() == 'list':
@@ -116,6 +110,12 @@ class Module(ModuleBase):
                     last_code = v
 
             return result.strip()
+
+        params = {
+            'LanguageChoice': '',
+            'Program':        '',
+            'CompilerArgs':   ''
+        }
 
         if args[1].isdigit():
             lang_code = int(args[1])
@@ -134,7 +134,8 @@ class Module(ModuleBase):
             async with s.post(REX_API_URL, params=params) as r:
                 if r.status == 200:
                     result_json = await r.json()
-                    result = result_json['Errors'] or result_json['Result']
+                    result  = result_json['Result'] or ''
+                    result += result_json['Errors'] or ''
                 else:
                     return '{error} Problem with rex response. Please, try again later'
 

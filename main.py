@@ -11,8 +11,6 @@ from utils.constants import PREFIXES, STOP_EXIT_CODE
 from utils.formatters import format_response, trim_message
 from utils.config import Config
 
-# import logging
-# logging.basicConfig(level=logging.DEBUG)
 
 class BotMyBot(discord.Client):
 
@@ -101,7 +99,6 @@ class BotMyBot(discord.Client):
                 await self.delete_message(self.tracked_messages[message.id])
                 self.tracked_messages[message.id] = None
 
-
     async def send_message(self, msg, text, response_to=None, parse_content=True, **kwargs):
         text = text.replace(self.token, 'my-token')
         if parse_content:
@@ -123,11 +120,15 @@ class BotMyBot(discord.Client):
             return message
 
     async def edit_message(self, message, parse_content=True, **fields):
-        message.content = message.content.replace(self.token, 'my-token')
-        if parse_content:
-            message.content = message.content.replace('@everyone', '@\u200beveryone')
-            message.content = message.content.replace('@here', '@\u200bhere')
-            message.content = trim_message(message.content)
+        content = fields.pop('content', '')
+        if content:
+            content = content.replace(self.token, 'my-token')
+            if parse_content:
+                content = content.replace('@everyone', '@\u200beveryone')
+                content = content.replace('@here', '@\u200bhere')
+                content = trim_message(content)
+
+            fields['content'] = content
 
         try:
             return await message.edit(**fields)
