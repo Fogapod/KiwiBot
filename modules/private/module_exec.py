@@ -30,9 +30,9 @@ class Module(ModuleBase):
             response_to=message
         )
 
-        print('Started  task:', command, '(pid = ' + pid + ')')
+        print('beg task:', command, '(pid = ' + pid + ')')
         stdout, stderr = await process.communicate()
-        print('Finiahed task:', command, '(pid = ' + pid + ')')
+        print('fin task:', command, '(pid = ' + pid + ')')
 
         result = stdout.decode().strip()
 
