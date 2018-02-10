@@ -2,7 +2,7 @@
 
 while true; do
     python3 main.py
-    
+
     if [ $? == 2 ];
     then
         echo "Terminate exit code recieved. Exiting"

@@ -12,6 +12,9 @@ from utils.formatters import format_response, trim_message
 from utils.config import Config
 
 
+EXIT_CODE = None
+
+
 class BotMyBot(discord.Client):
 
     def __init__(self, *args, **kwargs):
@@ -37,7 +40,12 @@ class BotMyBot(discord.Client):
 
     def stop(self, exit_code=STOP_EXIT_CODE):
         self.loop.stop()
-        sys.exit(exit_code)
+        self.logout()
+        tasks = asyncio.gather(*asyncio.Task.all_tasks(), loop=self.loop)
+        tasks.cancel()
+
+        global EXIT_CODE
+        EXIT_CODE = exit_code
 
     async def on_ready(self):
         await self.mm.load_modules()
@@ -164,3 +172,5 @@ class BotMyBot(discord.Client):
 
 if __name__ == '__main__':
     BotMyBot().run()
+    if EXIT_CODE is not None:
+        sys.exit(EXIT_CODE)
