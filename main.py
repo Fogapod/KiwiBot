@@ -48,8 +48,8 @@ class BotMyBot(discord.Client):
         EXIT_CODE = exit_code
 
     async def on_ready(self):
-        await self.mm.load_modules()
-        print('Loaded modules: [%s]' % ' '.join(self.mm.modules.keys()))
+        loaded, ignored = await self.mm.load_modules()
+        print('Loaded modules: [%s]' % ' '.join(loaded))
         self.start_time = time.time()
         print('Ready')
 

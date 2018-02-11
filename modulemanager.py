@@ -32,12 +32,14 @@ class ModuleManager(object):
             module_name = module_path[module_path.rfind(os.sep) + 8:-3]
             try:
                 await self.load_module(module_path)
-                loaded_modules.append(module_name)
             except ModuleLoadingException:
+                traceback.print_exc()
                 try:
                     await self.unload_module(module_name)
                 except Exception:
                     pass
+            else:
+                loaded_modules.append(module_name)
 
                 ignored_modules.append(module_name)
         return loaded_modules, ignored_modules
@@ -72,6 +74,11 @@ class ModuleManager(object):
         return loaded_modules, ignored_modules
 
     async def reload_module(self, name):
+        try:
+            await self._modules[name].on_unload()
+        except Exception:
+            pass
+
         try:
             reloaded = reload(self._modules[name])
             module = getattr(reloaded, 'Module')(self.bot)
