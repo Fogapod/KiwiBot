@@ -1,25 +1,25 @@
 from modules.modulebase import ModuleBase
 
 from utils.formatters import format_response
-from utils.helpers import create_subprocess_exec, execute_process
+from utils.helpers import create_subprocess_shell, execute_process
 
-import shlex
+import asyncio
 
 
 class Module(ModuleBase):
     """{prefix}{keywords} <code>
     
-    Exec terminal command.
+    Exec terminal command in a shell.
     {protection} or higher permission level required to use"""
 
-    name = 'exec'
+    name = 'exec2'
     keywords = (name, )
-    arguments_required = 1
+    arguments_required = 0
     protection = 2
 
     async def on_call(self, message, *args):
-        command = shlex.split(message.content)[1:]
-        process, pid = await create_subprocess_exec(*command)
+        command = ' '.join(args[1:])
+        process, pid = await create_subprocess_shell(command)
         
         start_message = await self.bot.send_message(
             message, 'Started task with pid `' + str(pid) + '`',
