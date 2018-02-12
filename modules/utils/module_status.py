@@ -3,14 +3,20 @@ from modules.modulebase import ModuleBase
 from discord import Game
 
 class Module(ModuleBase):
-    """{prefix}{keywords} <status>
-    
-    Set bot status.
+    """{prefix}{keywords} <type>* <status>
+
+    Update bot status.
+
+    Status types:
+        playing (default)
+        streaming
+        listening
+        watching
 
     {protection} or higher permission level required to use"""
 
     name = 'status'
-    keywords = (name, 'playing')
+    keywords = (name, )
     arguments_required = 0
     protection = 2
 
@@ -19,15 +25,34 @@ class Module(ModuleBase):
         return 'not dogsong or notsosuper'
 
     async def on_load(self):
-        previous_status = self.bot.config.get('previous_status', '')
+        last_status = self.bot.config.get('last_status', '')
+        last_status_type = self.bot.config.get('last_status_type', None)
 
-        if previous_status:
-            await self.bot.change_presence(game=Game(name=previous_status))
+        if last_status:
+            presence = Game(name=last_status, type=last_status_type)
+            await self.bot.change_presence(game=presence)
 
     async def on_call(self, message, *args):
-        status = message.content[len(args[0]):].strip()
+        if len(args) == 1:
+            status = message.content[len(args[0]):].strip()
+            presence = Game(name=status)
+        else:
+            subcommand = args[2].lower()
+            status = message.content[message.content.index(args[2]) + len(args[2]):].strip()
 
-        await self.bot.change_presence(game=Game(name=status))
-        await self.bot.config.put('previous_status', status)
+            if subcommand == 'playing':
+                presence = Game(name=status)
+            elif subcommand == 'streaming':
+                presence = Game(name=status, type=1)
+            elif subcommand == 'listening':
+                presence = Game(name=status, type=2)
+            elif subcommand == 'watching':
+                presence = Game(name=status, type=3)
+            else:
+                return '{warning} Unknown subcommand `' + subcommand + '`'
 
-        return 'Status changed to `' + status + '`' if status else 'Status removed'
+        await self.bot.change_presence(game=presence)
+        await self.bot.config.put('last_status', status)
+        await self.bot.config.put('last_status_type', presence.type)
+
+        return 'Status changed to `' + presence.name + '`' if presence.name else 'Status removed'
