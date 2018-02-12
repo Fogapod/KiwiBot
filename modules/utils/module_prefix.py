@@ -24,7 +24,7 @@ class Module(ModuleBase):
     async def on_call(self, message, *args):
         subcommand = args[0].lower()
         if subcommand == 'current':
-            return 'Current prefix is `' + self.bot.prefixes[0] + '`'
+            return 'Current prefix is `' + list(self.bot.prefixes)[0] + '`'
 
         if subcommand == 'update':
             if len(args) < 2:
@@ -35,7 +35,7 @@ class Module(ModuleBase):
                 if await get_user_access_level(self, message) < self.protection:
                     return self.permission_denied_text
 
-                self.bot.prefixes[0] = message.content[message.content.index(args[2]) + len(args[2]):].strip()
+                self.bot.prefixes = tuple(message.content[message.content.index(args[2]) + len(args[2]):].strip() + list(self.bot.prefixes))
             else:
                 return '{warning} Not implemented'
 
