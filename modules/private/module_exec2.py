@@ -14,7 +14,7 @@ class Module(ModuleBase):
 
     name = 'exec2'
     keywords = (name, )
-    arguments_required = 0
+    arguments_required = 1
     protection = 2
 
     async def on_call(self, message, *args):
