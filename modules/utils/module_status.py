@@ -3,7 +3,7 @@ from modules.modulebase import ModuleBase
 from discord import Game
 
 class Module(ModuleBase):
-    """{prefix}{keywords} <type>* <status>
+    """{prefix}{keywords} <type>* <status>*
 
     Update bot status.
 
@@ -12,6 +12,8 @@ class Module(ModuleBase):
         streaming
         listening
         watching
+    
+    *Leave empty to remove status
 
     {protection} or higher permission level required to use"""
 
@@ -34,8 +36,7 @@ class Module(ModuleBase):
 
     async def on_call(self, message, *args):
         if len(args) == 1:
-            status = message.content[len(args[0]):].strip()
-            presence = Game(name=status)
+            presence = Game(name='')
         else:
             subcommand = args[1].lower()
             status = message.content[message.content.index(args[1]) + len(args[1]):].strip()
@@ -49,7 +50,8 @@ class Module(ModuleBase):
             elif subcommand == 'watching':
                 presence = Game(name=status, type=3)
             else:
-                return '{warning} Unknown subcommand `' + subcommand + '`'
+                status = message.content[len(args[0]):].strip()
+                presence = Game(name=status)
 
         await self.bot.change_presence(game=presence)
         await self.bot.config.put('last_status', status)
