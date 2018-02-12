@@ -37,8 +37,8 @@ class Module(ModuleBase):
             status = message.content[len(args[0]):].strip()
             presence = Game(name=status)
         else:
-            subcommand = args[2].lower()
-            status = message.content[message.content.index(args[2]) + len(args[2]):].strip()
+            subcommand = args[1].lower()
+            status = message.content[message.content.index(args[1]) + len(args[1]):].strip()
 
             if subcommand == 'playing':
                 presence = Game(name=status)
