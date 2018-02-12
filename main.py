@@ -7,7 +7,7 @@ import discord
 
 from modulemanager import ModuleManager
 
-from utils.constants import PREFIXES, STOP_EXIT_CODE
+from utils.constants import DEFAULT_PREFIXES, STOP_EXIT_CODE
 from utils.formatters import format_response, trim_message
 from utils.config import Config
 
@@ -26,6 +26,7 @@ class BotMyBot(discord.Client):
 
         self.tracked_messages = {}
         self.mm = ModuleManager(self)
+        self.prefixes = DEFAULT_PREFIXES
 
     def run(self, token=None):
         if token is None:
@@ -71,11 +72,11 @@ class BotMyBot(discord.Client):
 
         lower_content = message.content.lower()
 
-        if not lower_content.startswith(PREFIXES):
+        if not lower_content.startswith(self.prefixes):
             return
 
         message.content = message.content[
-            len(next(p for p in PREFIXES if lower_content.startswith(p))):].strip()
+            len(next(p for p in self.prefixes if lower_content.startswith(p))):].strip()
         
         if not message.content:
             return
