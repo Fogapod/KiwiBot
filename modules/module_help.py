@@ -6,9 +6,9 @@ import random
 
 
 class Module(ModuleBase):
-    """{prefix}{keywords} <module>
+    """{prefix}{keywords} <module>*
     
-    Get information about module.
+    Get information about bot or module if provided.
     {protection} or higher permission level required to use"""
 
     name = 'help'
@@ -26,6 +26,9 @@ class Module(ModuleBase):
             return 'Available modules are: `%s`' % ', '.join(module_list)
 
         module = None
+
+        if len(args) > 2:
+            return '{warning} help for subcommands is not supported yet'
 
         for k, v in self.bot.mm.modules.items():
             if args[1] in v.keywords:
