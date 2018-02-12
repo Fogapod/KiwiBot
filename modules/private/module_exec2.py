@@ -3,8 +3,6 @@ from modules.modulebase import ModuleBase
 from utils.formatters import format_response
 from utils.helpers import create_subprocess_shell, execute_process
 
-import asyncio
-
 
 class Module(ModuleBase):
     """{prefix}{keywords} <code>

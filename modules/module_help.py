@@ -2,8 +2,6 @@ from modules.modulebase import ModuleBase
 
 from utils.constants import ACCESS_LEVEL_NAMES
 
-import random
-
 
 class Module(ModuleBase):
     """{prefix}{keywords} <module>*
@@ -47,7 +45,7 @@ class Module(ModuleBase):
 
     async def format_help(self, help_text, command):
         help_text = help_text.replace('\n    ', '\n')
-        help_text = help_text.replace('{prefix}', random.choice(self.bot.prefixes[:-2]))
+        help_text = help_text.replace('{prefix}', self.bot.prefixes[0])
 
         if len(command.keywords) == 1:
             help_text = help_text.replace('{keywords}', command.keywords[0])
