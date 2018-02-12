@@ -1,6 +1,6 @@
 from modules.modulebase import ModuleBase
 
-import asyncio
+from utils.helpers import create_subprocess_exec, execute_process
 
 
 class Module(ModuleBase):
@@ -19,8 +19,10 @@ class Module(ModuleBase):
             msg, 'Pinging ...', response_to=msg)
 
         if len(args) == 2:
-            process, pid = await self.create_subprocess_exec(*['ping', '-c', '4', args[1]])
-            stdout, stderr = await process.communicate()
+            program = ['ping', '-c', '4', args[1]]
+            process, pid = await create_subprocess_exec(*program)
+            stdout, stderr = await execute_process(process, program)
+
             await self.bot.edit_message(
                 ping_msg,
                 content='```\n' + (stdout.decode() or stderr.decode()) + '```'
@@ -36,10 +38,3 @@ class Module(ModuleBase):
         result += ' to ping `' + ' '.join(args[1:]) + '`' if args[1:] else ''
 
         await self.bot.edit_message(ping_msg, content=result)
-        
-    async def create_subprocess_exec(self, *args):
-        process = await asyncio.create_subprocess_exec(
-            *args, stdout=asyncio.subprocess.PIPE,
-                   stderr=asyncio.subprocess.PIPE
-        )
-        return process, str(process.pid)
