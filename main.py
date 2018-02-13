@@ -10,6 +10,7 @@ from modulemanager import ModuleManager
 from utils.constants import DEFAULT_PREFIXES, STOP_EXIT_CODE
 from utils.formatters import format_response, trim_message
 from utils.config import Config
+from utils.logger import Logger
 
 
 EXIT_CODE = None
@@ -22,10 +23,16 @@ class BotMyBot(discord.Client):
         self.start_time = 0
 
         self.config = Config('config.json', loop=self.loop)
-        self.token = self.config['token']
+        self.token = self.config.get('token', None)
+
+        self.logger = Logger()
+        self.logger.verbosity = self.config.get('config_verbosity', self.logger.VERBOSITY_INFO)
+        self.logger.debug('Logger connected')
 
         self.tracked_messages = {}
         self.mm = ModuleManager(self)
+        self.logger.debug('ModuleManager connected')
+
         self.prefixes = DEFAULT_PREFIXES
 
     def run(self, token=None):
@@ -34,30 +41,37 @@ class BotMyBot(discord.Client):
         else:
             self.token = token
 
+        if token is None:
+            self.loop.run_until_complete(self.close())
+            self.stop(1)
+            raise discord.LoginFailure('No token provided')
+
         super(BotMyBot, self).run(token, reconnect=True)
 
     def restart(self):
         self.stop(0)
 
     def stop(self, exit_code=STOP_EXIT_CODE):
+        self.logger.debug('Stopping event loop and cancelling tasks')
         self.loop.stop()
-        self.logout()
         tasks = asyncio.gather(*asyncio.Task.all_tasks(), loop=self.loop)
         tasks.cancel()
 
+        self.logger.debug('Preparing to exit with code ' + str(exit_code))
         global EXIT_CODE
         EXIT_CODE = exit_code
 
     async def on_ready(self):
-        loaded, ignored = await self.mm.load_modules()
-        print('Loaded modules: [%s]' % ' '.join(loaded))
+        await self.mm.load_modules()
+        self.logger.info('Loaded modules: [%s]' % ' '.join(self.mm.modules.keys()))
         self.start_time = time.time()
-        print('Ready')
+        self.logger.info('Bot ready')
+        self.logger.info('Default prefix: ' + self.prefixes[0])
 
     async def close(self):
         await super(BotMyBot, self).close()
         await self.mm.unload_modules()
-        print('Closed')
+        self.logger.info('Connection closed')
 
     async def on_message(self, message, from_edit=False):
         if message.author.bot:
@@ -77,7 +91,7 @@ class BotMyBot(discord.Client):
 
         message.content = message.content[
             len(next(p for p in self.prefixes if lower_content.startswith(p))):].strip()
-        
+
         if not message.content:
             return
 
@@ -142,7 +156,7 @@ class BotMyBot(discord.Client):
         try:
             return await message.edit(**fields)
         except discord.errors.NotFound:
-            print('edit_message: message not found')
+            self.logger.debug('edit_message: message not found')
             return
         except Exception:
             exception = traceback.format_exc()
@@ -154,7 +168,7 @@ class BotMyBot(discord.Client):
         try:
             return await message.delete()
         except discord.errors.NotFound:
-            print('delete_message: message not found')
+            self.logger.debug('delete_message: message not found')
             return
 
     async def track_message(self, message):
@@ -168,7 +182,7 @@ class BotMyBot(discord.Client):
         if request.id in self.tracked_messages:
             self.tracked_messages[request.id] = response
         else:
-            print('Request outdated, not registering')
+            self.logger.debug('Request outdated, not registering')
 
 
 if __name__ == '__main__':

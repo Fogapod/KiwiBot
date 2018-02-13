@@ -28,7 +28,7 @@ class Module(ModuleBase):
 
     async def on_load(self):
         last_status = self.bot.config.get('last_status', '')
-        last_status_type = self.bot.config.get('last_status_type', None)
+        last_status_type = self.bot.config.get('last_status_type', 0)
 
         if last_status:
             presence = Game(name=last_status, type=last_status_type)

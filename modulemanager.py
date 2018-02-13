@@ -17,7 +17,7 @@ class ModuleManager(object):
         self.modules = {}
         self._modules = {}
 
-    async def load_modules(self, module_dirs=['modules']):
+    async def load_modules(self, module_dirs=['modules'], strict_mode=True):
         modules_found = []
 
         for path, dirs, files in os.walk(module_dirs[0]):
@@ -25,73 +25,61 @@ class ModuleManager(object):
                 if f.startswith('module_') and f.endswith('.py'):
                     modules_found.append(path + os.sep + f)
 
-        loaded_modules  = []
-        ignored_modules = []
-
+        self.bot.logger.trace('Found ' + str(len(modules_found)) + ' modules')
         for module_path in modules_found:
             module_name = module_path[module_path.rfind(os.sep) + 8:-3]
             try:
                 await self.load_module(module_path)
-            except ModuleLoadingException:
-                traceback.print_exc()
-                try:
-                    await self.unload_module(module_name)
-                except Exception:
-                    pass
-            else:
-                loaded_modules.append(module_name)
+            except Exception:
+                self.bot.logger.info('Failed to load module ' + module_name)
+                self.bot.logger.info(traceback.format_exc())
 
-                ignored_modules.append(module_name)
-        return loaded_modules, ignored_modules
+                if strict_mode:
+                    raise
+                    
+        self.bot.logger.trace('Loaded ' + str(len(self.modules)) + ' modules')
 
     async def load_module(self, module_path):
-        try:
-            imported = __import__(
-                module_path.replace(os.sep, '.')[:-3], fromlist=['Module'])
-            module = getattr(imported, 'Module')(self.bot)
-            await module.on_load()
-        except Exception:
-            raise ModuleLoadingException(module_path[module_path.rfind(os.sep) + 8:-3], module_path)
+        self.bot.logger.trace('Loading module from ' + module_path)
+        imported = __import__(
+            module_path.replace(os.sep, '.')[:-3], fromlist=['Module'])
+        module = getattr(imported, 'Module')(self.bot)
+        self.bot.logger.trace('Calling ' + module.name + ' on_load')
+        await module.on_load()
 
         self.modules[module.name]  = module
         self._modules[module.name] = imported
 
     async def reload_modules(self):
-        loaded_modules  = []
-        ignored_modules = []
-
         for module_name in self.modules:
             try:
                 await self.reload_module(module_name)
-                loaded_modules.append(module_name)
-            except ModuleLoadingException:
-                try:
-                    await self.unload_module(module_name)
-                except Exception:
-                    pass
-
-                ignored_modules.append(module_name)
-        return loaded_modules, ignored_modules
+            except Exception:
+                self.bot.logger.info(
+                    'Failed reloading module {0} ({1})'.format(
+                        name, self._modules[name].__file__
+                    )
+                )
+                self.bot.logger.debug(traceback.format_exc())
+                raise
 
     async def reload_module(self, name):
+        self.bot.logger.trace('Calling ' + name + ' on_unload')
         try:
-            await self._modules[name].on_unload()
+            await self.modules[name].on_unload()
         except Exception:
-            pass
+            self.bot.logger.debug('Exception occured calling on_unload')
+            self.bot.logger.debug(traceback.format_exc())
 
-        try:
-            reloaded = reload(self._modules[name])
-            module = getattr(reloaded, 'Module')(self.bot)
+        self.bot.logger.trace('Reloading module ' + name)
+        reloaded = reload(self._modules[name])
+        module = getattr(reloaded, 'Module')(self.bot)
 
-            await module.on_load()
-        except Exception:
-            raise ModuleLoadingException(name, self._modules[name].__file__)
+        self.bot.logger.trace('Calling ' + name + 'mon_load')
+        await module.on_load()
 
         self._modules[name] = reloaded
         self.modules[name] = module
-
-    async def unload_modules(self):
-        pass
 
     async def unload_module(self, name):
         pass
@@ -116,13 +104,3 @@ class ModuleManager(object):
 
     async def check_permissions(self, module, message):
     	return await get_user_access_level(message) >= module.protection
-
-
-class ModuleLoadingException(Exception):
-    def __init__(self, module_name, module_path):
-        self.module_name = module_name
-        self.module_path = module_path
-        super(ModuleLoadingException, self).__init__(self)
-
-    def __str__(self):
-        return 'Failed to load module {0} ({1})'.format(self.module_name, self.module_path)

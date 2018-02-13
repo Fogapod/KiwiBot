@@ -1,5 +1,7 @@
 from modules.modulebase import ModuleBase
 
+from utils.formatters import format_response
+
 import traceback
 
 
@@ -47,18 +49,35 @@ class Module(ModuleBase):
             self.bot.restart()
 
         elif target == 'modules':
-            loaded_modules, ignored_modules = await self.bot.mm.reload_modules()
+            try:
+                await self.bot.mm.reload_modules()
+            except Exception:
+                response = '{error} Failed to reload modules. Exception:```py\n' + traceback.format_exc() + '```'
+                response = await format_response(response, msg, self.bot)
+                await self.bot.edit_message(
+                    reload_message,
+                    content=response
+                )
+                return
+
             await self.bot.edit_message(
-                reload_message, content='Reloaded {0} modules [{1}]\nCould not reload {2} modules [{3}]'.format(len(loaded_modules), ', '.join(loaded_modules), len(ignored_modules), ', '.join(ignored_modules)))
+                reload_message, content='Reloaded {0} modules: [{1}]'.format(
+                    len(self.bot.mm.modules),
+                    ', '.join(self.bot.mm.modules.keys())
+                )
+            )
             return
 
         elif target in self.bot.mm.modules:
             try:
                 await self.bot.mm.reload_module(target)
             except Exception:
+                response = '{error} Failed to reload module `' + target + '`. Exception:```py\n' + traceback.format_exc() + '```'
+                response = await format_response(response, msg, self.bot)
                 await self.bot.edit_message(
                     reload_message,
-                    content='Failed to reload module `' + target + '`. Exception:```py\n' + traceback.format_exc() + '```')
+                    content=response
+                )
                 return
 
         else:
