@@ -70,7 +70,6 @@ class BotMyBot(discord.Client):
 
     async def close(self):
         await super(BotMyBot, self).close()
-        await self.mm.unload_modules()
         self.logger.info('Connection closed')
 
     async def on_message(self, message, from_edit=False):
