@@ -26,7 +26,7 @@ class BotMyBot(discord.Client):
         self.token = self.config.get('token', None)
 
         self.logger = Logger()
-        self.logger.verbosity = self.config.get('config_verbosity', self.logger.VERBOSITY_INFO)
+        self.logger.verbosity = self.config.get('logger_verbosity', self.logger.VERBOSITY_INFO)
         self.logger.debug('Logger connected')
 
         self.tracked_messages = {}
@@ -78,7 +78,7 @@ class BotMyBot(discord.Client):
 
         if message.guild is None:
             await self.send_message(
-                message.channel, 'Personal messages are not supported yet')
+                message, 'Direct messages are not supported yet')
 
         if not from_edit:
             await self.track_message(message)
