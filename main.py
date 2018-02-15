@@ -79,6 +79,7 @@ class BotMyBot(discord.Client):
         if message.guild is None:
             await self.send_message(
                 message, 'Direct messages are not supported yet')
+            return
 
         if not from_edit:
             await self.track_message(message)
