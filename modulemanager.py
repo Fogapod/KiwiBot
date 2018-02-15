@@ -10,7 +10,7 @@ from utils.constants import ACCESS_LEVEL_NAMES
 from utils.checks import get_user_access_level
 
 
-class ModuleManager(object):
+class ModuleManager:
     
     def __init__(self, bot):
         self.bot = bot

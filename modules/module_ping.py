@@ -35,6 +35,6 @@ class Module(ModuleBase):
         result = 'Pong, it took `' + str(delta) + 'ms`'
 
         args = msg.content.strip().split(' ')
-        result += ' to ping `' + ' '.join(args[1:]) + '`' if args[1:] else ''
+        result += ' to ping `' + ' '.join(args[1:]) + '`' if args[1:] else 'to respond'
 
         await self.bot.edit_message(ping_msg, content=result)

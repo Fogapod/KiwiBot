@@ -1,7 +1,7 @@
 from utils.constants import ACCESS_LEVEL_NAMES
 
 
-class ModuleBase(object):
+class ModuleBase:
     """Module is not documented"""
 
     name = 'module'
