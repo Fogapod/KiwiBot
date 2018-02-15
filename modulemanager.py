@@ -75,7 +75,7 @@ class ModuleManager:
         reloaded = reload(self._modules[name])
         module = getattr(reloaded, 'Module')(self.bot)
 
-        self.bot.logger.trace('Calling ' + name + 'mon_load')
+        self.bot.logger.trace('Calling ' + name + ' on_load')
         await module.on_load()
 
         self._modules[name] = reloaded

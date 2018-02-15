@@ -10,7 +10,7 @@ class Module(ModuleBase):
     {protection} or higher permission level required to use"""
 
     name = 'stop'
-    keywords = (name, 'die')
+    keywords = (name, 'die', '!')
     protection = 2
     hidden = True
 
