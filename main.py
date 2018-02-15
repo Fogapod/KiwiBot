@@ -20,12 +20,15 @@ class BotMyBot(discord.Client):
 
     def __init__(self, *args, **kwargs):
         super(BotMyBot, self).__init__(*args, **kwargs)
+        # used to prevent reloading commands in on_ready after reconnect
+        self.is_first_on_ready_event = True
+
         self.start_time = 0
 
         self.config = Config('config.json', loop=self.loop)
         self.token = self.config.get('token', None)
 
-        self.logger = Logger()
+        self.logger = Logger(file=self.config.get('logs_file', None))
         self.logger.verbosity = self.config.get('logger_verbosity', self.logger.VERBOSITY_INFO)
         self.logger.debug('Logger connected')
 
@@ -62,6 +65,12 @@ class BotMyBot(discord.Client):
         EXIT_CODE = exit_code
 
     async def on_ready(self):
+        if not self.is_first_on_ready_event:
+            self.logger.info('Bot reconnected')
+            return
+
+        self.is_first_on_ready_event = False
+
         await self.mm.load_modules()
         self.logger.info('Loaded modules: [%s]' % ' '.join(self.mm.modules.keys()))
         self.start_time = time.time()

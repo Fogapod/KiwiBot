@@ -1,6 +1,14 @@
+from sys import stdout
+from os.path import exists
+
+
 class Logger:
 
-    def __init__(self):
+    _logger = None
+
+    def __init__(self, file=None):
+        Logger._logger = self
+
         self.VERBOSITY_SILENT = 0
         self.VERBOSITY_INFO   = 1
         self.VERBOSITY_DEBUG  = 2
@@ -8,17 +16,34 @@ class Logger:
 
         self.verbosity = self.VERBOSITY_INFO
 
-    def info(self, text):
+        self._files = [stdout, ]
+
+        if file is not None:
+            self._files.append(open(file, 'a'))
+
+    def info(self, *args):
         if self.verbosity >= self.VERBOSITY_INFO:
-            print(self._prepend(text, to_prepend='[INFO ]'))
+            text = ' '.join(args)
+            self._log(self._prepend(text, to_prepend='[INFO ]'))
 
-    def debug(self, text):
+    def debug(self, *args):
         if self.verbosity >= self.VERBOSITY_DEBUG:
-            print(self._prepend(text, to_prepend='[DEBUG]'))
+            text = ' '.join(args)
+            self._log(self._prepend(text, to_prepend='[DEBUG]'))
 
-    def trace(self, text):
+    def trace(self, *args):
         if self.verbosity >= self.VERBOSITY_TRACE:
-            print(self._prepend(text, to_prepend='[TRACE]'))
+            text = ' '.join(args)
+            self._log(self._prepend(text, to_prepend='[TRACE]'))
+     
+    def _log(self, text):
+        for f in self._files:
+            print(text, file=f)
+            f.flush()
 
+    @staticmethod
+    def get_logger():
+        return Logger._logger
+        
     def _prepend(self, text, to_prepend='    '):
         return to_prepend + ('\n' + to_prepend).join(text.split('\n'))

@@ -1,5 +1,9 @@
 import asyncio
 
+from utils.logger import Logger
+
+
+logger = Logger.get_logger()
 
 async def create_subprocess_exec(
         *args,
@@ -24,8 +28,8 @@ async def create_subprocess_shell(
 
 
 async def execute_process(process, code):
-    print('beg task:', str(code), '(pid = ' + str(process.pid) + ')')
+    logger.info('beg task: ', str(code), '(pid = ' + str(process.pid) + ')')
     stdout, stderr = await process.communicate()
-    print('fin task:', str(code), '(pid = ' + str(process.pid) + ')')
+    logger.info('fin task:', str(code), '(pid = ' + str(process.pid) + ')')
 
     return stdout, stderr
