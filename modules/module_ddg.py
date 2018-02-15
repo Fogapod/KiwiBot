@@ -47,4 +47,4 @@ class Module(ModuleBase):
                         result += '{error} failed to fetch image: ' + image_url
 
         result = await format_response(result, msg, self.bot)
-        await self.bot.send_message(msg, result, file=image)                     
+        await self.bot.send_message(msg, result, file=image, response_to=msg)                     
