@@ -1,3 +1,5 @@
+import time
+
 from sys import stdout
 from os.path import exists
 
@@ -24,17 +26,20 @@ class Logger:
     def info(self, *args):
         if self.verbosity >= self.VERBOSITY_INFO:
             text = ' '.join(args)
-            self._log(self._prepend(text, to_prepend='[INFO ]'))
+            to_prepend = time.strftime('[%H:%M:%S]', time.localtime()) + '[INFO ]'
+            self._log(self._prepend(text, to_prepend=to_prepend))
 
     def debug(self, *args):
         if self.verbosity >= self.VERBOSITY_DEBUG:
             text = ' '.join(args)
-            self._log(self._prepend(text, to_prepend='[DEBUG]'))
+            to_prepend = time.strftime('[%H:%M:%S]', time.localtime()) + '[DEBUG]'
+            self._log(self._prepend(text, to_prepend=to_prepend))
 
     def trace(self, *args):
         if self.verbosity >= self.VERBOSITY_TRACE:
             text = ' '.join(args)
-            self._log(self._prepend(text, to_prepend='[TRACE]'))
+            to_prepend = time.strftime('[%H:%M:%S]', time.localtime()) + '[TRACE]'
+            self._log(self._prepend(text, to_prepend=to_prepend))
      
     def _log(self, text):
         for f in self._files:
