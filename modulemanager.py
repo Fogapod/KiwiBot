@@ -62,7 +62,6 @@ class ModuleManager:
         for module_name in self.modules:
             try:
                 await self.reload_module(module_name)
-                await self.init_module(name)
             except Exception:
                 self.bot.logger.info(
                     'Failed reloading module {0} ({1})'.format(
