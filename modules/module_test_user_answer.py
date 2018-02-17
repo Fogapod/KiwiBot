@@ -14,7 +14,7 @@ class Module(ModuleBase):
     arguments_required = 0
     protection = 0
 
-    async def on_call(self, msg, *args):
+    async def on_call(self, msg, *args, **options):
         await self.bot.send_message(
             msg,
             await format_response(

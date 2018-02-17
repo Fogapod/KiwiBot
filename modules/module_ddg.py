@@ -19,7 +19,7 @@ class Module(ModuleBase):
     arguments_required = 1
     protection = 0
 
-    async def on_call(self, msg, *args):
+    async def on_call(self, msg, *args, **options):
         params = {
             'q': ' '.join(args[1:]),
             'o': 'json'
@@ -42,7 +42,7 @@ class Module(ModuleBase):
             if image_url:
                 async with s.get(image_url) as r:
                     if r.status == 200:
-                        image = File(await r.content.read(), filename='file.png')
+                        image = File(await r.read(), filename='file.png')
                     else:
                         result += '{error} failed to fetch image: ' + image_url
 

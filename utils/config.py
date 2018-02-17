@@ -3,7 +3,7 @@ import json
 import asyncio
 
 
-class Config(object):
+class Config:
 
     def __init__(self, config_file, **options):
         self.name = config_file

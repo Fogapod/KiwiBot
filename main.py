@@ -66,6 +66,7 @@ class BotMyBot(discord.Client):
 
     async def on_ready(self):
         if not self.is_first_on_ready_event:
+            await self.mm.init_modules()
             self.logger.info('Bot reconnected')
             return
 

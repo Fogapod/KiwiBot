@@ -34,7 +34,7 @@ class Module(ModuleBase):
             presence = Game(name=last_status, type=last_status_type)
             await self.bot.change_presence(game=presence)
 
-    async def on_call(self, message, *args):
+    async def on_call(self, message, *args, **options):
         if len(args) == 1:
             presence = Game(name='')
         else:

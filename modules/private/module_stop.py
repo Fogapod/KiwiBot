@@ -14,7 +14,7 @@ class Module(ModuleBase):
     protection = 2
     hidden = True
 
-    async def on_call(self, message, *args):
+    async def on_call(self, message, *args, **options):
         await message.add_reaction('✅')
         exit_code = args[1] if len(args) == 2 else STOP_EXIT_CODE
         self.bot.stop(exit_code)

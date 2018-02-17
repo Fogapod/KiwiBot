@@ -35,7 +35,7 @@ class Module(ModuleBase):
 
             await message.edit(content='Bot restarted')
 
-    async def on_call(self, msg, *args):
+    async def on_call(self, msg, *args, **options):
         target = args[1].lower()
 
         reload_message = await self.bot.send_message(

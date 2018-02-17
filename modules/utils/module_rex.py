@@ -96,7 +96,7 @@ class Module(ModuleBase):
     arguments_required = 1
     protection = 0
 
-    async def on_call(self, msg, *args):
+    async def on_call(self, msg, *args, **options):
         result = ''
 
         if args[1].lower() == 'list':

@@ -14,7 +14,7 @@ class Module(ModuleBase):
     keywords = (name, 'up')
     protection = 0
 
-    async def on_call(self, message, *args):
+    async def on_call(self, message, *args, **options):
         delta = time.time() - self.bot.start_time
 
         minutes, seconds = divmod(delta,   60)

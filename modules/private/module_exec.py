@@ -17,7 +17,7 @@ class Module(ModuleBase):
     arguments_required = 1
     protection = 2
 
-    async def on_call(self, message, *args):
+    async def on_call(self, message, *args, **options):
         command = shlex.split(message.content)[1:]
         process, pid = await create_subprocess_exec(*command)
         

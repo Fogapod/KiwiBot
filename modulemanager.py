@@ -7,7 +7,6 @@ import traceback
 from importlib import reload
 
 from utils.constants import ACCESS_LEVEL_NAMES
-from utils.checks import get_user_access_level
 
 
 class ModuleManager:
@@ -29,7 +28,8 @@ class ModuleManager:
         for module_path in modules_found:
             module_name = module_path[module_path.rfind(os.sep) + 8:-3]
             try:
-                await self.load_module(module_path)
+                module = await self.load_module(module_path)
+                await self.init_module(module)
             except Exception:
                 self.bot.logger.info('Failed to load module ' + module_name)
                 self.bot.logger.info(traceback.format_exc())
@@ -44,16 +44,25 @@ class ModuleManager:
         imported = __import__(
             module_path.replace(os.sep, '.')[:-3], fromlist=['Module'])
         module = getattr(imported, 'Module')(self.bot)
-        self.bot.logger.trace('Calling ' + module.name + ' on_load')
-        await module.on_load()
 
         self.modules[module.name]  = module
         self._modules[module.name] = imported
+
+        return module
+
+    async def init_modules(self):
+        for module in self.modules.values():
+            await self.init_module(module)
+
+    async def init_module(self, module):
+        self.bot.logger.trace('Calling ' + module.name + ' on_load')
+        await module.on_load()
 
     async def reload_modules(self):
         for module_name in self.modules:
             try:
                 await self.reload_module(module_name)
+                await self.init_module(name)
             except Exception:
                 self.bot.logger.info(
                     'Failed reloading module {0} ({1})'.format(
@@ -75,8 +84,7 @@ class ModuleManager:
         reloaded = reload(self._modules[name])
         module = getattr(reloaded, 'Module')(self.bot)
 
-        self.bot.logger.trace('Calling ' + name + ' on_load')
-        await module.on_load()
+        await self.init_module(module)
 
         self._modules[name] = reloaded
         self.modules[name] = module
@@ -88,19 +96,16 @@ class ModuleManager:
         args = message.content.split()
 
         for module in self.modules.values():
+            if module.disabled:
+                continue
+
             if not await module.check_message(message, *args):
                 continue
 
-            if not self.check_argument_count(module, len(args)):
+            if not module.check_argument_count(len(args)):
                 return module.not_enough_arguments_text
 
-            if not await self.check_permissions(module, message):
+            if not await module.check_permissions(message):
                 return module.permission_denied_text
 
-            return await module.on_call(message, *args)
-
-    def check_argument_count(self, module, argc):
-    	return argc - 1 >= module.arguments_required
-
-    async def check_permissions(self, module, message):
-    	return await get_user_access_level(message) >= module.protection
+            return await module.call_command(message, *args)

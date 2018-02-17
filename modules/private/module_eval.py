@@ -22,7 +22,7 @@ class Module(ModuleBase):
     async def on_load(self):
         self._last_result = None
 
-    async def on_call(self, message, *args):
+    async def on_call(self, message, *args, **options):
         program = message.content[message.content.index(args[0]) + len(args[0]):].strip()
 
         glob = {

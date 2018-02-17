@@ -14,14 +14,14 @@ class Module(ModuleBase):
     arguments_required = 0
     protection = 0
 
-    async def on_call(self, message, *args):
+    async def on_call(self, message, *args, **options):
         if len(args) == 1:
             module_list = []
             for name, module in self.bot.mm.modules.items():
                 if not module.hidden:
                     module_list.append(name)
 
-            return 'Available modules are: `%s`' % ', '.join(module_list)
+            return 'Available commands are: `%s`' % ', '.join(module_list)
 
         module = None
 
