@@ -28,7 +28,7 @@ async def create_subprocess_shell(
 
 
 async def execute_process(process, code):
-    logger.info('beg task: ', str(code), '(pid = ' + str(process.pid) + ')')
+    logger.info('beg task:', str(code), '(pid = ' + str(process.pid) + ')')
     stdout, stderr = await process.communicate()
     logger.info('fin task:', str(code), '(pid = ' + str(process.pid) + ')')
 
