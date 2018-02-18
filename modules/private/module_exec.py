@@ -18,7 +18,7 @@ class Module(ModuleBase):
     protection = 2
 
     async def on_call(self, message, *args, **options):
-        command = shlex.split(message.content)[1:]
+        command = args[1:]
         process, pid = await create_subprocess_exec(*command)
         
         start_message = await self.bot.send_message(
