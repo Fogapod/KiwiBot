@@ -3,7 +3,7 @@ from modules.modulebase import ModuleBase
 from discord import Game
 
 class Module(ModuleBase):
-    """{prefix}{keywords} <type>* <status>*
+    """{prefix}{keywords} [type] [status]
 
     Update bot status.
 
@@ -35,11 +35,13 @@ class Module(ModuleBase):
             await self.bot.change_presence(game=presence)
 
     async def on_call(self, message, *args, **options):
+        status = ''
+
         if len(args) == 1:
             presence = Game(name='')
         else:
             subcommand = args[1].lower()
-            status = message.content[message.content.index(args[1]) + len(args[1]):].strip()
+            status = ' '.join(args[2:])
 
             if subcommand == 'playing':
                 presence = Game(name=status)
@@ -50,7 +52,7 @@ class Module(ModuleBase):
             elif subcommand == 'watching':
                 presence = Game(name=status, type=3)
             else:
-                status = message.content[len(args[0]):].strip()
+                status = ' '.join(args[1:])
                 presence = Game(name=status)
 
         await self.bot.change_presence(game=presence)

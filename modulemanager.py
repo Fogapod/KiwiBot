@@ -2,6 +2,7 @@
 
 import os
 import sys
+import shlex
 import traceback
 
 from importlib import reload
@@ -92,7 +93,7 @@ class ModuleManager:
         pass
 
     async def check_modules(self, message):
-        args = message.content.split()
+        args = shlex.split(message.content)
 
         for module in self.modules.values():
             if module.disabled:
