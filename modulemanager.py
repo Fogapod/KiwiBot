@@ -93,7 +93,7 @@ class ModuleManager:
         pass
 
     async def check_modules(self, message):
-        args = shlex.split(message.content)
+        args = shlex.split(message.content, posix=False)
 
         for module in self.modules.values():
             if module.disabled:
