@@ -120,17 +120,18 @@ class BotMyBot(discord.Client):
             return
 
         if before.id in self.tracked_messages:
-            if self.tracked_messages[before.id] is not None:
-                await self.delete_message(self.tracked_messages[before.id])
-                self.tracked_messages[before.id] = None
-
+            await self.clear_responses_to_message(before.id)
             await self.on_message(after, from_edit=True)
 
     async def on_message_delete(self, message):
         if message.id in self.tracked_messages:
-            if self.tracked_messages[message.id] is not None:
-                await self.delete_message(self.tracked_messages[message.id])
-                self.tracked_messages[message.id] = None
+            await self.clear_responses_to_message(message.id)
+
+    async def clear_responses_to_message(self, message_id):
+        if len(self.tracked_messages[message_id]) > 0:
+            for message in self.tracked_messages[message_id]:
+                await self.delete_message(message)
+            self.tracked_messages[message_id] = []
 
     async def send_message(self, msg, text, response_to=None, parse_content=True, **kwargs):
         text = text.replace(self.token, 'my-token')
@@ -182,7 +183,7 @@ class BotMyBot(discord.Client):
             return
 
     async def track_message(self, message):
-        self.tracked_messages[message.id] = None
+        self.tracked_messages[message.id] = []
         self.loop.call_later(300, self.release_tracked_message, message.id)
 
     def release_tracked_message(self, message_id):
@@ -190,7 +191,7 @@ class BotMyBot(discord.Client):
 
     async def register_response(self, request, response):
         if request.id in self.tracked_messages:
-            self.tracked_messages[request.id] = response
+            self.tracked_messages[request.id].append(response)
         else:
             self.logger.debug('Request outdated, not registering')
 
