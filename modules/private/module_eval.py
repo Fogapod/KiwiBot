@@ -22,13 +22,14 @@ class Module(ModuleBase):
     async def on_load(self):
         self._last_result = None
 
-    async def on_call(self, message, *args, **options):
-        program = message.content[message.content.index(args[0]) + len(args[0]):].strip()
+    async def on_call(self, msg, *args, **options):
+        program = msg.content[msg.content.index(args[0]) + len(args[0]):].strip()
 
         glob = {
             'self': self,
             'bot': self.bot,
-            'message': message,
+            'msg': msg,
+            'message': msg,
             '_': self._last_result
         }
 
@@ -55,7 +56,7 @@ class Module(ModuleBase):
             output = fake_stdout.getvalue()
 
             if result is None:
-                if output:
+                if output is not None:
                     return '```py\n%s\n```' % output
             else:
                 self._last_result = result
