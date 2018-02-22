@@ -1,11 +1,13 @@
 from modules.modulebase import ModuleBase
 
+from utils.helpers import find_user_in_guild
+
 import re
 
 
 class Module(ModuleBase):
     """{prefix}{keywords} <user> <message>
-    
+
     Force bot to think message was sent by selected user.
     {protection} or higher permission level required to use"""
 
@@ -15,16 +17,21 @@ class Module(ModuleBase):
     protection = 2
 
     async def on_call(self, msg, *args, **options):
-        user_id = re.match('(<@!?)?(\d{18})>?$', args[1]).groups()[1]
-        user = msg.guild.get_member(int(user_id))
-        
-        if user is None:
-            return '{warning} User not found'
+        member = None
+        id_match = re.fullmatch('(<@!?)?(\d{18})>?', args[1])
+
+        if id_match is None:
+            member = await find_user_in_guild(args[1], msg.guild, self.bot)
+        else:
+            member = msg.guild.get_member(int(id_match.group(2)))
+
+        if member is None:
+            return '{warning} Member not found'
 
         new_content = msg.content[msg.content.index(args[1]) + len(args[1]):].strip()
-        msg.author = user
+        msg.author = member
         msg.content = self.bot.prefixes[0] + new_content
         
         await self.bot.on_message(msg)
         
-        return 'Message processed as `' + user_id + '`'
+        return 'Message processed as `' + str(member.name) + '#' + member.discriminator + '` '

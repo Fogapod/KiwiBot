@@ -1,3 +1,4 @@
+import re
 import asyncio
 
 from utils.logger import Logger
@@ -33,3 +34,16 @@ async def execute_process(process, code):
     logger.info('fin task:', str(code), '(pid = ' + str(process.pid) + ')')
 
     return stdout, stderr
+
+
+async def find_user_in_guild(pattern, guild, bot):
+    found = []
+    for member in guild.members:
+        if re.search(pattern, member.display_name, re.I) is None:
+            if re.search(pattern, member.name + '#' + member.discriminator, re.I) is None:
+                continue
+
+        found.append(member)
+    found.sort(key=lambda m: str(m.status) == 'online', reverse=True)
+
+    return found[0] if found else None
