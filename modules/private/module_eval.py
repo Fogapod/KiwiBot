@@ -56,9 +56,9 @@ class Module(ModuleBase):
             output = fake_stdout.getvalue()
 
             if result is None:
-                if output is not None:
+                if output:
                     return '```py\n%s\n```' % output
             else:
                 self._last_result = result
 
-            return '```py\n%s%s\n```' % (output, result if result else 'Evaluated')
+            return '```py\n%s%s\n```' % (output, result if result is not None else 'Evaluated')
