@@ -22,7 +22,7 @@ class Module(ModuleBase):
     arguments_required = 0
     protection = 2
 
-    async def on_permission_denied_text(self, msg):
+    async def on_permission_denied(self, msg):
         return 'not dogsong or notsosuper'
 
     async def on_load(self, from_reload):
