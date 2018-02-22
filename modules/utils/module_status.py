@@ -22,11 +22,10 @@ class Module(ModuleBase):
     arguments_required = 0
     protection = 2
 
-    @property
-    def permission_denied_text(self):
+    async def on_permission_denied_text(self, msg):
         return 'not dogsong or notsosuper'
 
-    async def on_load(self):
+    async def on_load(self, from_reload):
         last_status = self.bot.config.get('last_status', '')
         last_status_type = self.bot.config.get('last_status_type', 0)
 
@@ -34,7 +33,7 @@ class Module(ModuleBase):
             presence = Game(name=last_status, type=last_status_type)
             await self.bot.change_presence(game=presence)
 
-    async def on_call(self, message, *args, **options):
+    async def on_call(self, msg, *args, **options):
         status = ''
 
         if len(args) == 1:

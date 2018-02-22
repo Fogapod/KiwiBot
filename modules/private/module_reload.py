@@ -22,7 +22,10 @@ class Module(ModuleBase):
     arguments_required = 1
     protection = 2
 
-    async def on_load(self):
+    async def on_load(self, from_reload):
+        if from_reload:
+            return
+
         bot_reload_channel_id = self.bot.config.get('bot_reload_channel_id', 0)
         bot_reload_message_id = self.bot.config.get('bot_reload_message_id', 0)
 

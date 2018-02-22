@@ -15,21 +15,19 @@ class ModuleBase:
     def __init__(self, bot):
         self.bot = bot
 
-    def check_argument_count(self, argc):
+    def check_argument_count(self, argc, msg):
         return argc - 1 >= self.arguments_required
 
-    async def check_permissions(self, message):
-        return await get_user_access_level(message) >= self.protection
+    async def check_permissions(self, msg):
+        return await get_user_access_level(msg) >= self.protection
 
-    @property
-    def not_enough_arguments_text(self):
-        return '{warning} Not enough arguments to call ' + self.name
+    async def on_not_enough_arguments(self, msg):
+        return '{error} Not enough arguments to call ' + self.name
 
-    @property
-    def permission_denied_text(self):
+    async def on_permission_denied(self, msg):
         return '{error} Access demied. Minimum access level to use command is `' + ACCESS_LEVEL_NAMES[self.protection] + '`'
 
-    async def on_load(self):
+    async def on_load(self, from_reload):
         pass
 
     async def check_message(self, msg, *args, **options):
@@ -48,6 +46,13 @@ class ModuleBase:
 
     async def on_doc_request(self):
         return None
+
+    async def on_error(self, tb_text, msg):
+        return (
+            '{error} Error appeared during execution '
+            + self.name
+            + '```\n' + '\n'.join(tb_text.split('\n')[-4:]) + '\n```'
+        )
 
     async def on_unload(self):
         pass

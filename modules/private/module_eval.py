@@ -19,7 +19,7 @@ class Module(ModuleBase):
     arguments_required = 1
     protection = 2
 
-    async def on_load(self):
+    async def on_load(self, from_reload):
         self._last_result = None
 
     async def on_call(self, msg, *args, **options):

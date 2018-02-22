@@ -51,13 +51,13 @@ class ModuleManager:
 
         return module
 
-    async def init_modules(self):
+    async def init_modules(self, from_reload=True):
         for module in self.modules.values():
-            await self.init_module(module)
+            await self.init_module(module, from_reload=from_reload)
 
-    async def init_module(self, module):
+    async def init_module(self, module, from_reload=True):
         self.bot.logger.trace('Calling ' + module.name + ' on_load')
-        await module.on_load()
+        await module.on_load(from_reload)
 
     async def reload_modules(self):
         for module_name in self.modules:
@@ -84,7 +84,7 @@ class ModuleManager:
         reloaded = reload(self._modules[name])
         module = getattr(reloaded, 'Module')(self.bot)
 
-        await self.init_module(module)
+        await self.init_module(module, from_reload=True)
 
         self._modules[name] = reloaded
         self.modules[name] = module
@@ -95,17 +95,33 @@ class ModuleManager:
     async def check_modules(self, message):
         args = shlex.split(message.content, posix=False)
 
-        for module in self.modules.values():
+        for name, module in self.modules.items():
             if module.disabled:
                 continue
 
-            if not await module.check_message(message, *args):
-                continue
+            try:
+                if not await module.check_message(message, *args):
+                    continue
 
-            if not module.check_argument_count(len(args)):
-                return module.not_enough_arguments_text
+                if not module.check_argument_count(len(args), message):
+                    return await module.on_not_enough_arguments(message)
 
-            if not await module.check_permissions(message):
-                return module.permission_denied_text
-
-            return await module.call_command(message, *args)
+                if not await module.check_permissions(message):
+                    return await module.on_permission_denied(message)
+            except Exception:
+                self.bot.logger.info('Failed to check command, stopped on module ' + name)
+                self.bot.logger.info(traceback.format_exc())
+                self.bot.logger.info('Critical problem, attempting to restart')
+                self.bot.restart()
+            try:
+                return await module.call_command(message, *args)
+            except Exception:
+                module_tb = traceback.format_exc()
+                self.bot.logger.info('Exception occured calling ' + name)
+                self.bot.logger.info(module_tb)
+                self.bot.logger.trace('Calling ' + name + ' on_error')
+                try:
+                    return await module.on_error(module_tb, message)
+                except Exception:
+                    self.bot.logger.debug('Exception occured calling ' + name + ' on_error')
+                    self.bot.logger.debug(traceback.format_exc())
