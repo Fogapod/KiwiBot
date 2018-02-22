@@ -183,6 +183,9 @@ class BotMyBot(discord.Client):
             return
 
     async def track_message(self, message):
+        if message.id in self.tracked_messages:
+            return
+
         self.tracked_messages[message.id] = []
         self.loop.call_later(300, self.release_tracked_message, message.id)
 
