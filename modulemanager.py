@@ -92,8 +92,11 @@ class ModuleManager:
     async def unload_module(self, name):
         pass
 
-    async def check_modules(self, message):
-        args = shlex.split(message.content, posix=False)
+    async def check_modules(self, message, clean_content):
+        try:
+            args = shlex.split(clean_content)
+        except ValueError:
+            args = clean_content.split()
 
         for name, module in self.modules.items():
             if module.disabled:

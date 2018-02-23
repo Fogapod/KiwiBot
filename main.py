@@ -99,13 +99,13 @@ class BotMyBot(discord.Client):
         if not lower_content.startswith(self.prefixes):
             return
 
-        message.content = message.content[
+        clean_content = message.content[
             len(next(p for p in self.prefixes if lower_content.startswith(p))):].strip()
 
-        if not message.content:
+        if not clean_content:
             return
 
-        module_response = await self.mm.check_modules(message)
+        module_response = await self.mm.check_modules(message, clean_content)
 
         if module_response:
             module_response = await format_response(
