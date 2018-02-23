@@ -1,10 +1,12 @@
 from modules.modulebase import ModuleBase
 
+from utils.helpers import get_string_after_entry
+
 
 class Module(ModuleBase):
     """{prefix}{keywords} <text>
     
-    Respomd with given text.
+    Respond with given text.
 
     {protection} or higher permission level required to use"""
 
@@ -12,9 +14,10 @@ class Module(ModuleBase):
     keywords = (name, )
     arguments_required = 1
     protection = 2
+    hidden = True
 
-    async def on_call(self, message, *args, **options):
+    async def on_call(self, msg, *args, **options):
         await self.bot.send_message(
-            message, message.content[len(args[0]):].strip(),
-            parse_content=False
+            msg, get_string_after_entry(args[0], msg.content),
+            parse_content=False, response_to=msg
         )
