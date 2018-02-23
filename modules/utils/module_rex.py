@@ -1,8 +1,11 @@
 from modules.modulebase import ModuleBase
 
+from utils.helpers import get_string_after_entry
+
 from aiohttp import ClientSession
 
-REX_API_URL = 'http://rextester.com/rundotnet/api'
+
+API_URL = 'http://rextester.com/rundotnet/api'
 
 LANG_CODES = {
     'c#':          1,
@@ -128,10 +131,10 @@ class Module(ModuleBase):
             return '{warning} Invalid language'
 
         params['CompilerArgs'] = COMPILE_OPTIONS.get(params['LanguageChoice'], '')
-        params['Program'] = msg.content[msg.content.find(args[1]) + len(args[1]):].strip()
+        params['Program'] = get_string_after_entry(args[1], msg.content)
 
         async with ClientSession() as s:
-            async with s.post(REX_API_URL, params=params) as r:
+            async with s.post(API_URL, params=params) as r:
                 if r.status == 200:
                     result_json = await r.json()
                     result  = result_json['Result'] or ''

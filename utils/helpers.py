@@ -44,6 +44,11 @@ async def find_user_in_guild(pattern, guild, bot):
                 continue
 
         found.append(member)
-    found.sort(key=lambda m: str(m.status) == 'online', reverse=True)
+    found.sort(key=lambda m: m.status.name == 'online', reverse=True)
 
     return found[0] if found else None
+
+
+def get_string_after_entry(entry, string, strip=True):
+    substring = string[string.index(entry) + len(entry):]
+    return substring.lstrip() if strip else substring

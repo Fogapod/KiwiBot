@@ -21,6 +21,7 @@ class Module(ModuleBase):
     keywords = (name, )
     arguments_required = 1
     protection = 2
+    hidden = True
 
     async def on_load(self, from_reload):
         if from_reload:

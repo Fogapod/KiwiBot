@@ -1,9 +1,7 @@
 from modules.modulebase import ModuleBase
 
 from utils.formatters import format_response
-from utils.helpers import create_subprocess_exec, execute_process
-
-import shlex
+from utils.helpers import create_subprocess_exec, execute_process, get_string_after_entry
 
 
 class Module(ModuleBase):
@@ -16,14 +14,15 @@ class Module(ModuleBase):
     keywords = (name, )
     arguments_required = 1
     protection = 2
+    hidden = True
 
-    async def on_call(self, message, *args, **options):
-        command = message.content.split()[1:]
+    async def on_call(self, msg, *args, **options):
+        command = get_string_after_entry(args[0], msg.content).split(' ')
         process, pid = await create_subprocess_exec(*command)
         
         start_message = await self.bot.send_message(
-            message, 'Started task with pid `' + str(pid) + '`',
-            response_to=message
+            msg, 'Started task with pid `' + str(pid) + '`',
+            response_to=msg
         )
 
         stdout, stderr = await execute_process(process, command)
@@ -35,7 +34,7 @@ class Module(ModuleBase):
         if not result.strip():
             response = 'Executed'
         else:
-            response = await format_response(result, message, self.bot)
+            response = await format_response(result, msg, self.bot)
 
         await self.bot.edit_message(
             start_message, content='```\n' + response + '```')

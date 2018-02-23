@@ -1,6 +1,9 @@
 from modules.modulebase import ModuleBase
 
+from utils.helpers import get_string_after_entry
+
 from discord import Game
+
 
 class Module(ModuleBase):
     """{prefix}{keywords} [type] [status]
@@ -21,6 +24,7 @@ class Module(ModuleBase):
     keywords = (name, )
     arguments_required = 0
     protection = 2
+    hidden = True
 
     async def on_permission_denied(self, msg):
         return 'not dogsong or notsosuper'
@@ -40,7 +44,7 @@ class Module(ModuleBase):
             presence = Game(name='')
         else:
             subcommand = args[1].lower()
-            status = ' '.join(args[2:])
+            status = get_string_after_entry(args[1], msg.content)
 
             if subcommand == 'playing':
                 presence = Game(name=status)
@@ -51,7 +55,7 @@ class Module(ModuleBase):
             elif subcommand == 'watching':
                 presence = Game(name=status, type=3)
             else:
-                status = ' '.join(args[1:])
+                status = get_string_after_entry(args[0], msg.content)
                 presence = Game(name=status)
 
         await self.bot.change_presence(game=presence)

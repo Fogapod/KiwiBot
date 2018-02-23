@@ -1,5 +1,7 @@
 from modules.modulebase import ModuleBase
+
 from utils.formatters import format_response
+from utils.helpers import get_string_after_entry
 
 from discord import File
 
@@ -21,7 +23,7 @@ class Module(ModuleBase):
 
     async def on_call(self, msg, *args, **options):
         params = {
-            'q': ' '.join(args[1:]),
+            'q': get_string_after_entry(args[0], msg.content),
             'o': 'json'
         }
 

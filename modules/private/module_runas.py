@@ -1,6 +1,6 @@
 from modules.modulebase import ModuleBase
 
-from utils.helpers import find_user_in_guild
+from utils.helpers import find_user_in_guild, get_string_after_entry
 
 import re
 
@@ -15,6 +15,7 @@ class Module(ModuleBase):
     keywords = (name, )
     arguments_required = 1
     protection = 2
+    hidden = True
 
     async def on_call(self, msg, *args, **options):
         member = None
@@ -28,7 +29,7 @@ class Module(ModuleBase):
         if member is None:
             return '{warning} Member not found'
 
-        new_content = msg.content[msg.content.index(args[1]) + len(args[1]):].strip()
+        new_content = get_string_after_entry(args[1], msg.content)
         msg.author = member
         msg.content = self.bot.prefixes[0] + new_content
         

@@ -1,5 +1,7 @@
 from modules.modulebase import ModuleBase
 
+from utils.helpers import get_string_after_entry
+
 import io
 import sys
 import asyncio
@@ -7,6 +9,7 @@ import traceback
 
 import textwrap
 from contextlib import redirect_stdout
+
 
 class Module(ModuleBase):
     """{prefix}{keywords} <code>
@@ -18,12 +21,13 @@ class Module(ModuleBase):
     keywords = (name, )
     arguments_required = 1
     protection = 2
+    hidden = True
 
     async def on_load(self, from_reload):
         self._last_result = None
 
     async def on_call(self, msg, *args, **options):
-        program = msg.content[msg.content.index(args[0]) + len(args[0]):].strip()
+        program = get_string_after_entry(args[0], msg.content)
 
         glob = {
             'self': self,
