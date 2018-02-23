@@ -24,18 +24,18 @@ class Module(ModuleBase):
     hidden = True
 
     async def on_load(self, from_reload):
-        if from_reload:
+        if not from_reload:
             return
 
-        bot_reload_channel_id = self.bot.config.get('bot_reload_channel_id', 0)
-        bot_reload_message_id = self.bot.config.get('bot_reload_message_id', 0)
+        reload_channel_id = self.bot.config.get('reload_channel_id', 0)
+        reload_message_id = self.bot.config.get('reload_message_id', 0)
 
-        if bot_reload_channel_id and bot_reload_message_id:
-            await self.bot.config.remove('bot_reload_channel_id')
-            await self.bot.config.remove('bot_reload_message_id')
+        if reload_channel_id and reload_message_id:
+            await self.bot.config.remove('reload_channel_id')
+            await self.bot.config.remove('reload_message_id')
 
-            channel = self.bot.get_channel(bot_reload_channel_id)
-            message = await channel.get_message(bot_reload_message_id)
+            channel = self.bot.get_channel(reload_channel_id)
+            message = await channel.get_message(reload_message_id)
 
             await message.edit(content='Bot restarted')
 
@@ -48,8 +48,8 @@ class Module(ModuleBase):
         )
 
         if target == 'bot':
-            await self.bot.config.put('bot_reload_channel_id', reload_message.channel.id)
-            await self.bot.config.put('bot_reload_message_id', reload_message.id)
+            await self.bot.config.put('reload_channel_id', reload_message.channel.id)
+            await self.bot.config.put('reload_message_id', reload_message.id)
             self.bot.restart()
 
         elif target == 'modules':
