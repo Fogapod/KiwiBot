@@ -27,17 +27,21 @@ class Module(ModuleBase):
         if not from_reload:
             return
 
-        reload_channel_id = self.bot.config.get('reload_channel_id', 0)
-        reload_message_id = self.bot.config.get('reload_message_id', 0)
+        try:
+            reload_channel_id = self.bot.config.get('reload_channel_id', 0)
+            reload_message_id = self.bot.config.get('reload_message_id', 0)
 
-        if reload_channel_id and reload_message_id:
-            await self.bot.config.remove('reload_channel_id')
-            await self.bot.config.remove('reload_message_id')
+            if reload_channel_id and reload_message_id:
+                await self.bot.config.remove('reload_channel_id')
+                await self.bot.config.remove('reload_message_id')
 
-            channel = self.bot.get_channel(reload_channel_id)
-            message = await channel.get_message(reload_message_id)
+                channel = self.bot.get_channel(reload_channel_id)
+                message = await channel.get_message(reload_message_id)
 
-            await message.edit(content='Bot restarted')
+                await message.edit(content='Bot restarted')
+        except Exception:
+            import traceback
+            self.bot.logger.info(self.name + ': Failed to call on_load:\n' + traceback.format_exc())
 
     async def on_call(self, msg, *args, **options):
         target = args[1].lower()

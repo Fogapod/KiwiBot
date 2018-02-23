@@ -66,7 +66,7 @@ class ModuleManager:
             except Exception:
                 self.bot.logger.info(
                     'Failed reloading module {0} ({1})'.format(
-                        name, self._modules[name].__file__
+                        module_name, self._modules[module_name].__file__
                     )
                 )
                 self.bot.logger.debug(traceback.format_exc())
