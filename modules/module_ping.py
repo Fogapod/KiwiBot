@@ -19,15 +19,16 @@ class Module(ModuleBase):
             msg, 'Pinging ...', response_to=msg)
 
         if len(args) == 2:
-            program = ['ping', '-c', '4', args[1]]
+            program = ['ping', '-c', '4', args[1].encode('idna')]
             process, pid = await create_subprocess_exec(*program)
             stdout, stderr = await execute_process(process, program)
 
-            await self.bot.edit_message(
-                ping_msg,
-                content='```\n' + (stdout.decode() or stderr.decode()) + '```'
-            )
-            return
+            if process.returncode in (0, 1):  # successful ping, 100% package loss
+                await self.bot.edit_message(
+                    ping_msg,
+                    content='```\n' + (stdout.decode() or stderr.decode()) + '```'
+                )
+                return
 
         msg_timestamp = msg.edited_at if msg.edited_at else msg.created_at
         delta = int(round((ping_msg.created_at.timestamp() - msg_timestamp.timestamp()) * 1000))
