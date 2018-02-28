@@ -5,13 +5,12 @@ from utils.helpers import create_subprocess_exec, execute_process, get_string_af
 
 
 class Module(ModuleBase):
-    """{prefix}{keywords} <code>
-    
-    Exec terminal command.
-    {protection} or higher permission level required to use"""
+
+    usage_doc = '{prefix}{aliases} <code>'
+    short_doc = 'Execute terminal command.'
 
     name = 'exec'
-    keywords = (name, )
+    aliases = (name, )
     arguments_required = 1
     protection = 2
     hidden = True

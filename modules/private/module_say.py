@@ -4,14 +4,12 @@ from utils.helpers import get_string_after_entry
 
 
 class Module(ModuleBase):
-    """{prefix}{keywords} <text>
-    
-    Respond with given text.
 
-    {protection} or higher permission level required to use"""
+    usage_doc = '{prefix}{aliases} <text>'
+    short_doc = 'Respond with given text.'
 
     name = 'say'
-    keywords = (name, )
+    aliases = (name, 'echo')
     arguments_required = 1
     protection = 2
     hidden = True

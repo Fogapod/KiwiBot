@@ -6,19 +6,18 @@ import traceback
 
 
 class Module(ModuleBase):
-    """{prefix}{keywords} <target>
-    
-    Reload parts of the bot.
 
-    Targets:
-        bot: restarts bot
-        modules: reloads all modules
-        <command_name>: reload selected module
-
-    {protection} or higher permission level required to use"""
+    usage_doc = '{prefix}{aliases} <target>'
+    short_doc = 'Reload parts of the bot.'
+    additional_doc = (
+        'Targets:\n'
+        '\tbot: restarts bot\n'
+        '\tmodules: reloads all modules\n'
+        '\t<command_alias>: reload selected module'
+    )
 
     name = 'reload'
-    keywords = (name, )
+    aliases = (name, )
     arguments_required = 1
     protection = 2
     hidden = True
@@ -76,11 +75,19 @@ class Module(ModuleBase):
             )
             return
 
-        elif target in self.bot.mm.modules:
+        else:
+            module = self.bot.mm.get_module(target)
+            if module is None:
+                await self.bot.edit_message(
+                    reload_message, content=f'Unknown target `{target}`!')
+                return
+
+            target = module.name
+
             try:
                 await self.bot.mm.reload_module(target)
             except Exception:
-                response = '{error} Failed to reload module `' + target + '`. Exception:```py\n' + traceback.format_exc() + '```'
+                response = '{error} ' + f'Failed to reload module `{target}`. Exception:```py\n{traceback.format_exc()}```'
                 response = await format_response(response, msg, self.bot)
                 await self.bot.edit_message(
                     reload_message,
@@ -88,10 +95,5 @@ class Module(ModuleBase):
                 )
                 return
 
-        else:
-            await self.bot.edit_message(
-                reload_message, content='Unknown target `' + target + '`!')
-            return
-
         await self.bot.edit_message(
-            reload_message, content='Reloading `' + target + '` completed')
+            reload_message, content=f'Reloading `{target}` completed')

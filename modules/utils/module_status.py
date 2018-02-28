@@ -6,22 +6,20 @@ from discord import Game
 
 
 class Module(ModuleBase):
-    """{prefix}{keywords} [type] [status]
 
-    Update bot status.
-
-    Status types:
-        playing (default)
-        streaming
-        listening
-        watching
-    
-    *Leave empty to remove status
-
-    {protection} or higher permission level required to use"""
+    usage_doc = '{prefix}{aliases} [type] [status]'
+    short_doc = 'Update bot status.'
+    additional_doc = (
+        'Status types:\n'
+        '\tplaying (default)\n'
+        '\tstreaming\n'
+        '\tlistening\n'
+        '\twatching\n\n'
+        '*Leave empty to remove status'
+    )
 
     name = 'status'
-    keywords = (name, )
+    aliases = (name, )
     arguments_required = 0
     protection = 2
     hidden = True
@@ -62,4 +60,4 @@ class Module(ModuleBase):
         await self.bot.config.put('last_status', status)
         await self.bot.config.put('last_status_type', presence.type)
 
-        return 'Status changed to `' + presence.name + '`' if presence.name else 'Status removed'
+        return f'Status switched to `{presence.name}`' if presence.name else 'Status removed'

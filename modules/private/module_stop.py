@@ -4,13 +4,12 @@ from utils.constants import STOP_EXIT_CODE
 
 
 class Module(ModuleBase):
-    """{prefix}{keywords} <exit_code>*
-    
-    Stop bot.
-    {protection} or higher permission level required to use"""
+
+    usage_doc = '{prefix}{aliases} [exit_code]'
+    short_doc = 'Stop bot.'
 
     name = 'stop'
-    keywords = (name, 'die', '!')
+    aliases = (name, 'die', '!')
     protection = 2
     hidden = True
 

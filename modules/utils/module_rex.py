@@ -85,17 +85,16 @@ COMPILE_OPTIONS = {
 }
 
 class Module(ModuleBase):
-    """{prefix}{keywords} <language> <program>
-    
-    Execute code using rex service.
 
-    Subcommands:
-        list: show list of languages
-
-    {protection} or higher permission level required to use"""
+    usage_doc = '{prefix}{aliases} <language> <program>'
+    short_doc = 'Execute code using rex service.'
+    additional_doc = (
+        'Subcommands:\n'
+        '\tlist: show list of languages'
+    )
 
     name = 'rex'
-    keywords = (name, )
+    aliases = (name, )
     arguments_required = 1
     protection = 0
 

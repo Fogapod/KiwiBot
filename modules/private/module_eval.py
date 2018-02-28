@@ -12,13 +12,12 @@ from contextlib import redirect_stdout
 
 
 class Module(ModuleBase):
-    """{prefix}{keywords} <code>
-    
-    Eval python code.
-    {protection} or higher permission level required to use"""
+
+    usage_doc = '{prefix}{aliases} <code>'
+    short_doc = 'Eval python code.'
 
     name = 'eval'
-    keywords = (name, )
+    aliases = (name, )
     arguments_required = 1
     protection = 2
     hidden = True

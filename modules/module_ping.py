@@ -4,13 +4,12 @@ from utils.helpers import create_subprocess_exec, execute_process
 
 
 class Module(ModuleBase):
-    """{prefix}{keywords} <url>*
-    
-    Get bot response time / ping url.
-    {protection} or higher permission level required to use"""
+
+    usage_doc = '{prefix}{aliases} [url]'
+    short_doc = 'Get bot response time / ping url.'
 
     name = 'ping'
-    keywords = (name, )
+    aliases = (name, )
     arguments_required = 0
     protection = 0
 

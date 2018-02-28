@@ -4,14 +4,11 @@ import time
 
 
 class Module(ModuleBase):
-    """{prefix}{keywords}
-    
-    Get bot uptime.
 
-    {protection} or higher permission level required to use"""
+    short_doc = 'Get bot uptime.'
 
     name = 'uptime'
-    keywords = (name, 'up')
+    aliases = (name, 'up')
     protection = 0
 
     async def on_call(self, message, *args, **options):

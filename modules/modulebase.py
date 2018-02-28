@@ -3,10 +3,14 @@ from utils.checks import get_user_access_level
 
 
 class ModuleBase:
-    """Module is not documented"""
+
+    usage_doc = '{prefix}{aliases}'
+    short_doc = 'Not documented'
+    additional_doc = ''
+    permission_doc = '{protection} or higher permission level required to use'
 
     name = 'module'
-    keywords = ()
+    aliases = ()
     arguments_required = 0
     protection = 0
     hidden = False
@@ -36,7 +40,7 @@ class ModuleBase:
         return await self.on_check_message(msg, *args, **options)
 
     async def on_check_message(self, msg, *args, **options):
-        return args[0].lower() in self.keywords
+        return args[0].lower() in self.aliases
 
     async def call_command(self, msg, *args, **options):
         return await self.on_call(msg, *args, **options)

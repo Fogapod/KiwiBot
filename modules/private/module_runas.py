@@ -6,13 +6,12 @@ import re
 
 
 class Module(ModuleBase):
-    """{prefix}{keywords} <user> <message>
 
-    Force bot to think message was sent by selected user.
-    {protection} or higher permission level required to use"""
+    usage_doc = '{prefix}{aliases} <user> <message>'
+    short_help = 'Force bot to think message was sent by selected user.'
 
     name = 'runas'
-    keywords = (name, )
+    aliases = (name, )
     arguments_required = 1
     protection = 2
     hidden = True

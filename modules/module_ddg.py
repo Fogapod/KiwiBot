@@ -11,13 +11,12 @@ from aiohttp import ClientSession
 API_URL = 'https://api.duckduckgo.com'
 
 class Module(ModuleBase):
-    """{prefix}{keywords} <text>
 
-    Web search using duckduckgo.
-    {protection} or higher permission level required to use"""
+    usage_doc = '{prefix}{aliases} <query>'
+    short_doc = 'Web search using duckduckgo.'
 
     name = 'ddg'
-    keywords = (name, 'duckduckgo')
+    aliases = (name, 'duckduckgo')
     arguments_required = 1
     protection = 0
 
