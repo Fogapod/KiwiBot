@@ -8,7 +8,7 @@ class Logger:
 
     _logger = None
 
-    def __init__(self, file=None):
+    def __init__(self, filename=None):
         Logger._logger = self
 
         self.VERBOSITY_SILENT = 0
@@ -20,8 +20,14 @@ class Logger:
 
         self._files = [stdout, ]
 
-        if file is not None:
-            self._files.append(open(file, 'a'))
+        if filename is not None:
+            self._files.append(open(filename, 'a'))
+
+    def add_file(self, filename):
+        if filename is None:
+            return
+
+        self._files.append(open(filename, 'a'))
 
     def info(self, *args):
         if self.verbosity >= self.VERBOSITY_INFO:

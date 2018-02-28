@@ -5,16 +5,19 @@ import sys
 
 import discord
 
+from utils.logger import Logger
+
+logger = Logger()
+
 from modulemanager import ModuleManager
 
 from utils.constants import DEFAULT_PREFIXES, STOP_EXIT_CODE
 from utils.formatters import format_response, trim_message
 from utils.config import Config
-from utils.logger import Logger
+from redisdb import RedisDB
 
 
 EXIT_CODE = None
-
 
 class BotMyBot(discord.Client):
 
@@ -24,17 +27,21 @@ class BotMyBot(discord.Client):
         self.is_first_on_ready_event = True
 
         self.start_time = 0
+        self.tracked_messages = {}
 
         self.config = Config('config.json', loop=self.loop)
+        logger.verbosity = self.config.get('logger_verbosity', logger.VERBOSITY_INFO)
+        logger.add_file(self.config.get('logs_file', None))
+
+        logger.debug('Logger ................. connected')
+
         self.token = self.config.get('token', None)
 
-        self.logger = Logger(file=self.config.get('logs_file', None))
-        self.logger.verbosity = self.config.get('logger_verbosity', self.logger.VERBOSITY_INFO)
-        self.logger.debug('Logger connected')
-
-        self.tracked_messages = {}
         self.mm = ModuleManager(self)
-        self.logger.debug('ModuleManager connected')
+        logger.debug('ModuleManager .......... connected')
+
+        self.redis = RedisDB()
+        logger.debug('RedisDB ................ connected')
 
         self.prefixes = DEFAULT_PREFIXES
 
@@ -55,32 +62,36 @@ class BotMyBot(discord.Client):
         self.stop(0)
 
     def stop(self, exit_code=STOP_EXIT_CODE):
-        self.logger.debug('Stopping event loop and cancelling tasks')
+        self.redis.disconnect()
+        logger.debug('Stopping event loop and cancelling tasks')
         self.loop.stop()
         tasks = asyncio.gather(*asyncio.Task.all_tasks(), loop=self.loop)
         tasks.cancel()
 
-        self.logger.debug('Preparing to exit with code ' + str(exit_code))
         global EXIT_CODE
         EXIT_CODE = exit_code
 
     async def on_ready(self):
         if not self.is_first_on_ready_event:
             await self.mm.init_modules()
-            self.logger.info('Bot reconnected')
+            logger.info('Bot reconnected')
             return
 
         self.is_first_on_ready_event = False
 
         await self.mm.load_modules()
-        self.logger.info('Loaded modules: [%s]' % ' '.join(self.mm.modules.keys()))
+        logger.info('Loaded modules: [%s]' % ' '.join(self.mm.modules.keys()))
+
+        await self.redis.connect()
+        logger.info('Connected to redis db with %s keys' % await self.redis.get_db_size())
+
         self.start_time = time.time()
-        self.logger.info('Bot ready')
-        self.logger.info('Default prefix: ' + self.prefixes[0])
+        logger.info('Bot ready')
+        logger.info('Default prefix: ' + self.prefixes[0])
 
     async def close(self):
         await super(BotMyBot, self).close()
-        self.logger.info('Connection closed')
+        logger.info('Connection closed')
 
     async def on_message(self, message, from_edit=False):
         if message.author.bot:
@@ -145,7 +156,7 @@ class BotMyBot(discord.Client):
         except Exception:
             exception = traceback.format_exc()
             exception = '\n'.join(exception.split('\n')[-4:])
-            exception = '❗ Message delivery failed\n```\n' + exception + '```'
+            exception = f'❗ Message delivery failed\n```\n{exception}```'
             message = await msg.channel.send(exception)
         finally:
             if response_to is not None:
@@ -167,19 +178,19 @@ class BotMyBot(discord.Client):
         try:
             return await message.edit(**fields)
         except discord.errors.NotFound:
-            self.logger.debug('edit_message: message not found')
+            logger.debug('edit_message: message not found')
             return
         except Exception:
             exception = traceback.format_exc()
             exception = '\n'.join(exception.split('\n')[-4:])
-            exception = '❗ Message edit failed\n```\n' + exception + '```'
+            exception = f'❗ Message edit failed\n```\n{exception}```'
             return await message.edit(content=exception)
     
     async def delete_message(self, message):
         try:
             return await message.delete()
         except discord.errors.NotFound:
-            self.logger.debug('delete_message: message not found')
+            logger.debug('delete_message: message not found')
             return
 
     async def track_message(self, message):
@@ -196,10 +207,11 @@ class BotMyBot(discord.Client):
         if request.id in self.tracked_messages:
             self.tracked_messages[request.id].append(response)
         else:
-            self.logger.debug('Request outdated, not registering')
+            logger.debug('Request outdated, not registering')
 
 
 if __name__ == '__main__':
     BotMyBot().run()
     if EXIT_CODE is not None:
+        logger.debug(f'Exiting with code {EXIT_CODE}')
         sys.exit(EXIT_CODE)
