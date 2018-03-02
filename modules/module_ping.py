@@ -1,6 +1,7 @@
 from modules.modulebase import ModuleBase
 
-from utils.helpers import create_subprocess_exec, execute_process
+from utils.helpers import (
+    create_subprocess_exec, execute_process, get_string_after_entry)
 
 
 class Module(ModuleBase):
@@ -13,7 +14,7 @@ class Module(ModuleBase):
     arguments_required = 0
     protection = 0
 
-    async def on_call(self, msg, *args, **options):
+    async def on_call(self, msg, *args, **flags):
         ping_msg = await self.bot.send_message(
             msg, 'Pinging ...', response_to=msg)
 
@@ -34,7 +35,7 @@ class Module(ModuleBase):
 
         result = 'Pong, it took `' + str(delta) + 'ms`'
 
-        args = msg.content.strip().split(' ')
-        result += ' to ping `' + ' '.join(args[1:]) + '`' if args[1:] else ' to respond'
+        target = get_string_after_entry(args[0], msg.content)
+        result += ' to ping `' + target + '`' if target else ' to respond'
 
         await self.bot.edit_message(ping_msg, content=result)
