@@ -53,7 +53,7 @@ async def find_user(pattern, bot, guild=None, strict_guild=False):
             try:
                 user = await bot.get_user_info(user_id)
             except NotFound:
-                return
+                return None
 
     if user is not None:
         return user
@@ -64,14 +64,15 @@ async def find_user(pattern, bot, guild=None, strict_guild=False):
     found_in_guild = []
     for member in guild.members:
         if re.search(pattern, member.display_name, re.I) is None:
-            if re.search(pattern, member.name + '#' + member.discriminator, re.I) is None:
+            if re.search(pattern, f'{member.name}#{member.discriminator}', re.I) is None:
                 continue
 
         found_in_guild.append(member)
 
     found_in_guild.sort(
         key=lambda m: (
-            m.status.name == 'online'
+            m.status.name == 'online',
+            m.joined_at
         ),
         reverse=True
     )
