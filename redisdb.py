@@ -37,6 +37,15 @@ class RedisDB:
 
         self.connection.close()
 
+    async def get(self, key):
+        return await self.execute('GET', key)
+
+    async def set(self, key, value, *args):
+        return await self.execute('SET', key, value, *args)
+
+    async def exists(self, *values):
+        return await self.execute('EXISTS', *values) == len(values)
+
     async def get_db_size(self):
         return await self.execute('DBSIZE')
 
@@ -48,5 +57,15 @@ class RedisDB:
             except Exception:
                 logger.info(f'Could not reconnect to redis db. Command {command} failed')
                 return
-            
-        return await self.connection.execute(command, *args)
+
+        value = await self.connection.execute(command, *args)
+
+        return self.decode_value(value)
+
+    def decode_value(self, value):
+        if type(value) is list:
+            return [decode_output(v) for v in value]
+        elif type(value) is bytes:
+            return value.decode()
+
+        return value
