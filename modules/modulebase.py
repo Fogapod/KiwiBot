@@ -34,18 +34,24 @@ class ModuleBase:
     async def on_load(self, from_reload):
         pass
 
-    async def check_message(self, msg, *args, **options):
+    async def check_message(self, msg, *args, **flags):
         if self.disabled:
             return False
-        return await self.on_check_message(msg, *args, **options)
+        return await self.on_check_message(msg, *args, **flags)
 
-    async def on_check_message(self, msg, *args, **options):
+    async def on_check_message(self, msg, *args, **flags):
         return args[0].lower() in self.aliases
 
-    async def call_command(self, msg, *args, **options):
-        return await self.on_call(msg, *args, **options)
+    async def call_command(self, msg, *args, **flags):
+        return await self.on_call(msg, *args, **flags)
 
-    async def on_call(self, msg, *args, **options):
+    async def on_call(self, msg, *args, **flags):
+        pass
+
+    async def on_message_edit(self, before, after, *args, **flags):
+        pass
+
+    async def on_message_delete(self, msg, *args, **flags):
         pass
 
     async def on_doc_request(self):
