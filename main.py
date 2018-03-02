@@ -79,11 +79,11 @@ class BotMyBot(discord.Client):
 
         self.is_first_on_ready_event = False
 
-        await self.mm.load_modules()
-        logger.info('Loaded modules: [%s]' % ' '.join(self.mm.modules.keys()))
-
         await self.redis.connect()
         logger.info('Connected to redis db with %s keys' % await self.redis.get_db_size())
+
+        await self.mm.load_modules()
+        logger.info('Loaded modules: [%s]' % ' '.join(self.mm.modules.keys()))
 
         self.start_time = time.time()
         logger.info('Bot ready')
