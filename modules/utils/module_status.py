@@ -20,7 +20,6 @@ class Module(ModuleBase):
 
     name = 'status'
     aliases = (name, )
-    arguments_required = 0
     protection = 2
     hidden = True
 
@@ -28,14 +27,16 @@ class Module(ModuleBase):
         return 'not dogsong or notsosuper'
 
     async def on_load(self, from_reload):
-        last_status = self.bot.config.get('last_status', '')
-        last_status_type = self.bot.config.get('last_status_type', 0)
+        if not await self.bot.redis.exists('last_status', 'last_status_type'):
+            return
 
-        if last_status:
-            presence = Game(name=last_status, type=last_status_type)
-            await self.bot.change_presence(game=presence)
+        last_status = await self.bot.redis.get('last_status')
+        last_status_type = int(await self.bot.redis.get('last_status_type'))
 
-    async def on_call(self, msg, *args, **options):
+        presence = Game(name=last_status, type=last_status_type)
+        await self.bot.change_presence(game=presence)
+
+    async def on_call(self, msg, *args, **flags):
         status = ''
 
         if len(args) == 1:
@@ -57,7 +58,7 @@ class Module(ModuleBase):
                 presence = Game(name=status)
 
         await self.bot.change_presence(game=presence)
-        await self.bot.config.put('last_status', status)
-        await self.bot.config.put('last_status_type', presence.type)
+        await self.bot.redis.set('last_status', status)
+        await self.bot.redis.set('last_status_type', presence.type)
 
         return f'Status switched to `{presence.name}`' if presence.name else 'Status removed'
