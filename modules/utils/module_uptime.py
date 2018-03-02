@@ -11,7 +11,7 @@ class Module(ModuleBase):
     aliases = (name, 'up')
     protection = 0
 
-    async def on_call(self, message, *args, **options):
+    async def on_call(self, message, *args, **flags):
         delta = time.time() - self.bot.start_time
 
         minutes, seconds = divmod(delta,   60)
@@ -21,11 +21,11 @@ class Module(ModuleBase):
         years,   months  = divmod(months,  12)
 
         response = 'Up for: **'
-        response += '{0}y '.format(int(years)) if years else ''
-        response += '{0}mon '.format(int(months)) if months else ''
-        response += '{0}d '.format(int(days)) if days else ''
-        response += '{0}h '.format(int(hours)) if hours else ''
-        response += '{0}m '.format(int(minutes)) if minutes else ''
+        response += '{0}y '.format(int(years))    if years   else ''
+        response += '{0}mon '.format(int(months)) if months  else ''
+        response += '{0}d '.format(int(days))     if days    else ''
+        response += '{0}h '.format(int(hours))    if hours   else ''
+        response += '{0}m '.format(int(minutes))  if minutes else ''
         response += '{0}s**'.format(int(seconds))
 
         return response
