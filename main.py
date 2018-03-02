@@ -11,7 +11,7 @@ logger = Logger()
 
 from modulemanager import ModuleManager
 
-from utils.constants import DEFAULT_PREFIXES, STOP_EXIT_CODE
+from utils.constants import STOP_EXIT_CODE
 from utils.formatters import format_response, trim_message
 from utils.config import Config
 from redisdb import RedisDB
@@ -43,7 +43,15 @@ class BotMyBot(discord.Client):
         self.redis = RedisDB()
         logger.debug('RedisDB ................ connected')
 
-        self.prefixes = DEFAULT_PREFIXES
+        self.prefixes = []
+
+    async def init_prefixes(self):
+        bot_id = self.user.id
+
+        self.prefixes = []
+        self._default_prefix = await self.redis.get('prefix', default='+')
+        self._mention_prefixes = [f'<@{bot_id}>', f'<!@{bot_id}>']
+        self.prefixes.extend([self._default_prefix, *self._mention_prefixes])
 
     def run(self, token=None):
         if token is None:
@@ -85,46 +93,52 @@ class BotMyBot(discord.Client):
         await self.mm.load_modules()
         logger.info('Loaded modules: [%s]' % ' '.join(self.mm.modules.keys()))
 
+        await self.init_prefixes()
+
         self.start_time = time.time()
         logger.info('Bot ready')
-        logger.info('Default prefix: ' + self.prefixes[0])
+        logger.info('Default prefix: ' + self._default_prefix)
 
     async def close(self):
         await super(BotMyBot, self).close()
         logger.info('Connection closed')
 
-    async def on_message(self, message, from_edit=False):
-        if message.author.bot:
+    async def on_message(self, msg, from_edit=False):
+        if msg.author.bot:
             return
 
-        if message.guild is None:
+        prefix_override = False
+
+        if msg.guild is None:
             await self.send_message(
-                message, 'Direct messages are not supported yet')
+                msg, 'Direct messages are not supported yet')
             return
+        else:
+            prefix_override = await self.redis.get(f'guild_prefix:{msg.guild.id}')
 
         if not from_edit:
-            await self.track_message(message)
+            await self.track_message(msg)
 
-        lower_content = message.content.lower()
+        lower_content = msg.content.lower()
+        clean_content = None
 
-        if not lower_content.startswith(self.prefixes):
+        for p in self.prefixes if prefix_override is None else [prefix_override] + self.prefixes[1:]:
+            if lower_content.startswith(p):
+                clean_content = msg.content[len(p):].lstrip()
+                break
+
+        if clean_content is None:
             return
 
-        clean_content = message.content[
-            len(next(p for p in self.prefixes if lower_content.startswith(p))):].strip()
-
-        if not clean_content:
-            return
-
-        module_response = await self.mm.check_modules(message, clean_content)
+        module_response = await self.mm.check_modules(msg, clean_content)
 
         if module_response:
             module_response = await format_response(
-                module_response, message, self)
+                module_response, msg, self)
 
         if module_response:
             await self.send_message(
-                message, module_response, response_to=message)
+                msg, module_response, response_to=msg)
 
     async def on_message_edit(self, before, after):
         if before.content == after.content:

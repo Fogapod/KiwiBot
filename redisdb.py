@@ -37,7 +37,9 @@ class RedisDB:
 
         self.connection.close()
 
-    async def get(self, key):
+    async def get(self, key, default=None):
+        if not await self.exists(key):
+            return default
         return await self.execute('GET', key)
 
     async def set(self, key, value, *args):

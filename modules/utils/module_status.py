@@ -30,8 +30,8 @@ class Module(ModuleBase):
         if not await self.bot.redis.exists('last_status', 'last_status_type'):
             return
 
-        last_status = await self.bot.redis.get('last_status')
-        last_status_type = int(await self.bot.redis.get('last_status_type'))
+        last_status = await self.bot.redis.get('last_status', default='')
+        last_status_type = await self.bot.redis.get('last_status_type', default=0)
 
         presence = Game(name=last_status, type=last_status_type)
         await self.bot.change_presence(game=presence)
