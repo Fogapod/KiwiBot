@@ -64,7 +64,7 @@ class RedisDB:
 
     def decode_value(self, value):
         if type(value) is list:
-            return [decode_output(v) for v in value]
+            return [self.decode_value(v) for v in value]
         elif type(value) is bytes:
             return value.decode()
 
