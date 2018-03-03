@@ -159,7 +159,7 @@ class BotMyBot(discord.Client):
             self.tracked_messages[message_id] = []
 
     async def send_message(self, msg, text, response_to=None, parse_content=True, **kwargs):
-        text = text.replace(self.token, 'my-token')
+        text = text.replace(self.token, 'TOKEN_LEAKED')
         if parse_content:
             text = text.replace('@everyone', '@\u200beveryone')
             text = text.replace('@here', '@\u200bhere')
@@ -181,7 +181,7 @@ class BotMyBot(discord.Client):
     async def edit_message(self, message, parse_content=True, **fields):
         content = fields.pop('content', '')
         if content:
-            content = content.replace(self.token, 'my-token')
+            content = content.replace(self.token, 'TOKEN_LEAKED')
             if parse_content:
                 content = content.replace('@everyone', '@\u200beveryone')
                 content = content.replace('@here', '@\u200bhere')
