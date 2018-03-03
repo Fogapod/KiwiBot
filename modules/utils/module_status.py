@@ -19,7 +19,7 @@ class Module(ModuleBase):
     )
 
     name = 'status'
-    aliases = (name, )
+    aliases = (name, 'presence')
     protection = 2
     hidden = True
 
@@ -31,7 +31,7 @@ class Module(ModuleBase):
             return
 
         last_status = await self.bot.redis.get('last_status', default='')
-        last_status_type = await self.bot.redis.get('last_status_type', default=0)
+        last_status_type = int(await self.bot.redis.get('last_status_type', default=0))
 
         presence = Game(name=last_status, type=last_status_type)
         await self.bot.change_presence(game=presence)
