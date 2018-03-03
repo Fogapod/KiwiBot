@@ -103,6 +103,9 @@ class ModuleManager:
                 continue
 
             try:
+                if not await module.check_message(message, *args):
+                    continue
+
                 if not await module.check_nsfw_permission(message):
                     return await module.on_nsfw_prmission_denied(message)
 
@@ -111,9 +114,6 @@ class ModuleManager:
 
                 if not await module.check_permissions(message):
                     return await module.on_permission_denied(message)
-
-                if not await module.check_message(message, *args):
-                    continue
             except Exception:
                 logger.info(f'Failed to check command, stopped on module {name}')
                 logger.info(traceback.format_exc())
