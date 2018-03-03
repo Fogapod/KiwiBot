@@ -11,6 +11,7 @@ class ModuleBase:
 
     name = 'module'
     aliases = ()
+    nsfw = False
     arguments_required = 0
     protection = 0
     hidden = False
@@ -19,11 +20,17 @@ class ModuleBase:
     def __init__(self, bot):
         self.bot = bot
 
-    def check_argument_count(self, argc, msg):
+    async def check_nsfw_permission(self, msg):
+        return msg.channel.nsfw >= self.nsfw
+
+    async def check_argument_count(self, argc, msg):
         return argc - 1 >= self.arguments_required
 
     async def check_permissions(self, msg):
         return await get_user_access_level(msg) >= self.protection
+
+    async def on_nsfw_prmission_denied(self, msg):
+        return '{error} You can use this command only in channel marked as nsfw'
 
     async def on_not_enough_arguments(self, msg):
         return '{error} Not enough arguments to call ' + self.name
