@@ -54,7 +54,7 @@ class ModuleBase:
         return await self.on_check_message(msg, *args, **flags)
 
     async def on_check_message(self, msg, *args, **flags):
-        return args[0].lower() in self.aliases
+        return args and args[0].lower() in self.aliases
 
     async def call_command(self, msg, *args, **flags):
         return await self.on_call(msg, *args, **flags)

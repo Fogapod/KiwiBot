@@ -160,6 +160,7 @@ class BotMyBot(discord.Client):
             text = text.replace('@everyone', '@\u200beveryone')
             text = text.replace('@here', '@\u200bhere')
             text = trim_message(text)
+        message = None
 
         try:
             message = await msg.channel.send(text, **kwargs)
@@ -169,7 +170,7 @@ class BotMyBot(discord.Client):
             exception = f'❗ Message delivery failed\n```\n{exception}```'
             message = await msg.channel.send(exception)
         finally:
-            if response_to is not None:
+            if response_to is not None and message is not None:
                 await self.register_response(response_to, message)
 
             return message

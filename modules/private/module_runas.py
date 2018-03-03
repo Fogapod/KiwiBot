@@ -13,7 +13,7 @@ class Module(ModuleBase):
     name = 'runas'
     aliases = (name, )
     guild_only = True
-    arguments_required = 1
+    arguments_required = 2
     protection = 2
     hidden = True
 
@@ -23,11 +23,15 @@ class Module(ModuleBase):
         if user is None:
             return '{warning} User not found'
 
+        guild_prefix = await self.bot.redis.get(f'guild_prefix:{msg.guild.id}')
         new_content = get_string_after_entry(args[1], msg.content)
-        msg.author = user
-        msg.content = self.bot.prefixes[0] + new_content
-        print(msg.content)
-        
+
+        if guild_prefix is not None:
+            new_content = guild_prefix + new_content
+        else:
+            new_content = self.bot.prefixes[0] + new_content
+
+        msg.content = new_content
         await self.bot.on_message(msg)
-        
+
         return f'Message processed as `{user.name}#{user.discriminator}`'
