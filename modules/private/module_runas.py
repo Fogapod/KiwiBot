@@ -12,6 +12,7 @@ class Module(ModuleBase):
 
     name = 'runas'
     aliases = (name, )
+    guild_only = True
     arguments_required = 1
     protection = 2
     hidden = True
@@ -25,6 +26,7 @@ class Module(ModuleBase):
         new_content = get_string_after_entry(args[1], msg.content)
         msg.author = user
         msg.content = self.bot.prefixes[0] + new_content
+        print(msg.content)
         
         await self.bot.on_message(msg)
         

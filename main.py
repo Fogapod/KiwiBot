@@ -107,13 +107,9 @@ class BotMyBot(discord.Client):
         if msg.author.bot:
             return
 
-        prefix_override = False
+        prefix_override = None
 
-        if msg.guild is None:
-            await self.send_message(
-                msg, 'Direct messages are not supported yet')
-            return
-        else:
+        if msg.guild is not None:
             prefix_override = await self.redis.get(f'guild_prefix:{msg.guild.id}')
 
         if not from_edit:

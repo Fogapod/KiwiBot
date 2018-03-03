@@ -11,6 +11,7 @@ class ModuleBase:
 
     name = 'module'
     aliases = ()
+    guild_only = False
     nsfw = False
     arguments_required = 0
     protection = 0
@@ -20,14 +21,20 @@ class ModuleBase:
     def __init__(self, bot):
         self.bot = bot
 
+    async def check_guild(self, msg):
+        return (msg.guild is not None) >= self.guild_only
+
     async def check_nsfw_permission(self, msg):
-        return msg.channel.nsfw >= self.nsfw
+        return getattr(msg.channel, 'nsfw', False) >= self.nsfw
 
     async def check_argument_count(self, argc, msg):
         return argc - 1 >= self.arguments_required
 
     async def check_permissions(self, msg):
         return await get_user_access_level(msg) >= self.protection
+
+    async def on_guild_check_failed(self, msg):
+        return '{error} This command can only be used in guild'
 
     async def on_nsfw_prmission_denied(self, msg):
         return '{error} You can use this command only in channel marked as nsfw'
