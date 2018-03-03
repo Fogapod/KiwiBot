@@ -31,6 +31,7 @@ class Module(ModuleBase):
         else:
             new_content = self.bot.prefixes[0] + new_content
 
+        msg.author = user
         msg.content = new_content
         await self.bot.on_message(msg)
 
