@@ -1,4 +1,5 @@
 from utils.constants import ACCESS_LEVEL_NAMES
+from utils.helpers import get_local_prefix
 from utils.checks import get_user_access_level
 
 
@@ -68,8 +69,28 @@ class ModuleBase:
     async def on_message_delete(self, msg, *args, **flags):
         pass
 
-    async def on_doc_request(self):
-        return None
+    async def on_doc_request(self, msg):
+        help_text = ''
+        help_text += f'{self.usage_doc}'          if self.usage_doc else ''
+        help_text += f'\n\n{self.short_doc}'      if self.short_doc else ''
+        help_text += f'\n\n{self.additional_doc}' if self.additional_doc else ''
+        help_text += f'\n\n{self.permission_doc}' if self.permission_doc else ''
+
+        help_text = help_text.strip()
+
+        return await self._format_help(help_text, msg)
+
+    async def _format_help(self, help_text, msg):
+        help_text = help_text.replace('{prefix}', await get_local_prefix(msg, self.bot))
+
+        if len(self.aliases) == 1:
+            help_text = help_text.replace('{aliases}', self.aliases[0])
+        else:
+            help_text = help_text.replace('{aliases}', '[' + '|'.join(self.aliases) + ']')
+
+        help_text = help_text.replace('{protection}', ACCESS_LEVEL_NAMES[self.protection])
+
+        return f'```\n{help_text}\n```'
 
     async def on_error(self, tb_text, msg):
         return (

@@ -1,6 +1,6 @@
 from modules.modulebase import ModuleBase
 
-from utils.helpers import find_user, get_string_after_entry
+from utils.helpers import find_user, get_string_after_entry, get_local_prefix
 
 import re
 
@@ -23,16 +23,11 @@ class Module(ModuleBase):
         if user is None:
             return '{warning} User not found'
 
-        guild_prefix = await self.bot.redis.get(f'guild_prefix:{msg.guild.id}')
+        prefix = await get_local_prefix(msg)
         new_content = get_string_after_entry(args[1], msg.content)
 
-        if guild_prefix is not None:
-            new_content = guild_prefix + new_content
-        else:
-            new_content = self.bot.prefixes[0] + new_content
-
         msg.author = user
-        msg.content = new_content
+        msg.content = prefix + new_content
         await self.bot.on_message(msg)
 
         return f'Message processed as `{user.name}#{user.discriminator}`'

@@ -43,15 +43,23 @@ class BotMyBot(discord.Client):
         self.redis = RedisDB()
         logger.debug('RedisDB ................ connected')
 
+        self._default_prefixes = {}
+        self._mention_prefixes = {}
         self.prefixes = []
+        self._guild_prefixes = {}
 
     async def init_prefixes(self):
         bot_id = self.user.id
 
         self.prefixes = []
-        self._default_prefix = await self.redis.get('prefix', default='+')
+        self._default_prefixes = [await self.redis.get('prefix', default='+')]
         self._mention_prefixes = [f'<@{bot_id}>', f'<!@{bot_id}>']
-        self.prefixes.extend([self._default_prefix, *self._mention_prefixes])
+        self.prefixes.extend([*self._default_prefixes, *self._mention_prefixes])
+
+        self._guild_prefixes = {}
+        for p in await self.redis.execute('KEYS', 'guild_prefix:*'):
+            guild_id = int(p[len('guild_prefix:'):])
+            self._guild_prefixes[guild_id] = await self.redis.get(p)
 
     def run(self, token=None):
         if token is None:
@@ -97,7 +105,10 @@ class BotMyBot(discord.Client):
 
         self.start_time = time.time()
         logger.info('Bot ready')
-        logger.info('Default prefix: ' + self._default_prefix)
+        if len(self._default_prefixes) == 1:
+            logger.info('Default prefix: ' + self._default_prefixes[0])
+        else:
+            logger.info('Default prefixes: [' + ' '.join(self._default_prefixes) + ']')
 
     async def close(self):
         await super(BotMyBot, self).close()
@@ -107,18 +118,21 @@ class BotMyBot(discord.Client):
         if msg.author.bot:
             return
 
-        prefix_override = None
-
-        if msg.guild is not None:
-            prefix_override = await self.redis.get(f'guild_prefix:{msg.guild.id}')
-
         if not from_edit:
             await self.track_message(msg)
 
         lower_content = msg.content.lower()
         clean_content = None
 
-        for p in self.prefixes if prefix_override is None else [prefix_override] + self.prefixes[1:]:
+        prefixes = self.prefixes
+
+        if msg.guild is not None:
+            guild_prefixes = self._guild_prefixes.get(msg.guild.id, None)
+
+            if guild_prefixes:
+                prefixes = [guild_prefixes] + self._mention_prefixes
+
+        for p in prefixes:
             if lower_content.startswith(p):
                 clean_content = msg.content[len(p):].lstrip()
                 break

@@ -83,3 +83,11 @@ async def find_user(pattern, bot, guild=None, strict_guild=False):
 def get_string_after_entry(entry, string, strip=True):
     substring = string[string.index(entry) + len(entry):]
     return substring.lstrip() if strip else substring
+
+
+async def get_local_prefix(msg, bot):
+    if msg.guild is not None:
+        guild_prefix = bot._guild_prefixes.get(msg.guild.id)
+        if guild_prefix is not None:
+            return guild_prefix
+    return bot._default_prefixes[0]

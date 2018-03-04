@@ -25,7 +25,7 @@ class Module(ModuleBase):
     async def on_load(self, from_reload):
         self._last_result = None
 
-    async def on_call(self, msg, *args, **options):
+    async def on_call(self, msg, *args, **flags):
         program = get_string_after_entry(args[0], msg.content)
 
         glob = {

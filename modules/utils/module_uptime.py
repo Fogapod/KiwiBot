@@ -9,7 +9,6 @@ class Module(ModuleBase):
 
     name = 'uptime'
     aliases = (name, 'up')
-    protection = 0
 
     async def on_call(self, message, *args, **flags):
         delta = time.time() - self.bot.start_time
