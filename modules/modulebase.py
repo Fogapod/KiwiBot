@@ -101,3 +101,6 @@ class ModuleBase:
 
     async def on_unload(self):
         pass
+
+    async def send(self, msg, **kwargs):
+        return await self.bot.send_message(msg, '', response_to=msg, **kwargs)
