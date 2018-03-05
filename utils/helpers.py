@@ -1,4 +1,5 @@
 import re
+import datetime
 import asyncio
 
 from discord import NotFound
@@ -71,6 +72,7 @@ async def find_user(pattern, bot, guild=None, strict_guild=False, return_all=Fal
 
     found_in_guild.sort(
         key=lambda m: (
+            _get_last_user_message_timestamp(m.id, guild.id, bot),
             m.status.name == 'online',
             m.joined_at
         ),
@@ -81,6 +83,13 @@ async def find_user(pattern, bot, guild=None, strict_guild=False, return_all=Fal
         return found_in_guild if return_all else found_in_guild[0]
 
     return None
+
+
+def _get_last_user_message_timestamp(user_id, guild_id, bot):
+    if guild_id in bot._last_messages:
+        if user_id in bot._last_messages[guild_id]:
+            return bot._last_messages[guild_id][user_id].edited_at or bot._last_messages[guild_id][user_id].created_at
+    return datetime.datetime.fromtimestamp(0)
 
 
 def get_string_after_entry(entry, string, strip=True):

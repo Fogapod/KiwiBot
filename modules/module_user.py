@@ -4,8 +4,6 @@ from utils.helpers import find_user, get_string_after_entry
 
 from discord import Embed
 
-import re
-
 
 class Module(ModuleBase):
 

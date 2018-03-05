@@ -48,6 +48,8 @@ class BotMyBot(discord.Client):
         self.prefixes = []
         self._guild_prefixes = {}
 
+        self._last_messages = {}
+
     async def init_prefixes(self):
         bot_id = self.user.id
 
@@ -115,6 +117,8 @@ class BotMyBot(discord.Client):
         logger.info('Connection closed')
 
     async def on_message(self, msg, from_edit=False):
+        self.register_last_user_message(msg)
+
         if msg.author.bot:
             return
 
@@ -149,6 +153,12 @@ class BotMyBot(discord.Client):
         if module_response:
             await self.send_message(
                 msg, module_response, response_to=msg)
+
+    def register_last_user_message(self, msg):
+        if msg.guild.id not in self._last_messages:
+            self._last_messages[msg.guild.id] = {msg.author.id: msg}
+        else:
+            self._last_messages[msg.guild.id][msg.author.id] = msg
 
     async def on_message_edit(self, before, after):
         if before.content == after.content:
