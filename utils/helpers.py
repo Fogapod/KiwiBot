@@ -38,7 +38,7 @@ async def execute_process(process, code):
     return stdout, stderr
 
 
-async def find_user(pattern, bot, guild=None, strict_guild=False):
+async def find_user(pattern, bot, guild=None, strict_guild=False, return_all=False):
     user = None
     id_match = re.fullmatch('(?:<@!?(\d{17,19})>)|\d{17,19}', pattern)
 
@@ -56,7 +56,7 @@ async def find_user(pattern, bot, guild=None, strict_guild=False):
                 return None
 
     if user is not None:
-        return user
+        return [user] if return_all else user
 
     if guild is None:
         return None
@@ -77,7 +77,10 @@ async def find_user(pattern, bot, guild=None, strict_guild=False):
         reverse=True
     )
 
-    return found_in_guild[0] if found_in_guild else None
+    if found_in_guild:
+        return found_in_guild if return_all else found_in_guild[0]
+
+    return None
 
 
 def get_string_after_entry(entry, string, strip=True):
