@@ -23,7 +23,7 @@ class Module(ModuleBase):
         if user is None:
             return '{warning} User not found'
 
-        prefix = await get_local_prefix(msg)
+        prefix = await get_local_prefix(msg, bot)
         new_content = get_string_after_entry(args[1], msg.content)
 
         msg.author = user
