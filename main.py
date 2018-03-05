@@ -155,10 +155,10 @@ class BotMyBot(discord.Client):
                 msg, module_response, response_to=msg)
 
     def register_last_user_message(self, msg):
-        if msg.guild.id not in self._last_messages:
-            self._last_messages[msg.guild.id] = {msg.author.id: msg}
+        if msg.channel.id not in self._last_messages:
+            self._last_messages[msg.channel.id] = {msg.author.id: msg}
         else:
-            self._last_messages[msg.guild.id][msg.author.id] = msg
+            self._last_messages[msg.channel.id][msg.author.id] = msg
 
     async def on_message_edit(self, before, after):
         if before.content == after.content:

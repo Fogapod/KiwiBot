@@ -39,14 +39,14 @@ async def execute_process(process, code):
     return stdout, stderr
 
 
-async def find_user(pattern, bot, guild=None, strict_guild=False, return_all=False):
+async def find_user(pattern, msg, bot, strict_guild=False, return_all=False):
     user = None
     id_match = re.fullmatch('(?:<@!?(\d{17,19})>)|\d{17,19}', pattern)
 
     if id_match is not None:
         user_id = int(id_match.group(1) or id_match.group(0))
-        if guild is not None:
-            user = guild.get_member(user_id)
+        if msg.guild is not None:
+            user = msg.guild.get_member(user_id)
         elif not strict_guild:
             user = bot.get_user(user_id)
 
@@ -59,11 +59,11 @@ async def find_user(pattern, bot, guild=None, strict_guild=False, return_all=Fal
     if user is not None:
         return [user] if return_all else user
 
-    if guild is None:
+    if msg.guild is None:
         return None
 
     found_in_guild = []
-    for member in guild.members:
+    for member in msg.guild.members:
         if re.search(pattern, member.display_name, re.I) is None:
             if re.search(pattern, f'{member.name}#{member.discriminator}', re.I) is None:
                 continue
@@ -72,7 +72,7 @@ async def find_user(pattern, bot, guild=None, strict_guild=False, return_all=Fal
 
     found_in_guild.sort(
         key=lambda m: (
-            _get_last_user_message_timestamp(m.id, guild.id, bot),
+            _get_last_user_message_timestamp(m.id, msg.channel.id, bot),
             m.status.name == 'online',
             m.joined_at
         ),
@@ -85,10 +85,10 @@ async def find_user(pattern, bot, guild=None, strict_guild=False, return_all=Fal
     return None
 
 
-def _get_last_user_message_timestamp(user_id, guild_id, bot):
-    if guild_id in bot._last_messages:
-        if user_id in bot._last_messages[guild_id]:
-            return bot._last_messages[guild_id][user_id].edited_at or bot._last_messages[guild_id][user_id].created_at
+def _get_last_user_message_timestamp(user_id, channel_id, bot):
+    if channel_id in bot._last_messages:
+        if user_id in bot._last_messages[channel_id]:
+            return bot._last_messages[channel_id][user_id].edited_at or bot._last_messages[channel_id][user_id].created_at
     return datetime.datetime.fromtimestamp(0)
 
 

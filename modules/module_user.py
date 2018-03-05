@@ -21,7 +21,7 @@ class Module(ModuleBase):
         else:
             user = await find_user(
                 get_string_after_entry(args[0], msg.content),
-                self.bot, guild=msg.guild
+                msg, self.bot
             )
 
         if user is None:
