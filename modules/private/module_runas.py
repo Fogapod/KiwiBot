@@ -18,7 +18,7 @@ class Module(ModuleBase):
     hidden = True
 
     async def on_call(self, msg, *args, **flags):
-        user = await find_user(args[1], self.bot, guild=msg.guild, strict_guild=True)
+        user = await find_user(args[1], msg, self.bot, strict_guild=True)
 
         if user is None:
             return '{warning} User not found'
