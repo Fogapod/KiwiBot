@@ -105,6 +105,9 @@ class ModuleManager:
                 if not await module.check_message(message, *args):
                     continue
 
+                if not module.check_guild(message):
+                    return await module.on_guild_check_failed(message)
+
                 if not module.check_nsfw_permission(message):
                     return await module.on_nsfw_permission_denied(message)
 

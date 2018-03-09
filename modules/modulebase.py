@@ -53,7 +53,7 @@ class ModuleBase:
     async def on_guild_check_failed(self, msg):
         return '{error} This command can only be used in guild'
 
-    async def on_nsfw_pemission_denied(self, msg):
+    async def on_nsfw_permission_denied(self, msg):
         return '{error} You can use this command only in channel marked as nsfw'
 
     async def on_not_enough_arguments(self, msg):
