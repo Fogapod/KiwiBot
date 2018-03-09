@@ -1,5 +1,6 @@
 from modules.modulebase import ModuleBase
 
+from permissions import PermissionEmbedLinks
 from discord import Colour, Embed
 
 
@@ -11,6 +12,7 @@ class Module(ModuleBase):
 
     name = 'invite'
     aliases = (name, )
+    required_perms = (PermissionEmbedLinks, )
 
     async def on_call(self, msg, *args, **options):
         e = Embed(

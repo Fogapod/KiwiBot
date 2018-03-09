@@ -1,5 +1,6 @@
 from modules.modulebase import ModuleBase
 
+from permissions import PermissionBotOwner
 from utils.constants import STOP_EXIT_CODE
 
 
@@ -10,7 +11,7 @@ class Module(ModuleBase):
 
     name = 'stop'
     aliases = (name, 'die', '!')
-    protection = 2
+    require_perms = (PermissionBotOwner, )
     hidden = True
 
     async def on_call(self, message, *args, **options):

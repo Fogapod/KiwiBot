@@ -1,5 +1,6 @@
 from modules.modulebase import ModuleBase
 
+from permissions import PermissionBotOwner
 from utils.helpers import get_string_after_entry
 
 from discord import Game
@@ -20,10 +21,10 @@ class Module(ModuleBase):
 
     name = 'status'
     aliases = (name, 'presence')
-    protection = 2
+    require_perms = (PermissionBotOwner, )
     hidden = True
 
-    async def on_permission_denied(self, msg):
+    async def on_missing_user_permissions(self, msg, missing_permissions):
         return 'not dogsong or notsosuper'
 
     async def on_load(self, from_reload):

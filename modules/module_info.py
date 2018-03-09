@@ -1,8 +1,9 @@
 from modules.modulebase import ModuleBase
 
+from permissions import PermissionEmbedLinks
 from utils.helpers import (
     create_subprocess_shell, execute_process, get_local_prefix)
-from utils.constants import AUTHOR_ID
+from utils.constants import BOT_OWNER_ID
 
 from discord import Colour, Embed
 import discord
@@ -17,6 +18,7 @@ class Module(ModuleBase):
 
     name = 'info'
     aliases = (name, 'information', 'stats')
+    required_perms = (PermissionEmbedLinks, )
 
     async def on_call(self, msg, *args, **flags):
         git_url = None
@@ -50,7 +52,7 @@ class Module(ModuleBase):
             repo_name = 'NameBotName'
 
         try:
-            user = await self.bot.get_user_info(AUTHOR_ID)
+            user = await self.bot.get_user_info(BOT_OWNER_ID)
         except Exception:
             author = f'Not found! His id was {AUTHOR_ID}'
         else:
@@ -69,7 +71,7 @@ class Module(ModuleBase):
         embed.add_field(
             name='Here is some useful info about me', value=(
                 f'Local prefix: **{prefix}**\n'
-                f'Bot is in **{len(self.bot.guilds)}** guilds with **{len(self.bot.users)}** unique users'
+                f'Bot is currently in **{len(self.bot.guilds)}** guilds with **{len(self.bot.users)}** unique users'
             ), inline=False
         )
         embed.add_field(

@@ -1,50 +1,76 @@
-from utils.constants import ACCESS_LEVEL_NAMES
 from utils.helpers import get_local_prefix
-from utils.checks import get_user_access_level
 
 
 class ModuleBase:
 
-    usage_doc = '{prefix}{aliases}'
-    short_doc = 'Not documented'
+    usage_doc = '{prefix}{aliases} [arg...]'
+    short_doc = 'Not documented.'
     additional_doc = ''
-    permission_doc = '{protection} or higher permission level required to use'
 
-    name = 'module'
-    aliases = ()
-    guild_only = False
-    nsfw = False
-    arguments_required = 0
-    protection = 0
-    hidden = False
-    disabled = False
+    name             = 'module'
+    aliases          = ()
+    required_perms   = ()  # permissions required for bot
+    require_perms    = ()  # permissions required from user
+    required_args    = 0
+    guild_only       = False
+    nsfw             = False
+    hidden           = False
+    disabled         = False
 
     def __init__(self, bot):
         self.bot = bot
 
-    async def check_guild(self, msg):
+        # init permission classes
+        self.required_perms = tuple(p(bot) for p in self.required_perms)
+        self.require_perms  = tuple(p(bot) for p in self.require_perms )
+
+    def check_guild(self, msg):
         return (msg.guild is not None) >= self.guild_only
 
-    async def check_nsfw_permission(self, msg):
+    def check_nsfw_permission(self, msg):
         return getattr(msg.channel, 'nsfw', False) >= self.nsfw
 
-    async def check_argument_count(self, argc, msg):
-        return argc - 1 >= self.arguments_required
+    def check_argument_count(self, argc, msg):
+        return argc - 1 >= self.required_args
 
-    async def check_permissions(self, msg):
-        return await get_user_access_level(msg) >= self.protection
+    async def get_missing_bot_permissions(self, msg):
+        missing = []
+        for permission in self.required_perms:
+            print(permission)
+            if not await permission.check(msg, bot=True):
+                missing.append(permission)
+
+        return missing
+
+    async def get_missing_user_permissions(self, msg):
+        missing = []
+        for permission in self.require_perms:
+            if not await permission.check(msg, bot=False):
+                missing.append(permission)
+
+        return missing
 
     async def on_guild_check_failed(self, msg):
         return '{error} This command can only be used in guild'
 
-    async def on_nsfw_prmission_denied(self, msg):
+    async def on_nsfw_pemission_denied(self, msg):
         return '{error} You can use this command only in channel marked as nsfw'
 
     async def on_not_enough_arguments(self, msg):
-        return '{error} Not enough arguments to call ' + self.name
+        return await self.on_doc_request(msg)
 
-    async def on_permission_denied(self, msg):
-        return '{error} Access demied. Minimum access level to use command is `' + ACCESS_LEVEL_NAMES[self.protection] + '`'
+    async def on_missing_bot_permissions(self, msg, missing):
+        return (
+            '{error} I\'m missing the following permissions to execute commamd: '
+            '[' + ', '.join([f'`{p.name}`' for p in missing]) + ']'
+        )
+
+    async def on_missing_user_permissions(self, msg, missing):
+        return (
+            '{error} Access demied.\n'
+            'You\'re missing the following permissions to use this command: '
+            '[' + ', '.join([f'`{p.name}`' for p in missing]) + ']'
+        )
 
     async def on_load(self, from_reload):
         pass
@@ -74,7 +100,6 @@ class ModuleBase:
         help_text += f'{self.usage_doc}'          if self.usage_doc else ''
         help_text += f'\n\n{self.short_doc}'      if self.short_doc else ''
         help_text += f'\n\n{self.additional_doc}' if self.additional_doc else ''
-        help_text += f'\n\n{self.permission_doc}' if self.permission_doc else ''
 
         help_text = help_text.strip()
 
@@ -87,8 +112,6 @@ class ModuleBase:
             help_text = help_text.replace('{aliases}', self.aliases[0])
         else:
             help_text = help_text.replace('{aliases}', '[' + '|'.join(self.aliases) + ']')
-
-        help_text = help_text.replace('{protection}', ACCESS_LEVEL_NAMES[self.protection])
 
         return f'```\n{help_text}\n```'
 

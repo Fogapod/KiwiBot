@@ -7,7 +7,6 @@ import traceback
 
 from importlib import reload
 
-from utils.constants import ACCESS_LEVEL_NAMES
 from utils.logger import Logger
 
 
@@ -106,17 +105,19 @@ class ModuleManager:
                 if not await module.check_message(message, *args):
                     continue
 
-                if not await module.check_guild(message):
-                    return await module.on_guild_check_failed(message)
+                if not module.check_nsfw_permission(message):
+                    return await module.on_nsfw_permission_denied(message)
 
-                if not await module.check_nsfw_permission(message):
-                    return await module.on_nsfw_prmission_denied(message)
-
-                if not await module.check_argument_count(len(args), message):
+                if not module.check_argument_count(len(args), message):
                     return await module.on_not_enough_arguments(message)
 
-                if not await module.check_permissions(message):
-                    return await module.on_permission_denied(message)
+                missing_bot_permissions = await module.get_missing_bot_permissions(message)
+                if missing_bot_permissions:
+                    return await module.on_missing_bot_permissions(message, missing_bot_permissions)
+
+                missing_user_permissions = await module.get_missing_user_permissions(message)
+                if missing_user_permissions:
+                    return await module.on_missing_user_permissions(message, missing_user_permissions)
             except Exception:
                 logger.info(f'Failed to check command, stopped on module {name}')
                 logger.info(traceback.format_exc())

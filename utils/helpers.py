@@ -93,7 +93,7 @@ def _get_last_user_message_timestamp(user_id, channel_id, bot):
 
 
 def get_string_after_entry(entry, string, strip=True):
-    substring = string[string.index(entry) + len(entry):]
+    _, entry, substring = string.partition(entry)
     return substring.lstrip() if strip else substring
 
 

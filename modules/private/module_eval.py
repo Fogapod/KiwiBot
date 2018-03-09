@@ -1,5 +1,6 @@
 from modules.modulebase import ModuleBase
 
+from permissions import PermissionBotOwner
 from utils.helpers import get_string_after_entry
 
 import io
@@ -18,8 +19,8 @@ class Module(ModuleBase):
 
     name = 'eval'
     aliases = (name, )
-    arguments_required = 1
-    protection = 2
+    required_args = 1
+    require_perms = (PermissionBotOwner, )
     hidden = True
 
     async def on_load(self, from_reload):

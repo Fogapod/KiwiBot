@@ -1,5 +1,6 @@
 from modules.modulebase import ModuleBase
 
+from permissions import PermissionBotOwner
 from utils.helpers import find_user, get_string_after_entry, get_local_prefix
 
 import re
@@ -8,13 +9,13 @@ import re
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} <user> <message>'
-    short_help = 'Force bot to think message was sent by selected user.'
+    short_doc = 'Force bot to think message was sent by selected user.'
 
     name = 'runas'
     aliases = (name, )
     guild_only = True
-    arguments_required = 2
-    protection = 2
+    required_args = 2
+    require_perms = (PermissionBotOwner, )
     hidden = True
 
     async def on_call(self, msg, *args, **flags):

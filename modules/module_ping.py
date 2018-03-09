@@ -11,8 +11,6 @@ class Module(ModuleBase):
 
     name = 'ping'
     aliases = (name, )
-    arguments_required = 0
-    protection = 0
 
     async def on_call(self, msg, *args, **flags):
         ping_msg = await self.bot.send_message(

@@ -95,8 +95,7 @@ class Module(ModuleBase):
 
     name = 'rex'
     aliases = (name, )
-    arguments_required = 1
-    protection = 0
+    required_args = 1
 
     async def on_call(self, msg, *args, **options):
         result = ''

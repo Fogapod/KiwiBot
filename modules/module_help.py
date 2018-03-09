@@ -1,5 +1,6 @@
 from modules.modulebase import ModuleBase
 
+from permissions import PermissionEmbedLinks
 from utils.helpers import get_local_prefix
 
 from discord import Embed, Colour
@@ -12,8 +13,7 @@ class Module(ModuleBase):
 
     name = 'help'
     aliases = (name, 'commands')
-    arguments_required = 0
-    protection = 0
+    required_perms = (PermissionEmbedLinks, )
 
     async def on_call(self, msg, *args, **flags):
         if len(args) == 1:

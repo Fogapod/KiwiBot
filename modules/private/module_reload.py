@@ -1,5 +1,6 @@
 from modules.modulebase import ModuleBase
 
+from permissions import PermissionBotOwner
 from utils.formatters import format_response
 
 import traceback
@@ -18,31 +19,30 @@ class Module(ModuleBase):
 
     name = 'reload'
     aliases = (name, )
-    arguments_required = 1
-    protection = 2
+    required_args = 1
+    require_perms = (PermissionBotOwner, )
     hidden = True
 
     async def on_load(self, from_reload):
         if not from_reload:
             return
 
-        try:
-            reload_channel_id = self.bot.config.get('reload_channel_id', 0)
-            reload_message_id = self.bot.config.get('reload_message_id', 0)
+        reload_channel_id = self.bot.config.get('reload_channel_id', 0)
+        reload_message_id = self.bot.config.get('reload_message_id', 0)
 
-            if reload_channel_id and reload_message_id:
-                await self.bot.config.remove('reload_channel_id')
-                await self.bot.config.remove('reload_message_id')
+        if reload_channel_id and reload_message_id:
+            await self.bot.config.remove('reload_channel_id')
+            await self.bot.config.remove('reload_message_id')
 
-                channel = self.bot.get_channel(reload_channel_id)
-                message = await channel.get_message(reload_message_id)
+            try:
+                await self.bot.http.edit_message(
+                    reload_message_id, reload_channel_id,
+                    content='Bot restarted'
+                )
+            except Exception:
+                pass
 
-                await message.edit(content='Bot restarted')
-        except Exception:
-            import traceback
-            self.bot.logger.info(self.name + ': Failed to call on_load:\n' + traceback.format_exc())
-
-    async def on_call(self, msg, *args, **options):
+    async def on_call(self, msg, *args, **flags):
         target = args[1].lower()
 
         reload_message = await self.bot.send_message(
@@ -55,7 +55,7 @@ class Module(ModuleBase):
             await self.bot.config.put('reload_message_id', reload_message.id)
             self.bot.restart()
 
-        elif target == 'modules':
+        if target == 'modules':
             try:
                 await self.bot.mm.reload_modules()
             except Exception:

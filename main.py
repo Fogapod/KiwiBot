@@ -74,7 +74,7 @@ class BotMyBot(discord.Client):
             self.stop(1)
             raise discord.LoginFailure('No token provided')
 
-        super(BotMyBot, self).run(token, reconnect=True)
+        super(BotMyBot, self).run(token, reconnect=True, fetch_offline_members=True)
 
     def restart(self):
         self.stop(0)
