@@ -183,8 +183,7 @@ class BotMyBot(discord.Client):
     async def send_message(self, msg, text, response_to=None, parse_content=True, **kwargs):
         text = text.replace(self.token, 'TOKEN_LEAKED')
         if parse_content:
-            text = text.replace('@everyone', '@\u200beveryone')
-            text = text.replace('@here', '@\u200bhere')
+            text = text.replace('@', '@\u200b')
             text = trim_message(text)
         message = None
 
@@ -206,8 +205,7 @@ class BotMyBot(discord.Client):
         if content:
             content = content.replace(self.token, 'TOKEN_LEAKED')
             if parse_content:
-                content = content.replace('@everyone', '@\u200beveryone')
-                content = content.replace('@here', '@\u200bhere')
+                content = content.replace('@', '@\u200b')
                 content = trim_message(content)
 
             fields['content'] = content
