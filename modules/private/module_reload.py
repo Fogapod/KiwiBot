@@ -45,9 +45,8 @@ class Module(ModuleBase):
     async def on_call(self, msg, *args, **flags):
         target = args[1].lower()
 
-        reload_message = await self.bot.send_message(
-            msg, 'Reloading `' + target + '` ...',
-            response_to=msg
+        reload_message = await self.send(
+            msg, content='Reloading `' + target + '` ...'
         )
 
         if target == 'bot':

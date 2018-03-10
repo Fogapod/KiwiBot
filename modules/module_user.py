@@ -27,4 +27,4 @@ class Module(ModuleBase):
         if user is None:
             return '{warning} User not found'
 
-        return f'`{user.name}#{user.discriminator} {user.id}`'
+        return f'`{user} {user.id}`'

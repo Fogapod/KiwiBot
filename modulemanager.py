@@ -128,13 +128,13 @@ class ModuleManager:
                 self.bot.restart()
             try:
                 return await module.call_command(message, *args)
-            except Exception:
+            except Exception as e:
                 module_tb = traceback.format_exc()
                 logger.info(f'Exception occured calling {name}')
                 logger.info(module_tb)
                 logger.trace(f'Calling {name} on_error')
                 try:
-                    return await module.on_error(module_tb, message)
+                    return await module.on_error(e, module_tb, message)
                 except Exception:
                     logger.debug(f'Exception occured calling {name} on_error')
                     logger.debug(traceback.format_exc())

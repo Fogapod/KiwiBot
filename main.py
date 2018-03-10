@@ -13,6 +13,7 @@ from modulemanager import ModuleManager
 
 from utils.constants import STOP_EXIT_CODE
 from utils.formatters import format_response, trim_message
+from utils import helpers
 from utils.config import Config
 from redisdb import RedisDB
 
@@ -154,7 +155,7 @@ class BotMyBot(discord.Client):
 
         if module_response:
             await self.send_message(
-                msg, module_response, response_to=msg)
+                msg, content=module_response, response_to=msg)
 
     def register_last_user_message(self, msg):
         if msg.channel.id not in self._last_messages:
@@ -180,15 +181,24 @@ class BotMyBot(discord.Client):
                 await self.delete_message(message)
             self.tracked_messages[message_id] = []
 
-    async def send_message(self, msg, text, response_to=None, parse_content=True, **kwargs):
-        text = text.replace(self.token, 'TOKEN_LEAKED')
-        if parse_content:
-            text = text.replace('@', '@\u200b')
-            text = trim_message(text)
+    async def send_message(self, msg, response_to=None, replace_everyone=True, replace_mentions=True, **fields):
+        content = fields.pop('content', '')
+        content = content.replace(self.token, 'TOKEN_LEAKED')
+
+        if replace_everyone:
+            content = content.replace('@everyone', '@\u200beveryone')
+            content = content.replace('@here', '@\u200bhere')
+            content = trim_message(content)
+        if replace_mentions:
+            content = await helpers.replace_mentions(content, self)
+
+        content = trim_message(content)
+        fields['content'] = content
+
         message = None
 
         try:
-            message = await msg.channel.send(text, **kwargs)
+            message = await msg.channel.send(**fields)
         except Exception:
             exception = traceback.format_exc()
             exception = '\n'.join(exception.split('\n')[-4:])
@@ -200,21 +210,24 @@ class BotMyBot(discord.Client):
 
             return message
 
-    async def edit_message(self, message, parse_content=True, **fields):
+    async def edit_message(self, message, replace_everyone=True, replace_mentions=True, **fields):
         content = fields.pop('content', '')
-        if content:
-            content = content.replace(self.token, 'TOKEN_LEAKED')
-            if parse_content:
-                content = content.replace('@', '@\u200b')
-                content = trim_message(content)
+        content = content.replace(self.token, 'TOKEN_LEAKED')
 
-            fields['content'] = content
+        if replace_everyone:
+            content = content.replace('@everyone', '@\u200beveryone')
+            content = content.replace('@here', '@\u200bhere')
+        if replace_mentions:
+            content = await helpers.replace_mentions(content, self)
+
+        content = trim_message(content)
+        fields['content'] = content
 
         try:
             return await message.edit(**fields)
         except discord.errors.NotFound:
             logger.debug('edit_message: message not found')
-            return
+            return None
         except Exception:
             exception = traceback.format_exc()
             exception = '\n'.join(exception.split('\n')[-4:])

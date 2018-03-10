@@ -114,10 +114,10 @@ class ModuleBase:
 
         return f'```\n{help_text}\n```'
 
-    async def on_error(self, tb_text, msg):
+    async def on_error(self, e, tb_text, msg):
         return (
-            '{error} Error appeared during execution '
-            + self.name
+            '{error} Error appeared during execution **'
+            + self.name + '**: **' + e.__class__.__name__ + '**'
             + '```\n' + '\n'.join(tb_text.split('\n')[-4:]) + '\n```'
         )
 
@@ -125,4 +125,4 @@ class ModuleBase:
         pass
 
     async def send(self, msg, **kwargs):
-        return await self.bot.send_message(msg, '', response_to=msg, **kwargs)
+        return await self.bot.send_message(msg, response_to=msg, **kwargs)

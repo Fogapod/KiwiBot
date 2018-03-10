@@ -16,15 +16,30 @@ class Module(ModuleBase):
     required_perms = (PermissionEmbedLinks, )
 
     async def on_call(self, msg, *args, **flags):
+        # temporary solution
+        args = list(args)
+        if '-d' in args:
+            args.remove('-d')
+            flags['show-disabled'] = True
+        if '--show-disabled' in args:
+            args.remove('--show-disabled')
+            flags['show-disabled'] = True
+        if '-h' in args:
+            args.remove('-h')
+            flags['show-hidden'] = True
+        if '--show-hidden' in args:
+            args.remove('--show-hidden')
+            flags['show-hidden'] = True
+
         if len(args) == 1:
             module_list = []
             for name, module in self.bot.mm.modules.items():
                 if module.disabled:
-                    if not (flags.get('d', True) or flags.get('show-disabled', False)):
-                        continue  # temporary True, until flag system implemented
+                    if not flags.get('show-disabled', False):
+                        continue
                 if module.hidden:
-                    if not (flags.get('h', True) or flags.get('show-hidden', False)):
-                        continue  # temporary True, until flag system implemented
+                    if not flags.get('show-hidden', False):
+                        continue
 
                 module_list.append((name, module))
 

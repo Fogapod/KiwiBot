@@ -20,9 +20,8 @@ class Module(ModuleBase):
         command = get_string_after_entry(args[0], msg.content).split(' ')
         process, pid = await create_subprocess_exec(*command)
         
-        start_message = await self.bot.send_message(
-            msg, 'Started task with pid `' + str(pid) + '`',
-            response_to=msg
+        start_message = await self.send(
+            msg, content='Started task with pid `' + str(pid) + '`'
         )
 
         stdout, stderr = await execute_process(process, command)

@@ -2,12 +2,15 @@ import regex as re
 import datetime
 import asyncio
 
-from discord import NotFound
+import discord
 
 from utils.logger import Logger
 
 
 logger = Logger.get_logger()
+
+MENTION_REGEX = re.compile('<@!?(\d{17,19})>')
+
 
 async def create_subprocess_exec(
         *args,
@@ -39,7 +42,7 @@ async def execute_process(process, code):
     return stdout, stderr
 
 
-async def find_user(pattern, msg, bot, strict_guild=False, return_all=False):
+async def find_user(pattern, msg, bot, strict_guild=False, max_count=1):
     user = None
     id_match = re.fullmatch('(?:<@!?(\d{17,19})>)|\d{17,19}', pattern)
 
@@ -53,22 +56,31 @@ async def find_user(pattern, msg, bot, strict_guild=False, return_all=False):
         if user is None and not strict_guild:
             try:
                 user = await bot.get_user_info(user_id)
-            except NotFound:
+            except discord.NotFound:
                 return None
 
     if user is not None:
-        return [user] if return_all else user
+        return user if max_count == 1 else [user]
 
     if msg.guild is None:
         return None
 
     found_in_guild = []
-    for member in msg.guild.members:
-        if re.search(pattern, member.display_name, re.I) is None:
-            if re.search(pattern, f'{member.name}#{member.discriminator}', re.I) is None:
-                continue
 
-        found_in_guild.append(member)
+    try:
+        regex_pattern = re.compile(pattern, re.I)
+    except Exception:
+        pass
+    else:
+        for member in msg.guild.members:
+            if regex_pattern.search(member.display_name) is None:
+                if regex_pattern.search(str(member)) is None:
+                    continue
+
+            found_in_guild.append(member)
+
+            if len(found_in_guild) >= max_count:
+                break
 
     found_in_guild.sort(
         key=lambda m: (
@@ -80,9 +92,24 @@ async def find_user(pattern, msg, bot, strict_guild=False, return_all=False):
     )
 
     if found_in_guild:
-        return found_in_guild if return_all else found_in_guild[0]
+        return found_in_guild[0] if max_count == 1 else found_in_guild
 
     return None
+
+
+async def replace_mentions(content, bot):
+    mentions = MENTION_REGEX.findall(content)
+    if mentions:
+        for m in mentions:
+            user = discord.utils.get(bot.users, id=m)
+            if user is None:
+                try:
+                    user = await bot.get_user_info(m)
+                except discord.NotFound:
+                    return content
+
+            content = re.sub(f'(<@\!?{user.id}>)', f'@{user}', content)
+    return content
 
 
 def _get_last_user_message_timestamp(user_id, channel_id, bot):

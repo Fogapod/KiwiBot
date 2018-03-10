@@ -13,8 +13,7 @@ class Module(ModuleBase):
     aliases = (name, )
 
     async def on_call(self, msg, *args, **flags):
-        ping_msg = await self.bot.send_message(
-            msg, 'Pinging ...', response_to=msg)
+        ping_msg = await self.send(msg, content='Pinging ...')
 
         if len(args) == 2:
             program = ['ping', '-c', '4', args[1].encode('idna')]
