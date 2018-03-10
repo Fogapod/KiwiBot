@@ -36,7 +36,6 @@ class ModuleBase:
     async def get_missing_bot_permissions(self, msg):
         missing = []
         for permission in self.required_perms:
-            print(permission)
             if not await permission.check(msg, bot=True):
                 missing.append(permission)
 

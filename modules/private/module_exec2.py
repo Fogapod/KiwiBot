@@ -26,7 +26,7 @@ class Module(ModuleBase):
         )
 
         stdout, stderr = await execute_process(process, command)
-        result = stdout.decode().strip()
+        result = stdout.decode()
 
         if process.returncode != 0:
             result += '\n' + stderr.decode()
