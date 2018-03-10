@@ -188,7 +188,6 @@ class BotMyBot(discord.Client):
         if replace_everyone:
             content = content.replace('@everyone', '@\u200beveryone')
             content = content.replace('@here', '@\u200bhere')
-            content = trim_message(content)
         if replace_mentions:
             content = await helpers.replace_mentions(content, self)
 
