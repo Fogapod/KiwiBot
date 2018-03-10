@@ -135,6 +135,8 @@ class BotMyBot(discord.Client):
 
             if guild_prefixes:
                 prefixes = [guild_prefixes] + self._mention_prefixes
+        else:
+            prefixes = prefixes + ['']
 
         for p in prefixes:
             if lower_content.startswith(p):
