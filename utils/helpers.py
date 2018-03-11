@@ -112,7 +112,7 @@ async def replace_mentions(content, bot):
                 except discord.NotFound:
                     return content
 
-            content = re.sub(f'(<@\!?{user.id}>)', f'@{user}', content)
+            content = re.sub(f'(<@!?{user.id}>)', f'@{user}', content)
     return content
 
 

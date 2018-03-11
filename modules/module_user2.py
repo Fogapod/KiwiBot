@@ -2,8 +2,6 @@ from modules.modulebase import ModuleBase
 
 from utils.helpers import find_user
 
-from discord import Embed
-
 
 class Module(ModuleBase):
 
@@ -15,8 +13,6 @@ class Module(ModuleBase):
     hidden = True
 
     async def on_call(self, msg, *args, **flags):
-        user = None
-
         if len(args) == 1:
             users = (msg.author, )
         else:
@@ -28,4 +24,4 @@ class Module(ModuleBase):
         if not users:
             return '{warning} Users not found'
 
-        return 'Matched users:```\n' + '\n'.join(f'{i + 1}) {u.name}#{u.discriminator} {u.id}' for i, u in enumerate(users)) + '```'
+        return 'Matched users:```\n' + '\n'.join(f'{str(i + 1) + ")":<3}{str(u):<20} {u.id}' for i, u in enumerate(users)) + '```'
