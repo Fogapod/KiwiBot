@@ -17,7 +17,7 @@ class Module(ModuleBase):
     required_perms = (PermissionEmbedLinks, )
 
     async def on_call(self, msg, *args, **flags):
-        format = flags.pop('format', 'webp')
+        format = flags.pop('format', 'png')
 
         if len(args) == 1:
             user = msg.author
