@@ -8,7 +8,7 @@ from hashlib import sha256
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} <subject>'
-    short_doc = 'Do a comrehensive research and rate given subject.'
+    short_doc = 'Perform a comprehensive research and rate given subject.'
 
     name = 'rate'
     aliases = (name, )
