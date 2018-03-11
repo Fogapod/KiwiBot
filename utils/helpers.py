@@ -70,7 +70,13 @@ async def find_user(pattern, msg, bot, strict_guild=False, max_count=1):
     try:
         regex_pattern = re.compile(pattern, re.I)
     except Exception:
-        pass
+        # invalid regex, trying to use 'in'
+        for member in msg.guild.members:
+            if pattern not in member.display_name:
+                if pattern not in str(member):
+                    continue
+
+            found_in_guild.append(member)
     else:
         for member in msg.guild.members:
             if regex_pattern.search(member.display_name) is None:
