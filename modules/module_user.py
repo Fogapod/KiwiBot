@@ -7,15 +7,13 @@ from discord import Embed
 
 class Module(ModuleBase):
 
-    usage_doc = '{prefix}{aliases} <user>'
-    short_doc = 'Get information about user.'
+    usage_doc = '{prefix}{aliases} [user]'
+    short_doc = 'Get information about matched user.'
 
     name = 'user'
     aliases = (name, )
 
     async def on_call(self, msg, *args, **flags):
-        user = None
-
         if len(args) == 1:
             user = msg.author
         else:

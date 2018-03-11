@@ -10,18 +10,15 @@ class Module(ModuleBase):
 
     name = 'user2'
     aliases = (name, )
-    hidden = True
+    required_args = 1
 
     async def on_call(self, msg, *args, **flags):
-        if len(args) == 1:
-            users = (msg.author, )
-        else:
-            users = await find_user(
-                msg.content.partition(args[0])[2].lstrip(),
-                msg, self.bot, max_count=20
-            )
+        users = await find_user(
+            msg.content.partition(args[0])[2].lstrip(),
+            msg, self.bot, max_count=20
+        )
 
         if not users:
             return '{warning} Users not found'
 
-        return 'Matched users:```\n' + '\n'.join(f'{str(i + 1) + ")":<3}{str(u):<20} {u.id}' for i, u in enumerate(users)) + '```'
+        return 'Matched users:```\n' + '\n'.join(f'{str(i + 1) + ")":<3}{str(u):<37} {u.id}' for i, u in enumerate(users)) + '```'

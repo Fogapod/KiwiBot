@@ -23,4 +23,4 @@ class Module(ModuleBase):
         else:
             target = subject
 
-        return 'I rate **`{0}`** {1}/10'.format(user.name if user else subject, sum(int(ord(c)) for c in sha256(target.upper().encode()).hexdigest()) % 11)
+        return 'I rate **{0}** {1}/10'.format(user.display_name if user else subject, sum(int(ord(c)) for c in sha256(target.upper().encode()).hexdigest()) % 11)
