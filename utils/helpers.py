@@ -79,9 +79,6 @@ async def find_user(pattern, msg, bot, strict_guild=False, max_count=1):
 
             found_in_guild.append(member)
 
-            if len(found_in_guild) >= max_count:
-                break
-
     found_in_guild.sort(
         key=lambda m: (
             _get_last_user_message_timestamp(m.id, msg.channel.id, bot),
@@ -92,7 +89,7 @@ async def find_user(pattern, msg, bot, strict_guild=False, max_count=1):
     )
 
     if found_in_guild:
-        return found_in_guild[0] if max_count == 1 else found_in_guild
+        return found_in_guild[0] if max_count == 1 else found_in_guild[:max_count]
 
     return None
 
