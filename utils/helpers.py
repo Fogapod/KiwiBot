@@ -129,3 +129,37 @@ async def get_local_prefix(msg, bot):
         if guild_prefix is not None:
             return guild_prefix
     return bot._default_prefixes[0]
+
+
+async def request_reaction_confirmation(msg, user, bot, emoji_accept='✅', emoji_cancel='❌', timeout=20):
+    try:
+        for emoji in (emoji_accept, emoji_cancel):
+            await msg.add_reaction(emoji)
+    except discord.NotFound:
+        return False
+
+    def check(reaction, member):
+        return all((
+            member == user,
+            reaction.message.id == msg.id,
+            str(reaction.emoji) in (emoji_accept, emoji_cancel)
+         ))
+
+    try:
+        reaction, member = await bot.wait_for('reaction_add', timeout=timeout, check=check)
+    except asyncio.TimeoutError:
+        pass
+    else:
+        if str(reaction) == emoji_accept:
+            try:
+                await msg.clear_reactions()
+            except Exception:
+                pass
+
+            return True
+    try:
+        await msg.clear_reactions()
+    except Exception:
+        pass
+
+    return False
