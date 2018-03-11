@@ -1,7 +1,7 @@
 from modules.modulebase import ModuleBase
 
 from permissions import PermissionBotOwner
-from utils.helpers import find_user, get_string_after_entry, get_local_prefix
+from utils.helpers import find_user, get_local_prefix
 
 import re
 
@@ -25,7 +25,7 @@ class Module(ModuleBase):
             return '{warning} User not found'
 
         prefix = await get_local_prefix(msg, self.bot)
-        new_content = get_string_after_entry(args[1], msg.content)
+        new_content = msg.content.partition(args[1])[2].lstrip()
 
         msg.author = user
         msg.content = prefix + new_content

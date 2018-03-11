@@ -1,6 +1,6 @@
 from modules.modulebase import ModuleBase
 
-from utils.helpers import find_user, get_string_after_entry
+from utils.helpers import find_user
 
 from discord import Embed
 
@@ -20,7 +20,7 @@ class Module(ModuleBase):
             user = msg.author
         else:
             user = await find_user(
-                get_string_after_entry(args[0], msg.content),
+                msg.content.partition(args[0])[2].lstrip(),
                 msg, self.bot
             )
 

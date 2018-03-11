@@ -1,7 +1,6 @@
 from modules.modulebase import ModuleBase
 
 from permissions import PermissionBotOwner
-from utils.helpers import get_string_after_entry
 
 import io
 import sys
@@ -27,7 +26,7 @@ class Module(ModuleBase):
         self._last_result = None
 
     async def on_call(self, msg, *args, **flags):
-        program = get_string_after_entry(args[0], msg.content)
+        program = msg.content.partition(args[0])[2].lstrip()
 
         glob = {
             'self': self,

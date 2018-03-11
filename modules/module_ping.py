@@ -1,7 +1,6 @@
 from modules.modulebase import ModuleBase
 
-from utils.helpers import (
-    create_subprocess_exec, execute_process, get_string_after_entry)
+from utils.helpers import create_subprocess_exec, execute_process
 
 
 class Module(ModuleBase):
@@ -32,7 +31,7 @@ class Module(ModuleBase):
 
         result = 'Pong, it took `' + str(delta) + 'ms`'
 
-        target = get_string_after_entry(args[0], msg.content)
+        target = msg.content.partition(args[0])[2].lstrip()
         result += ' to ping `' + target + '`' if target else ' to respond'
 
         await self.bot.edit_message(ping_msg, content=result)

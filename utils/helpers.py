@@ -123,11 +123,6 @@ def _get_last_user_message_timestamp(user_id, channel_id, bot):
     return datetime.datetime.fromtimestamp(0)
 
 
-def get_string_after_entry(entry, string, strip=True):
-    _, entry, substring = string.partition(entry)
-    return substring.lstrip() if strip else substring
-
-
 async def get_local_prefix(msg, bot):
     if msg.guild is not None:
         guild_prefix = bot._guild_prefixes.get(msg.guild.id)

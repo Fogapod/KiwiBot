@@ -1,7 +1,5 @@
 from modules.modulebase import ModuleBase
 
-from utils.helpers import get_string_after_entry
-
 from aiohttp import ClientSession
 
 
@@ -129,7 +127,7 @@ class Module(ModuleBase):
             return '{warning} Invalid language'
 
         params['CompilerArgs'] = COMPILE_OPTIONS.get(params['LanguageChoice'], '')
-        params['Program'] = get_string_after_entry(args[1], msg.content)
+        params['Program'] = msg.content.partition(args[1])[2].lstrip()
 
         async with ClientSession() as s:
             async with s.post(API_URL, params=params) as r:

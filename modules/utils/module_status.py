@@ -1,7 +1,6 @@
 from modules.modulebase import ModuleBase
 
 from permissions import PermissionBotOwner
-from utils.helpers import get_string_after_entry
 
 from discord import Game
 
@@ -44,7 +43,7 @@ class Module(ModuleBase):
             presence = Game(name='')
         else:
             subcommand = args[1].lower()
-            status = get_string_after_entry(args[1], msg.content)
+            status = msg.content.partition(args[1])[2].lstrip()
 
             if subcommand == 'playing':
                 presence = Game(name=status)
@@ -55,7 +54,7 @@ class Module(ModuleBase):
             elif subcommand == 'watching':
                 presence = Game(name=status, type=3)
             else:
-                status = get_string_after_entry(args[0], msg.content)
+                status = msg.content.partition(args[0])[2].lstrip()
                 presence = Game(name=status)
 
         await self.bot.change_presence(game=presence)

@@ -1,8 +1,5 @@
 from modules.modulebase import ModuleBase
 
-from utils.formatters import format_response
-from utils.helpers import get_string_after_entry
-
 from discord import File
 
 from aiohttp import ClientSession
@@ -22,7 +19,7 @@ class Module(ModuleBase):
 
     async def on_call(self, msg, *args, **options):
         params = {
-            'q': get_string_after_entry(args[0], msg.content),
+            'q': msg.content.partition(args[0])[2].lstrip(),
             'o': 'json'
         }
 
@@ -47,5 +44,4 @@ class Module(ModuleBase):
                     else:
                         result += '{error} failed to fetch image: ' + image_url
 
-        result = await format_response(result, msg, self.bot)
-        await self.bot.send_message(msg, result, file=image, response_to=msg)                     
+        await self.send(msg, content=result, file=image)                     

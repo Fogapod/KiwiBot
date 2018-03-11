@@ -2,7 +2,7 @@ from modules.modulebase import ModuleBase
 
 from permissions import PermissionBotOwner
 from utils.formatters import format_response
-from utils.helpers import create_subprocess_shell, execute_process, get_string_after_entry
+from utils.helpers import create_subprocess_shell, execute_process
 
 
 class Module(ModuleBase):
@@ -17,7 +17,7 @@ class Module(ModuleBase):
     hidden = True
 
     async def on_call(self, msg, *args, **options):
-        command = get_string_after_entry(args[0], msg.content)
+        command = msg.content.partition(args[0])[2].lstrip()
         process, pid = await create_subprocess_shell(command)
         
         start_message = await self.send(
