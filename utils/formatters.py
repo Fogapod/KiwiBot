@@ -5,14 +5,14 @@ async def format_response(response, message, bot):
         format_dict['warning'] = '❗'
     if '{error}' in response:
         format_dict['error'] = '⛔'
-    if '{server}' in response:
-        format_dict['server'] = message.guild.name
+    if '{guild}' in response and message.guild:
+        format_dict['guild'] = message.guild.name
+    if '{guild_id}' in response and message.guild:
+        format_dict['guild_id'] = message.guild.id
     if '{channel}' in response:
-        format_dict['channel'] = message.channel.name
-    if '{channel_name}' in response:
-        format_dict['channel_name'] = message.channel.name
+        format_dict['channel'] = getattr(message.channel, 'name', 'DMchannel')
     if '{channel_id}' in response:
-        format_dict['channel_id'] = message.author.id
+        format_dict['channel_id'] = message.channel.id
     if '{id}' in response: 
         format_dict['id'] = message.author.id
     if '{name}' in response:
@@ -22,7 +22,7 @@ async def format_response(response, message, bot):
     if '{discrim}' in response:
         format_dict['discrim'] = message.author.discriminator
     if '{mention}' in response:
-        format_dict['mention'] = message.author.name + '#' + message.author.discriminator
+        format_dict['mention'] = message.author.mention
 
     return lazy_format(response, **format_dict)
 
@@ -42,5 +42,5 @@ def lazy_format(s, *args, **kwargs):
     except KeyError as e:
         key = e.args[0]
         kwargs[key] = "{%s}" % key
-    except Exception:
+    except (ValueError, AttributeError):
         return s
