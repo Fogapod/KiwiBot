@@ -101,6 +101,7 @@ async def replace_mentions(content, bot):
     mentions = MENTION_REGEX.findall(content)
     if mentions:
         for m in mentions:
+            m = int(m)
             user = discord.utils.get(bot.users, id=m)
             if user is None:
                 try:
