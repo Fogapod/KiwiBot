@@ -17,7 +17,7 @@ class Module(ModuleBase):
     async def on_call(self, msg, *args, **options):
         e = Embed(
             title='TitleMyTitle', colour=Colour.gold(),
-            description='Here aren some useful links for you'
+            description='Here are some useful links for you'
         )
         e.set_thumbnail(url=self.bot.user.avatar_url)
         e.add_field(
