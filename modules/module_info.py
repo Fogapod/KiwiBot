@@ -54,9 +54,9 @@ class Module(ModuleBase):
         try:
             user = await self.bot.get_user_info(BOT_OWNER_ID)
         except Exception:
-            author = f'Not found! His id was {AUTHOR_ID}'
+            author = f'Not found! His id was {BOT_OWNER_ID}'
         else:
-            author = f'{user.name}#{user.discriminator}'
+            author = str(user)
 
         prefix = await get_local_prefix(msg, self.bot)
 

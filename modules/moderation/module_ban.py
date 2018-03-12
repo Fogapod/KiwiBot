@@ -29,13 +29,13 @@ class Module(ModuleBase):
         if isinstance(user, Member):
             if msg.guild.me.top_role <= user.top_role:
                 return '{warning} My top role is lower or equal to member\'s top role, can\'t ban'
-            elif msg.author.top_role <= user.top_role:
+            elif msg.author.top_role <= user.top_role and msg.guild.owner != msg.author:
                 return '{warning} Your top role is lower or equal to member\'s top role, can\'t ban'
 
         ban_msg = await self.send(
             msg,
             content=(
-                f'Are you sure you want to ban **{user}**?' +
+                f'Are you sure you want to ban **{user}** ?' +
                 (f'\nReason:```\n{reason}```' if reason else '\n') +
                 f'React with ✅ to continue'
             )
@@ -47,7 +47,7 @@ class Module(ModuleBase):
                 ban_msg,
                 content=(
                     f'Successefully banned **{user}** [{user.id}]' +
-                    (f'\nReason: `{reason}`' if reason else '')
+                    (f'\nReason: ```\n{reason}```' if reason else '')
                 )
             )
         else:

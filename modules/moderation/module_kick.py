@@ -27,13 +27,13 @@ class Module(ModuleBase):
 
         if msg.guild.me.top_role <= guild_member.top_role:
             return '{warning} My top role is lower or equal to member\'s top role, can\'t kick'
-        if msg.author.top_role <= guild_member.top_role:
+        if msg.author.top_role <= guild_member.top_role and msg.guild.owner != msg.author:
             return '{warning} Your top role is lower or equal to member\'s top role, can\'t kick'
 
         kick_msg = await self.send(
             msg,
             content=(
-                f'Are you sure you want to kick **{guild_member}**?' +
+                f'Are you sure you want to kick **{guild_member}** ?' +
                 (f'\nReason:```\n{reason}```' if reason else '\n') +
                 f'React with ✅ to continue'
             )
@@ -45,7 +45,7 @@ class Module(ModuleBase):
                 kick_msg,
                 content=(
                     f'Successefully kicked **{guild_member}** [{guild_member.id}]' +
-                    (f'\nReason: `{reason}`' if reason else '')
+                    (f'\nReason: ```\n{reason}```' if reason else '')
                 )
             )
         else:
