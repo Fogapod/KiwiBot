@@ -42,5 +42,5 @@ def lazy_format(s, *args, **kwargs):
     except KeyError as e:
         key = e.args[0]
         kwargs[key] = "{%s}" % key
-    except (ValueError, AttributeError):
+    except (ValueError, AttributeError, IndexError):
         return s
