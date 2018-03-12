@@ -4,13 +4,8 @@ from permissions import PermissionBanMembers
 
 from utils.helpers import find_user, request_reaction_confirmation
 
-from asyncio import TimeoutError
-
 from discord import Member
 
-
-EMOJI_ACCEPT = '✅'
-EMOJI_CANCEL = '❌'
 
 class Module(ModuleBase):
 
@@ -21,7 +16,7 @@ class Module(ModuleBase):
     aliases = (name, 'hackban')
     required_args = 1
     guild_only = True
-    require_perms = (PermissionBanMembers, )
+    require_perms  = (PermissionBanMembers, )
     required_perms = (PermissionBanMembers, )
 
     async def on_call(self, msg, *args, **flags):
@@ -40,9 +35,9 @@ class Module(ModuleBase):
         ban_msg = await self.send(
             msg,
             content=(
-                f'Targeting user **{user}**' +
-                (f'\nReason: `{reason}`' if reason else '') +
-                f'\nReact with {EMOJI_ACCEPT} to apply ban'
+                f'Are you sure you want to ban **{user}**?' +
+                (f'\nReason:```\n{reason}```' if reason else '\n') +
+                f'React with ✅ to continue'
             )
         )
 

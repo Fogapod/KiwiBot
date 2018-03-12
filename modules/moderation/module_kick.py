@@ -4,11 +4,6 @@ from permissions import PermissionKickMembers
 
 from utils.helpers import find_user, request_reaction_confirmation
 
-from asyncio import TimeoutError
-
-
-EMOJI_ACCEPT = '✅'
-EMOJI_CANCEL = '❌'
 
 class Module(ModuleBase):
 
@@ -38,9 +33,9 @@ class Module(ModuleBase):
         kick_msg = await self.send(
             msg,
             content=(
-                f'Targeting user **{str(guild_member)}**' +
-                (f'\nReason: `{reason}`' if reason else '') +
-                f'\nReact with {EMOJI_ACCEPT} to apply kick'
+                f'Are you sure you want to kick **{guild_member}**?' +
+                (f'\nReason:```\n{reason}```' if reason else '\n') +
+                f'React with ✅ to continue'
             )
         )
 

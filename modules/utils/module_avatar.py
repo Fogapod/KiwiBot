@@ -32,8 +32,8 @@ class Module(ModuleBase):
 
         avatar_url = user.avatar_url_as(static_format=format)
 
-        e = Embed(title='direct link', url=avatar_url)
+        e = Embed(title=f'{user.id}', url=avatar_url)
         e.set_image(url=avatar_url)
-        e.set_footer(text=user, icon_url=avatar_url)
+        e.set_footer(text=user)
 
         await self.send(msg, embed=e)
