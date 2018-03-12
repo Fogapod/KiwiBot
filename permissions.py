@@ -9,7 +9,7 @@ class Permission:
         self.bot = bot
 
     async def check(self, msg, bot=False):
-        return await self._check(msg.guild.me if msg.guild else None if bot else msg.author, msg)
+        return await self._check((msg.guild.me if msg.guild else None) if bot else msg.author, msg)
     
     async def _check(self, user, msg):
         return True
