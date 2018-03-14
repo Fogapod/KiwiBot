@@ -1,4 +1,4 @@
-from modules.modulebase import ModuleBase
+from objects.modulebase import ModuleBase
 
 import time
 
@@ -10,8 +10,11 @@ class Module(ModuleBase):
     name = 'uptime'
     aliases = (name, 'up')
 
+    async def on_load(self, from_reload):
+        self.start_time = time.time()
+
     async def on_call(self, message, *args, **flags):
-        delta = time.time() - self.bot.start_time
+        delta = time.time() - self.start_time
 
         minutes, seconds = divmod(delta,   60)
         hours,   minutes = divmod(minutes, 60)

@@ -1,5 +1,3 @@
-# coding:utf8
-
 import os
 import sys
 import shlex
@@ -7,7 +5,7 @@ import traceback
 
 from importlib import reload
 
-from utils.logger import Logger
+from objects.logger import Logger
 
 
 logger = Logger.get_logger()

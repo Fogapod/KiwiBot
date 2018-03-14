@@ -1,15 +1,13 @@
-from modules.modulebase import ModuleBase
+from objects.modulebase import ModuleBase
+from objects.permissions import PermissionBotOwner
 
-from permissions import PermissionBotOwner
-from utils.helpers import find_user, get_local_prefix
-
-import re
+from utils.funcs import find_user, get_local_prefix
 
 
 class Module(ModuleBase):
 
-    usage_doc = '{prefix}{aliases} <user> <message>'
-    short_doc = 'Force bot to think message was sent by selected user.'
+    usage_doc = '{prefix}{aliases} <user> <command>'
+    short_doc = 'Force bot to think command was sent by matched user.'
 
     name = 'runas'
     aliases = (name, )
@@ -31,4 +29,4 @@ class Module(ModuleBase):
         msg.content = prefix + new_content
         await self.bot.on_message(msg)
 
-        return f'Message processed as `{user.name}#{user.discriminator}`'
+        return f'Message processed as `{user}`'

@@ -1,7 +1,7 @@
-from modules.modulebase import ModuleBase
+from objects.modulebase import ModuleBase
+from objects.permissions import PermissionBotOwner
 
-from permissions import PermissionBotOwner
-from utils.constants import STOP_EXIT_CODE
+from constants import STOP_EXIT_CODE
 
 
 class Module(ModuleBase):

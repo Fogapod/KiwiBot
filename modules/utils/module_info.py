@@ -1,9 +1,8 @@
-from modules.modulebase import ModuleBase
+from objects.modulebase import ModuleBase
+from objects.permissions import PermissionEmbedLinks
 
-from permissions import PermissionEmbedLinks
-from utils.helpers import (
-    create_subprocess_shell, execute_process, get_local_prefix)
-from utils.constants import BOT_OWNER_ID
+from utils.funcs import create_subprocess_shell, execute_process, get_local_prefix
+from constants import BOT_OWNER_ID
 
 from discord import Colour, Embed
 import discord
@@ -68,6 +67,8 @@ class Module(ModuleBase):
                 f'I\'m a discord bot created by **{author}**'
             )
         )
+        if self.bot.is_dev:
+            embed.add_field(name='Warning', value='This is a dev instance of bot')
         embed.add_field(
             name='Here is some useful info about me', value=(
                 f'Local prefix: **{prefix}**\n'

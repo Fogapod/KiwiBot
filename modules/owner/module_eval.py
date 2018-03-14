@@ -1,13 +1,12 @@
-from modules.modulebase import ModuleBase
-
-from permissions import PermissionBotOwner
+from objects.modulebase import ModuleBase
+from objects.permissions import PermissionBotOwner
 
 import io
 import sys
 import asyncio
+import textwrap
 import traceback
 
-import textwrap
 from contextlib import redirect_stdout
 
 

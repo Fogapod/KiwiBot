@@ -1,10 +1,9 @@
 import aioredis
 
-from utils.logger import Logger
+from objects.logger import Logger
 
 
-REDIS_IP   = 'localhost'
-REDIS_PORT = 6379
+DEFAULT_REDIS_PORT = 6379
 
 logger = Logger.get_logger()
 
@@ -13,18 +12,16 @@ class RedisDB:
     def __init__(self):
         self.connection = None
 
-    async def connect(self, ip=None, port=None, password=None):
+    async def connect(self, **kwargs):
         if self.connection is not None and not self.connection.closed:
             logger.info(f'Warning: can\'t establish new connection to redis, connection already exists: {self.connection.address}')
             return
 
-        if ip is None:
-            ip = REDIS_IP
-        if port is None:
-            port = REDIS_PORT
+        port = kwargs.pop('port', DEFAULT_REDIS_PORT) or DEFAULT_REDIS_PORT
+        password = kwargs.pop('password', None) or None
 
         self.connection = await aioredis.create_connection(
-            (ip, port), password=password)
+            ('localhost', port), password=password)
 
     async def reconnect(self):
         self.connection = await aioredis.create_connection(

@@ -1,8 +1,8 @@
-from modules.modulebase import ModuleBase
+from objects.modulebase import ModuleBase
+from objects.permissions import PermissionBotOwner
 
-from permissions import PermissionBotOwner
 from utils.formatters import format_response
-from utils.helpers import create_subprocess_exec, execute_process
+from utils.funcs import create_subprocess_exec, execute_process
 
 
 class Module(ModuleBase):

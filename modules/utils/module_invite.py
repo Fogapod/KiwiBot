@@ -1,6 +1,6 @@
-from modules.modulebase import ModuleBase
+from objects.modulebase import ModuleBase
+from objects.permissions import PermissionEmbedLinks
 
-from permissions import PermissionEmbedLinks
 from discord import Colour, Embed
 
 

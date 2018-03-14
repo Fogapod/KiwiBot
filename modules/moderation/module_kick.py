@@ -1,8 +1,7 @@
-from modules.modulebase import ModuleBase
+from objects.modulebase import ModuleBase
+from objects.permissions import PermissionKickMembers
 
-from permissions import PermissionKickMembers
-
-from utils.helpers import find_user, request_reaction_confirmation
+from utils.funcs import find_user, request_reaction_confirmation
 
 
 class Module(ModuleBase):

@@ -1,6 +1,5 @@
-from modules.modulebase import ModuleBase
-
-from permissions import PermissionBotOwner
+from objects.modulebase import ModuleBase
+from objects.permissions import PermissionBotOwner
 
 from discord import Activity
 

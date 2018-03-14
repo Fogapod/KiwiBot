@@ -1,6 +1,5 @@
-from modules.modulebase import ModuleBase
-
-from permissions import PermissionManageMessages
+from objects.modulebase import ModuleBase
+from objects.permissions import PermissionManageMessages
 
 
 class Module(ModuleBase):

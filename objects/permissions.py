@@ -1,4 +1,4 @@
-from utils.constants import BOT_OWNER_ID
+from constants import BOT_OWNER_ID
 
 
 class Permission:

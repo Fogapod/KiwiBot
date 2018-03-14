@@ -1,6 +1,6 @@
-from modules.modulebase import ModuleBase
+from objects.modulebase import ModuleBase
 
-from utils.helpers import find_user
+from utils.funcs import find_user
 
 
 class Module(ModuleBase):

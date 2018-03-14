@@ -1,4 +1,4 @@
-from modules.modulebase import ModuleBase
+from objects.modulebase import ModuleBase
 
 from aiohttp import ClientSession
 

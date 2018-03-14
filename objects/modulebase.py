@@ -1,21 +1,21 @@
-from utils.helpers import get_local_prefix
+from utils.funcs import get_local_prefix
 
 
 class ModuleBase:
 
-    usage_doc = '{prefix}{aliases} [arg...]'
+    usage_doc = '{prefix}{aliases}'
     short_doc = 'Not documented.'
     additional_doc = ''
 
-    name             = 'module'
-    aliases          = ()
-    required_perms   = ()  # permissions required for bot
-    require_perms    = ()  # permissions required from user
-    required_args    = 0
-    guild_only       = False
-    nsfw             = False
-    hidden           = False
-    disabled         = False
+    name             = ''     # name of module, should be same as in file name
+    aliases          = ()     # default on_check_message event would search for matches in this tuple
+    required_perms   = ()     # permissions required for bot
+    require_perms    = ()     # permissions required from user
+    required_args    = 0      # number if required arguments
+    guild_only       = False  # can only be used in guild
+    nsfw             = False  # can only be used in nsfw channel
+    hidden           = False  # would be hidden when possible
+    disabled         = False  # won't be checked or called
 
     def __init__(self, bot):
         self.bot = bot

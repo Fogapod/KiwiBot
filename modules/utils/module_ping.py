@@ -1,6 +1,6 @@
-from modules.modulebase import ModuleBase
+from objects.modulebase import ModuleBase
 
-from utils.helpers import create_subprocess_exec, execute_process
+from utils.funcs import create_subprocess_exec, execute_process
 
 
 class Module(ModuleBase):

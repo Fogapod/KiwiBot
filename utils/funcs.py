@@ -4,12 +4,14 @@ import asyncio
 
 import discord
 
-from utils.logger import Logger
+from objects.logger import Logger
 
 
 logger = Logger.get_logger()
 
 MENTION_REGEX = re.compile('<@!?(\d{17,19})>')
+MENTION_OR_ID_REGEX = re.compile('(?:<@!?(\d{17,19})>)|\d{17,19}')
+ROLE_OR_ID_REGEX = re.compile('(?:<@&(\d{17,19})>)|\d{17,19}')
 
 
 async def create_subprocess_exec(
@@ -44,7 +46,7 @@ async def execute_process(process, code):
 
 async def find_user(pattern, msg, bot, strict_guild=False, max_count=1):
     user = None
-    id_match = re.fullmatch('(?:<@!?(\d{17,19})>)|\d{17,19}', pattern)
+    id_match = MENTION_OR_ID_REGEX.fullmatch(pattern)
 
     if id_match is not None:
         user_id = int(id_match.group(1) or id_match.group(0))
@@ -57,7 +59,7 @@ async def find_user(pattern, msg, bot, strict_guild=False, max_count=1):
             try:
                 user = await bot.get_user_info(user_id)
             except discord.NotFound:
-                return None
+                pass
 
     if user is not None:
         return user if max_count == 1 else [user]
@@ -98,6 +100,30 @@ async def find_user(pattern, msg, bot, strict_guild=False, max_count=1):
         return found_in_guild[0] if max_count == 1 else found_in_guild[:max_count]
 
     return None
+
+
+async def find_role(pattern, guild, bot):
+    id_match = ROLE_OR_ID_REGEX.fullmatch(pattern)
+    if id_match is not None:
+        role_id = int(id_match.group(1) or id_match.group(0))
+        for role in guild.roles:
+            if role.id == role_id:
+                return role
+
+    found_roles = []
+
+    try:
+        regex_pattern = re.compile(pattern, re.I)
+    except Exception:
+        for role in guild.roles:
+            if role.name == pattern:
+                found_roles.append(role)
+    for role in guild.roles:
+        if regex_pattern.search(role.name) is None:
+            continue
+        found_roles.append(role)
+
+    return found_roles[0] if found_roles else None
 
 
 async def replace_mentions(content, bot):

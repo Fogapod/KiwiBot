@@ -1,6 +1,6 @@
-from modules.modulebase import ModuleBase
+from objects.modulebase import ModuleBase
+from objects.permissions import PermissionBotOwner
 
-from permissions import PermissionBotOwner
 from utils.formatters import format_response
 
 import traceback

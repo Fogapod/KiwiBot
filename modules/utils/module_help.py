@@ -1,7 +1,7 @@
-from modules.modulebase import ModuleBase
+from objects.modulebase import ModuleBase
+from objects.permissions import PermissionEmbedLinks
 
-from permissions import PermissionEmbedLinks
-from utils.helpers import get_local_prefix
+from utils.funcs import get_local_prefix
 
 from discord import Embed, Colour
 

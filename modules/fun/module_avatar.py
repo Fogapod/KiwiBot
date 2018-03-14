@@ -1,8 +1,7 @@
-from modules.modulebase import ModuleBase
+from objects.modulebase import ModuleBase
+from objects.permissions import PermissionEmbedLinks
 
-from utils.helpers import find_user
-
-from permissions import PermissionEmbedLinks
+from utils.funcs import find_user
 
 from discord import Embed
 
