@@ -9,9 +9,12 @@ from objects.logger import Logger
 
 logger = Logger.get_logger()
 
-MENTION_REGEX = re.compile('<@!?(\d{17,19})>')
-MENTION_OR_ID_REGEX = re.compile('(?:<@!?(\d{17,19})>)|\d{17,19}')
-ROLE_OR_ID_REGEX = re.compile('(?:<@&(\d{17,19})>)|\d{17,19}')
+ID_EXPR = '\d{17,19}'
+
+ID_REGEX = re.compile(ID_EXPR)
+MENTION_REGEX = re.compile(f'<@!?(ID_EXPR)>')
+MENTION_OR_ID_REGEX = re.compile(f'(?:<@!?(ID_EXPR)>)|ID_EXPR')
+ROLE_OR_ID_REGEX = re.compile(f'(?:<@&(ID_EXPR)>)|ID_EXPR')
 
 
 async def create_subprocess_exec(
@@ -51,11 +54,14 @@ async def find_user(pattern, msg, bot, strict_guild=False, max_count=1):
     if id_match is not None:
         user_id = int(id_match.group(1) or id_match.group(0))
         if msg.guild is not None:
+            # check guild members
             user = msg.guild.get_member(user_id)
         elif not strict_guild:
+            # check all cached users
             user = bot.get_user(user_id)
 
         if user is None and not strict_guild:
+            # user is not cached
             try:
                 user = await bot.get_user_info(user_id)
             except discord.NotFound:
@@ -67,27 +73,31 @@ async def find_user(pattern, msg, bot, strict_guild=False, max_count=1):
     if msg.guild is None:
         return None
 
-    found_in_guild = []
+    found = []
 
     try:
-        regex_pattern = re.compile(pattern, re.I)
+        input_regex = re.compile(pattern, re.I)
     except Exception:
         # invalid regex, trying to use 'in'
         for member in msg.guild.members:
+            # check member nick
             if pattern not in member.display_name:
+                # check user name#discrim
                 if pattern not in str(member):
                     continue
 
-            found_in_guild.append(member)
+            found.append(member)
     else:
         for member in msg.guild.members:
-            if regex_pattern.search(member.display_name) is None:
-                if regex_pattern.search(str(member)) is None:
+            # check member nick
+            if input_regex.search(member.display_name) is None:
+                # check user name#discrim
+                if input_regex.search(str(member)) is None:
                     continue
 
-            found_in_guild.append(member)
+            found.append(member)
 
-    found_in_guild.sort(
+    found.sort(
         key=lambda m: (
             _get_last_user_message_timestamp(m.id, msg.channel.id, bot),
             m.status.name == 'online',
@@ -96,8 +106,8 @@ async def find_user(pattern, msg, bot, strict_guild=False, max_count=1):
         reverse=True
     )
 
-    if found_in_guild:
-        return found_in_guild[0] if max_count == 1 else found_in_guild[:max_count]
+    if found:
+        return found[0] if max_count == 1 else found[:max_count]
 
     return None
 
@@ -106,24 +116,61 @@ async def find_role(pattern, guild, bot):
     id_match = ROLE_OR_ID_REGEX.fullmatch(pattern)
     if id_match is not None:
         role_id = int(id_match.group(1) or id_match.group(0))
+        # role = guild.get_role(role_id)
+        # if role is not None:
+        #     return role
         for role in guild.roles:
             if role.id == role_id:
                 return role
 
-    found_roles = []
+    found = []
 
     try:
-        regex_pattern = re.compile(pattern, re.I)
+        input_regex = re.compile(pattern, re.I)
     except Exception:
         for role in guild.roles:
-            if role.name == pattern:
-                found_roles.append(role)
+            if pattern in role.name:
+                # found.append(role)
+                return role
     for role in guild.roles:
-        if regex_pattern.search(role.name) is None:
+        if input_regex.search(role.name) is None:
             continue
-        found_roles.append(role)
+        # found.append(role)
+        return role
 
-    return found_roles[0] if found_roles else None
+    return None  # found[0] if found else None
+
+
+async def find_guild(pattern, bot):
+    id_match = ID_REGEX.fullmatch(pattern)
+    if id_match is not None:
+        guild_id = int(match.group(0))
+        guild = bot.get_guild(guild_id)
+        if guild is not None:
+            return guild
+
+    found = []
+
+    try:
+        input_regex = re.compile(pattern, re.I)
+    except Exception:
+        # invalid regex, trying to use 'in'
+        for guild in bot.guilds:
+            if pattern in guild.name:
+                found.append(guild)
+    else:
+        for guild in bot.guilds:
+            if input_regex.search(guild.name) is not None:
+                found.append(guild)
+
+    found.sort(
+        key=lambda g: g.member_count,
+        reverse=True
+    )
+
+    return found[0] if found else None
+
+find_server = find_guild
 
 
 async def replace_mentions(content, bot):
