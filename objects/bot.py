@@ -62,7 +62,7 @@ class BotMyBot(discord.Client):
 
         self.prefixes = []
         self._default_prefixes = [await self.redis.get('prefix', default='+')]
-        self._mention_prefixes = [f'<@{bot_id}>', f'<!@{bot_id}>']
+        self._mention_prefixes = [f'<@{bot_id}>', f'<@!{bot_id}>']
         self.prefixes.extend([*self._default_prefixes, *self._mention_prefixes])
 
         self._guild_prefixes = {}
