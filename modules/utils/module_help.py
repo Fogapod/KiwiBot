@@ -1,5 +1,6 @@
 from objects.modulebase import ModuleBase
-from objects.permissions import PermissionEmbedLinks
+from objects.permissions import PermissionEmbedLinks, PermissionAddReactions
+from objects.paginators import Paginator
 
 from utils.funcs import get_local_prefix
 
@@ -13,7 +14,7 @@ class Module(ModuleBase):
 
     name = 'help'
     aliases = (name, 'commands')
-    required_perms = (PermissionEmbedLinks, )
+    required_perms = (PermissionEmbedLinks, PermissionAddReactions)
 
     async def on_call(self, msg, *args, **flags):
         # temporary solution
@@ -43,18 +44,30 @@ class Module(ModuleBase):
 
                 module_list.append((name, module))
 
-            help_text  = '```\n'
-            help_text += '\n'.join(sorted([f'{m.aliases[0]:<20}{m.short_doc}' for n, m in module_list]))
-            help_text += '\n```'
+            lines = sorted([f'{m.aliases[0]:<20}{m.short_doc}' for n, m in module_list])
+            lines_per_chunk = 20
+            chunks = [lines[i:i + lines_per_chunk] for i in range(0, len(lines), lines_per_chunk)]
 
-            embed = Embed(
-                colour=Colour.gold(), title='Available commands:',
-                description=help_text
-            )
-            embed.set_footer(
-                text='Current prefix: ' + await get_local_prefix(msg, self.bot) + '\n')
+            local_prefix = await get_local_prefix(msg, self.bot)
 
-            await self.send(msg, embed=embed)
+            def make_embed(chunk):
+                e = Embed(
+                    colour=Colour.gold(), title='Available commands:',
+                    description='```\n' + "\n".join(chunk) + '```'
+                )
+                e.set_footer(text=f'Current prefix: {local_prefix}')
+                return e
+
+            if len(chunks) == 1:
+                await self.send(msg, embed=make_embed(chunks[0]))
+                return
+
+            p = Paginator(self.bot)
+            for i, chunk in enumerate(chunks):
+                p.add_page(embed=make_embed(chunk), content=f'Help page **{i + 1}/{len(chunks)}**')
+
+            m = await self.send(msg, **p.current_page)
+            await p.run_paginator(m, msg.author)
             return
 
         if len(args) > 2:
