@@ -24,12 +24,12 @@ class ModuleBase:
         if type(self.required_perms) is not tuple:
             self.required_perms = (self.required_perms(bot), )
         else:
-            self.required_perms = (p(bot) for p in self.required_perms)
+            self.required_perms = tuple(p(bot) for p in self.required_perms)
 
         if type(self.require_perms) is not tuple:
             self.require_perms = (self.require_perms(bot), )
         else:
-            self.require_perms = (p(bot) for p in self.require_perms)
+            self.require_perms = tuple(p(bot) for p in self.require_perms)
 
     def check_guild(self, msg):
         return (msg.guild is not None) >= self.guild_only
