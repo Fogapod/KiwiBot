@@ -25,6 +25,14 @@ class PermissionBotOwner(Permission):
         return msg.author.id == BOT_OWNER_ID
 
 
+class PermissionGuildOwner(Permission):
+
+    name = 'GUILD_OWNER'
+
+    async def _check(self, user, msg):
+        return msg.channel.guild.owner == user
+
+
 class PermissionAddReactions(Permission):
 
     name = 'ADD_REACTIONS'
