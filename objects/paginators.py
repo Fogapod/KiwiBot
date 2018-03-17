@@ -12,7 +12,7 @@ class Paginator:
     Requires PermissionManageMessages and PermissionAddReactions to work, last is vital
     """
 
-    def __init__(self, bot, *args, looped=True, timeout=180,
+    def __init__(self, bot, *args, looped=True, timeout=60,
         emoji_go_left='◀', emoji_go_right='▶',
         emoji_use_index='🔢', emoji_quit='⏹', **kwargs
         ):
