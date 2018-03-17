@@ -124,6 +124,7 @@ class Paginator:
                 reaction, user = await self.bot.wait_for('reaction_add', timeout=time_left, check=check)
             except TimeoutError:
                 await self.cleanup(target_message)
+                return
 
             if callback is not None:
                 if (await callback(reaction, user)) is False:
