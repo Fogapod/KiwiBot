@@ -80,7 +80,7 @@ class Module(ModuleBase):
             name='emojis',
             value=(
                 f'**{min(max_emoji, emoji_num)} / {emoji_num}** shown: ' +
-                ' '.join(str(e) for e in sorted(random.sample(guild.emojis, min(max_emoji, emoji_num)), key=lambda e: (e.name, e.animated)))
+                ' '.join(str(e) for e in sorted(random.sample(guild.emojis, min(max_emoji, emoji_num)), key=lambda e: (e.animated, e.name)))
             )
         )
 
