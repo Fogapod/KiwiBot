@@ -221,7 +221,11 @@ async def request_reaction_confirmation(msg, user, bot, emoji_accept='✅', emoj
     try:
         reaction, member = await bot.wait_for('reaction_add', timeout=timeout, check=check)
     except asyncio.TimeoutError:
-        pass
+        try:
+            await msg.clear_reactions()
+        except Exception:
+            pass
+        return None
     else:
         if str(reaction) == emoji_accept:
             try:
