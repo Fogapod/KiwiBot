@@ -12,9 +12,9 @@ logger = Logger.get_logger()
 ID_EXPR = '\d{17,19}'
 
 ID_REGEX = re.compile(ID_EXPR)
-MENTION_REGEX = re.compile(f'<@!?(ID_EXPR)>')
-MENTION_OR_ID_REGEX = re.compile(f'(?:<@!?(ID_EXPR)>)|ID_EXPR')
-ROLE_OR_ID_REGEX = re.compile(f'(?:<@&(ID_EXPR)>)|ID_EXPR')
+MENTION_REGEX = re.compile(f'<@!?({ID_EXPR})>')
+MENTION_OR_ID_REGEX = re.compile(f'(?:<@!?({ID_EXPR})>)|{ID_EXPR}')
+ROLE_OR_ID_REGEX = re.compile(f'(?:<@&({ID_EXPR})>)|{ID_EXPR}')
 
 
 async def create_subprocess_exec(
