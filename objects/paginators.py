@@ -3,7 +3,7 @@ from asyncio import TimeoutError
 
 import time
 
-from discord import Forbidden
+from discord.errors import Forbidden, NotFound
 
 
 class Paginator:
@@ -102,7 +102,7 @@ class Paginator:
     async def cleanup(self, msg):
         try:
             await msg.clear_reactions()
-        except Forbidden:
+        except (Forbidden, NotFound):
             pass
         self.closed = True
 
@@ -135,6 +135,8 @@ class Paginator:
                 await target_message.remove_reaction(reaction, user)
             except Forbidden:
                 pass
+            except NotFound:
+                break
 
             self.start_time += 10
             time_left = 180 - (time.time() - self.start_time)
