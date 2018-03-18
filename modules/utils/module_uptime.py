@@ -13,7 +13,7 @@ class Module(ModuleBase):
     async def on_load(self, from_reload):
         self.start_time = time.time()
 
-    async def on_call(self, message, *args, **flags):
+    async def on_call(self, msg, *args, **flags):
         online_delta = time.time() - self.start_time
 
         return (
@@ -37,6 +37,6 @@ class Module(ModuleBase):
         s += '{0}d '.format(days)     if days    else ''
         s += '{0}h '.format(hours)    if hours   else ''
         s += '{0}m '.format(minutes)  if minutes else ''
-        s += '{0}s'.format(seconds)
+        s += '{0}s'.format(seconds)   if seconds else ''
 
         return s
