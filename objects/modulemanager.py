@@ -125,6 +125,10 @@ class ModuleManager:
                 logger.info('Critical problem, attempting to restart')
                 self.bot.restart()
             try:
+                logger.info(
+                    f'User {message.author} [{message.author.id}] called module {module.name} in ' +
+                    (f'guild {message.guild} [{message.guild.id}]' if message.guild is not None else 'direct messages')
+                )
                 return await module.call_command(message, *args)
             except Exception as e:
                 module_tb = traceback.format_exc()
