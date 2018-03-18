@@ -14,7 +14,17 @@ class Module(ModuleBase):
         self.start_time = time.time()
 
     async def on_call(self, message, *args, **flags):
-        delta = time.time() - self.start_time
+        online_delta = time.time() - self.start_time
+
+        return (
+            f'Running: **{self.delta_to_str(self.bot.uptime)}**\n'
+            f'Online: **{self.delta_to_str(online_delta)}**'
+        )
+
+    def delta_to_str(self, delta):
+        s = ''
+
+        delta = round(delta)
 
         minutes, seconds = divmod(delta,   60)
         hours,   minutes = divmod(minutes, 60)
@@ -22,12 +32,11 @@ class Module(ModuleBase):
         months,  days    = divmod(days,    30)
         years,   months  = divmod(months,  12)
 
-        response = 'Up for: **'
-        response += '{0}y '.format(int(years))    if years   else ''
-        response += '{0}mon '.format(int(months)) if months  else ''
-        response += '{0}d '.format(int(days))     if days    else ''
-        response += '{0}h '.format(int(hours))    if hours   else ''
-        response += '{0}m '.format(int(minutes))  if minutes else ''
-        response += '{0}s**'.format(int(seconds))
+        s += '{0}y '.format(years)    if years   else ''
+        s += '{0}mon '.format(months) if months  else ''
+        s += '{0}d '.format(days)     if days    else ''
+        s += '{0}h '.format(hours)    if hours   else ''
+        s += '{0}m '.format(minutes)  if minutes else ''
+        s += '{0}s'.format(seconds)
 
-        return response
+        return s

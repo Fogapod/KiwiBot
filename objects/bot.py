@@ -57,6 +57,10 @@ class BotMyBot(discord.Client):
 
         self._last_messages = {}
 
+    @property
+    def uptime(self):
+        return time.time() - self.start_time
+
     async def init_prefixes(self):
         bot_id = self.user.id
 
