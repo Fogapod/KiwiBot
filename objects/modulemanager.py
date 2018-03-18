@@ -125,7 +125,7 @@ class ModuleManager:
                 logger.info('Critical problem, attempting to restart')
                 self.bot.restart()
             try:
-                logger.info(
+                logger.trace(
                     f'User {message.author} [{message.author.id}] called module {module.name} in ' +
                     (f'guild {message.guild} [{message.guild.id}]' if message.guild is not None else 'direct messages')
                 )
