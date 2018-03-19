@@ -144,7 +144,7 @@ async def find_role(pattern, guild, bot):
 async def find_guild(pattern, bot):
     id_match = ID_REGEX.fullmatch(pattern)
     if id_match is not None:
-        guild_id = int(match.group(0))
+        guild_id = int(id_match.group(0))
         guild = bot.get_guild(guild_id)
         if guild is not None:
             return guild
