@@ -2,6 +2,8 @@ from objects.modulebase import ModuleBase
 
 from utils.funcs import create_subprocess_exec, execute_process
 
+import re
+
 
 class Module(ModuleBase):
 
@@ -15,11 +17,16 @@ class Module(ModuleBase):
         ping_msg = await self.send(msg, content='Pinging ...')
 
         if len(args) == 2:
-            program = ['ping', '-c', '4', args[1].encode('idna')]
+            domain = args[1]
+            if domain.startswith('<') and domain.endswith('>'):
+                domain = domain[1:-1]
+            if re.fullmatch('https?://.+', domain):
+                domain = re.sub('^https?://', '', domain)
+            program = ['ping', '-c', '4', domain.encode('idna')]
             process, pid = await create_subprocess_exec(*program)
             stdout, stderr = await execute_process(process, program)
 
-            if process.returncode in (0, 1):  # successful ping, 100% package loss
+            if process.returncode in (0, 1):  # (successful ping, 100% package loss)
                 await self.bot.edit_message(
                     ping_msg,
                     content='```\n' + (stdout.decode() or stderr.decode()) + '```'
