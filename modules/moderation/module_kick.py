@@ -22,8 +22,10 @@ class Module(ModuleBase):
         if not guild_member:
             return '{warning} User not found'
 
-        reason = msg.content[len(args[0]):].partition(args[1])[2].lstrip() or None
+        reason = msg.content[len(args[0]):].partition(args[1])[2].lstrip() or f'performed by {msg.author} [{msg.author.id}]'
 
+        if guild_member == msg.guild.owner:
+            return '{warning} Can\'t kick guild owner'
         if msg.guild.me.top_role <= guild_member.top_role:
             return '{warning} My top role is lower or equal to member\'s top role, can\'t kick'
         if msg.author.top_role <= guild_member.top_role and msg.guild.owner != msg.author:
