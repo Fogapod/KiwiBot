@@ -80,9 +80,17 @@ class Paginator:
     async def on_use_index(self, msg, reaction, user):
         index_request_message = None
         index_response_message = None
+
+        def check(message):
+            return all((
+                message.author == user,
+                message.channel == msg.channel,
+                message.content.isdigit()
+            ))
+
         try:
             index_request_message = await msg.channel.send('Please, send number of page you want to go')
-            index_response_message = await self.bot.wait_for('message', timeout=10, check=lambda m: m.author == user and m.content.isdigit())
+            index_response_message = await self.bot.wait_for('message', timeout=10, check=check)
             index = int(index_response_message.content)
             await self.bot.edit_message(msg, **self.switch_to_page(index - 1))
         except TimeoutError:
