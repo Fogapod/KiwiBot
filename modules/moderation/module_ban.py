@@ -23,7 +23,7 @@ class Module(ModuleBase):
 
         if not user:
             return '{warning} User not found'
-        reason = msg.content[len(args[0]):].partition(args[1])[2].lstrip() or f'performed by {msg.author} [{msg.author.id}]'
+        reason = msg.content[len(args[0]):].partition(args[1])[2].lstrip() or ''
 
         if isinstance(user, Member):
             if user == msg.guild.owner:
@@ -43,7 +43,11 @@ class Module(ModuleBase):
         )
 
         if await request_reaction_confirmation(ban_msg, msg.author, self.bot):
-            await msg.guild.ban(user, reason=reason, delete_message_days=0)
+            await msg.guild.ban(
+                user, delete_message_days=0,
+                reason=reason + f' banned by {msg.author}'
+            )
+
             await self.bot.edit_message(
                 ban_msg,
                 content=(
@@ -52,4 +56,4 @@ class Module(ModuleBase):
                 )
             )
         else:
-            await self.bot.edit_message(ban_msg, content=f'Cancelled ban of **{user}** [{user.id}]')
+            await self.bot.edit_message(ban_msg, content=f'Cancelled ban of **{user}**')

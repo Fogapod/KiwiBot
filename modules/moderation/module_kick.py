@@ -22,7 +22,7 @@ class Module(ModuleBase):
         if not guild_member:
             return '{warning} User not found'
 
-        reason = msg.content[len(args[0]):].partition(args[1])[2].lstrip() or f'performed by {msg.author} [{msg.author.id}]'
+        reason = msg.content[len(args[0]):].partition(args[1])[2].lstrip() or ''
 
         if guild_member == msg.guild.owner:
             return '{warning} Can\'t kick guild owner'
@@ -41,7 +41,7 @@ class Module(ModuleBase):
         )
 
         if await request_reaction_confirmation(kick_msg, msg.author, self.bot):
-            await msg.guild.kick(guild_member, reason=reason)
+            await msg.guild.kick(guild_member, reason=reason + f' kicked by {msg.author}')
             await self.bot.edit_message(
                 kick_msg,
                 content=(
@@ -50,4 +50,4 @@ class Module(ModuleBase):
                 )
             )
         else:
-            await self.bot.edit_message(kick_msg, content=f'Cancelled kick of **{guild_member}** [{guild_member.id}]')
+            await self.bot.edit_message(kick_msg, content=f'Cancelled kick of **{guild_member}**')
