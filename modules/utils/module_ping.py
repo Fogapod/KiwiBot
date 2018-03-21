@@ -21,7 +21,7 @@ class Module(ModuleBase):
             if domain.startswith('<') and domain.endswith('>'):
                 domain = domain[1:-1]
             if re.fullmatch('https?://.+', domain):
-                domain = re.sub('^https?://', '', domain)
+                domain = re.sub('^https?://|/$', '', domain)
             program = ['ping', '-c', '4', domain.encode('idna')]
             process, pid = await create_subprocess_exec(*program)
             stdout, stderr = await execute_process(process, program)

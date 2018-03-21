@@ -83,7 +83,7 @@ class BotMyBot(discord.Client):
         if token is None:
             token = input('Token not provided. Please, insert it into config file or paste here for single bot launch: ')
 
-        super(BotMyBot, self).run(token, reconnect=True, fetch_offline_members=True)
+        super().run(token, reconnect=True, fetch_offline_members=True)
 
     def restart(self):
         self.stop(0)
