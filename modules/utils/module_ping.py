@@ -29,16 +29,16 @@ class Module(ModuleBase):
             if process.returncode in (0, 1):  # (successful ping, 100% package loss)
                 await self.bot.edit_message(
                     ping_msg,
-                    content='```\n' + (stdout.decode() or stderr.decode()) + '```'
+                    content=f'```\n{stdout.decode() or stderr.decode()}```'
                 )
                 return
 
-        msg_timestamp = msg.edited_at if msg.edited_at else msg.created_at
-        delta = int(round((ping_msg.created_at.timestamp() - msg_timestamp.timestamp()) * 1000))
+        msg_timestamp = msg.edited_at or msg.created_at
+        delta = round((ping_msg.created_at.timestamp() - msg_timestamp.timestamp()) * 1000)
 
-        result = 'Pong, it took `' + str(delta) + 'ms`'
+        result = f'Pong, it took `{int(delta)}ms`'
 
         target = msg.content.partition(args[0])[2].lstrip()
-        result += ' to ping `' + target + '`' if target else ' to respond'
+        result += f' to ping `{target}`' if target else ' to respond'
 
         await self.bot.edit_message(ping_msg, content=result)
