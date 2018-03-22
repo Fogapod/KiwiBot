@@ -9,7 +9,7 @@ from discord.errors import Forbidden, NotFound
 class Paginator:
     """
     Basic paginator class.
-    Requires PermissionManageMessages and PermissionAddReactions to work, last is vital
+    Requires PermissionAddReactions to work
     """
 
     def __init__(self, bot, *args, looped=True, timeout=60,
@@ -115,6 +115,7 @@ class Paginator:
         self.closed = True
 
     async def run_paginator(self, target_message, target_user, callback=None):
+        manage_messages_permission = target_message.guild and target_message.channel.permissions_for(target_message.guild.me).manage_messages
         await self.init_reactions(target_message)
 
         def check(reaction, user):
@@ -127,9 +128,11 @@ class Paginator:
         self.start_time = time.time()
         time_left = self.timeout
 
+        reaction_event = 'reaction_add'
+
         while time_left >= 0 and not self.closed:
             try:
-                reaction, user = await self.bot.wait_for('reaction_add', timeout=time_left, check=check)
+                reaction, user = await self.bot.wait_for(reaction_event, timeout=time_left, check=check)
             except TimeoutError:
                 await self.cleanup(target_message)
                 return
@@ -139,12 +142,19 @@ class Paginator:
                     continue
             
             await self.events[str(reaction)](target_message, reaction, user)
-            try:
-                await target_message.remove_reaction(reaction, user)
-            except Forbidden:
-                pass
-            except NotFound:
-                break
+            if reaction_event == 'reaction_add':
+                if manage_messages_permission:
+                    try:
+                        await target_message.remove_reaction(reaction, user)
+                    except Forbidden:
+                        manage_messages_permission = False
+                        reaction_event = 'reaction_remove'
+                    except NotFound:
+                        break
+                else:
+                    reaction_event = 'reaction_remove'
+            else:
+                reaction_event = 'reaction_add'
 
             self.start_time += 10
             time_left = 180 - (time.time() - self.start_time)
