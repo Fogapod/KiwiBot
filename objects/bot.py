@@ -117,7 +117,11 @@ class BotMyBot(discord.Client):
             self.stop(ERROR_EXIT_CODE, force=True)
         logger.info('Connected to redis db with %s keys' % await self.redis.get_db_size())
 
-        await self.mm.load_modules()
+        try:
+            await self.mm.load_modules()
+        except Exception:
+            logger.info('Could not load modules, trying to restart')
+            self.restart()
         logger.info('Loaded modules: [%s]' % ' '.join(self.mm.modules.keys()))
 
         await self.init_prefixes()
