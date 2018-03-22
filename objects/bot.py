@@ -220,18 +220,30 @@ class BotMyBot(discord.Client):
         content = trim_message(content)
         fields['content'] = content
 
-        message = None
+        message = dm_message = None
 
         try:
             message = await msg.channel.send(**fields)
+        except discord.Forbidden:
+            try:
+                dm_message = await msg.author.send(
+                    f'I was not able to send this message to channel '
+                    f'{msg.channel.mention} in guild **{msg.guild}**, result is below'
+                )
+                message = await msg.author.send(**fields)
+            except Exception:
+                pass
         except Exception:
             exception = traceback.format_exc()
             exception = '\n'.join(exception.split('\n')[-4:])
             exception = f'❗ Message delivery failed\n```\n{exception}```'
             message = await msg.channel.send(exception)
         finally:
-            if response_to is not None and message is not None:
-                await self.register_response(response_to, message)
+            if response_to is not None:
+                if message is not None:
+                    await self.register_response(response_to, message)
+                if dm_message is not None:
+                    await self.register_response(response_to, dm_message)
 
             return message
 
