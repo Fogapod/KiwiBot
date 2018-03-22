@@ -4,6 +4,8 @@ from discord import File
 
 from aiohttp import ClientSession
 
+import random
+
 
 API_URL = 'https://api.duckduckgo.com'
 
@@ -29,10 +31,17 @@ class Module(ModuleBase):
                     return '{error} request failed: ' + str(r.status)
                 r_json = await r.json(content_type='application/x-javascript')
             
-            result = r_json['AbstractText']
+            abstract_text = r_json['AbstractText']
 
-            if not result:
-                return 'Nothing found'
+            if not abstract_text:
+                related = r_json['RelatedTopics']
+                if not related:
+                    return '{warning} Nothing found'
+                topic = random.choice(related)
+                if 'Topics' in topic:
+                    topic = random.choice(topic['Topics'])
+                abstract_text = topic['Text']
+                image_url = topic['Icon']['URL']
             else:
                 image_url = r_json['Image']
 
@@ -40,8 +49,8 @@ class Module(ModuleBase):
             if image_url:
                 async with s.get(image_url) as r:
                     if r.status == 200:
-                        image = File(await r.read(), filename='file.png')
+                        image = File(await r.read(), filename=image_url.split('/')[-1])
                     else:
                         result += '{error} failed to fetch image: ' + image_url
 
-        await self.send(msg, content=result, file=image)                     
+        await self.send(msg, content=abstract_text, file=image)
