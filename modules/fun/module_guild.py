@@ -3,7 +3,7 @@ from objects.permissions import PermissionEmbedLinks
 
 from utils.funcs import find_guild
 
-from discord import Embed, Forbidden, CategoryChannel, VoiceChannel, Colour
+from discord import Embed, Forbidden, VoiceChannel, TextChannel, Colour
 
 import random
 from datetime import datetime
@@ -34,7 +34,7 @@ class Module(ModuleBase):
         if guild != msg.guild:
             try:
                 invite = await guild.channels[0].create_invite(
-                    reason=f'requested by {msg.author} ({msg.author.id}) in guild {msg.guild} ({msg.guild.id})',
+                    reason=f'requested by {msg.author} ({msg.author.id})' + (f' in guild {msg.guild} {msg.guild.id})' if msg.guild else ''),
                     max_age=1800  # 30 minutes
                 )
                 invite = invite.url
@@ -43,33 +43,38 @@ class Module(ModuleBase):
             
         e = Embed(
             title=guild.name, url=invite,
-            description=f'[avatar url]({guild.icon_url_as()})',
             colour=Colour.gold()
         )
-        e.set_thumbnail(url=guild.icon_url_as())
+        if guild.icon_url:
+            e.description = f'[avatar url]({guild.icon_url_as()})'
+            e.set_thumbnail(url=guild.icon_url_as())
+        else:
+            # TODO: custom thumbnail for this case
+            pass
+
         e.add_field(name='owner', value=f'**{guild.owner}** {guild.owner.id}')
         e.add_field(
             name='created', inline=False,
             value=f'`{guild.created_at.replace(microsecond=0)}` ({(datetime.now() - guild.created_at).days} days ago)'
         )
 
+        bot_count = sum(1 for m in guild.members if m.bot)
+
         e.add_field(
             name='members',
-            value=f'{guild.member_count} ({sum(1 for m in guild.members if m.bot)} robots)'
+            value=f'{guild.member_count - bot_count} + {bot_count} robots'
         )
 
-        category_channels_num = voice_channels_num = text_channels_num = 0
+        voice_channels_num = text_channels_num = 0
         for channel in guild.channels:
-            if isinstance(channel, CategoryChannel):
-                category_channels_num += 1
-            elif isinstance(channel, VoiceChannel):
+            if isinstance(channel, VoiceChannel):
                 voice_channels_num += 1
-            else:
+            elif isinstance(channel, TextChannel):
                 text_channels_num += 1
 
         e.add_field(
             name='channels',
-            value=f'{text_channels_num} ({voice_channels_num} voice, {category_channels_num} categories)'
+            value=f'{text_channels_num} text, {voice_channels_num} voice'
         )
 
         e.add_field(name='roles', value=len(guild.roles))
@@ -81,7 +86,8 @@ class Module(ModuleBase):
             value=(
                 f'**{min(max_emoji, emoji_num)} / {emoji_num}** shown: ' +
                 ' '.join(str(e) for e in sorted(random.sample(guild.emojis, min(max_emoji, emoji_num)), key=lambda e: (e.animated, e.name)))
-            )
+            ) if guild.emojis else 'Guild does not have them :/',
+            inline=False
         )
 
         e.set_footer(text=guild.id)
