@@ -8,8 +8,8 @@ class Permission:
     def __init__(self, bot):
         self.bot = bot
 
-    async def check(self, msg, bot=False):
-        return await self._check((msg.guild.me if msg.guild else None) if bot else msg.author, msg)
+    async def check(self, msg, check_myself=False):
+        return await self._check((msg.guild.me if msg.guild else None) if check_myself else msg.author, msg)
     
     async def _check(self, user, msg):
         return True
@@ -19,8 +19,8 @@ class PermissionBotOwner(Permission):
 
     name = 'BOT_OWNER'
 
-    async def check(self, msg, bot=False):
-        if bot:
+    async def check(self, msg, check_myself=False):
+        if check_myself:
             raise ValueError(f'Bot can\'t have {self.name} permission')
         return msg.author.id == BOT_OWNER_ID
 

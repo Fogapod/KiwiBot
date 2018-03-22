@@ -43,7 +43,7 @@ class ModuleBase:
     async def get_missing_bot_permissions(self, msg):
         missing = []
         for permission in self.required_perms:
-            if not await permission.check(msg, bot=True):
+            if not await permission.check(msg, check_myself=True):
                 missing.append(permission)
 
         return missing
@@ -51,7 +51,7 @@ class ModuleBase:
     async def get_missing_user_permissions(self, msg):
         missing = []
         for permission in self.require_perms:
-            if not await permission.check(msg, bot=False):
+            if not await permission.check(msg, check_myself=False):
                 missing.append(permission)
 
         return missing
