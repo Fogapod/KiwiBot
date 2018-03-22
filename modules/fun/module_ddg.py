@@ -16,8 +16,7 @@ class Module(ModuleBase):
 
     name = 'ddg'
     aliases = (name, 'duckduckgo')
-    arguments_required = 1
-    protection = 0
+    required_args = 1
 
     async def on_call(self, msg, *args, **options):
         params = {
