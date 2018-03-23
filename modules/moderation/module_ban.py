@@ -30,7 +30,7 @@ class Module(ModuleBase):
                 return '{warning} Can\'t ban guild owner'
             if msg.guild.me.top_role <= user.top_role:
                 return '{warning} My top role is lower or equal to member\'s top role, can\'t ban'
-            if msg.author.top_role <= user.top_role:
+            if msg.author.top_role <= user.top_role and msg.author != msg.guild.owner:
                 return '{warning} Your top role is lower or equal to member\'s top role, can\'t ban'
 
         ban_msg = await self.send(
