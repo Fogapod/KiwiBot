@@ -24,7 +24,7 @@ class Module(ModuleBase):
     hidden = True
 
     async def on_load(self, from_reload):
-        if not from_reload:
+        if from_reload:
             return
 
         reload_channel_id = self.bot.config.get('reload_channel_id', 0)
