@@ -5,8 +5,8 @@ from discord import Embed, Colour
 
 class Module(ModuleBase):
 
-    usage_doc = 'not for direct use'
-    short_doc = 'Event handler used for monitoring server joins / leaves.'
+    usage_doc = ''
+    short_doc = 'Handler for guild add/remove events.'
 
     name = 'guild-add-remove'
     hidden = True
@@ -40,6 +40,7 @@ class Module(ModuleBase):
         e.add_field(name='members', value=f'{guild.member_count} + {bot_count} bots')
         e.add_field(name='owner id', value=guild.owner.id)
         e.add_field(name='bot ratio', value=f'{bot_ratio}%')
+        e.add_field(name='total guilds', value=len(self.bot.guilds))
         e.set_thumbnail(url=guild.icon_url or guild.owner.avatar_url)
         e.set_footer(text=guild.owner, icon_url=guild.owner.avatar_url)
 
