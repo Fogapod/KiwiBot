@@ -1,7 +1,7 @@
 #!/bin/bash
 
 while true; do
-    python3 main.py
+    python3.6 main.py
 
     if [ $? == 2 ];
     then
