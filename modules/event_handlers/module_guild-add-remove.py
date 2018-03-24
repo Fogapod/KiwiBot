@@ -37,7 +37,7 @@ class Module(ModuleBase):
         e.add_field(name='guild id', value=guild.id)
         bot_count = sum(1 for m in guild.members if m.bot)
         bot_ratio = round(bot_count / guild.member_count * 100)
-        e.add_field(name='members', value=f'{guild.member_count} + {bot_count} bots')
+        e.add_field(name='members', value=f'{guild.member_count - bot_count} + {bot_count} bots')
         e.add_field(name='owner id', value=guild.owner.id)
         e.add_field(name='bot ratio', value=f'{bot_ratio}%')
         e.add_field(name='total guilds', value=len(self.bot.guilds))
