@@ -8,7 +8,7 @@ class Module(ModuleBase):
     usage_doc = '{prefix}{aliases} <user>'
     short_doc = 'Get matched users list.'
 
-    name = 'user2'
+    name = 'userlist'
     aliases = (name, )
     required_args = 1
 
