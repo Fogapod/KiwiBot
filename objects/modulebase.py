@@ -16,6 +16,7 @@ class ModuleBase:
     nsfw             = False  # can only be used in nsfw channel
     hidden           = False  # would be hidden when possible
     disabled         = False  # won't be checked or called
+    events           = {}     # name: function pairs of events module will handle
 
     def __init__(self, bot):
         self.bot = bot

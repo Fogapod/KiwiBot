@@ -137,7 +137,8 @@ class BotMyBot(discord.Client):
             logger.info('Default prefixes: [' + ' '.join(self._default_prefixes) + ']')
 
     async def on_error(self, event, *args, **kwargs):
-        pass
+        if self.is_dev:
+            await super().on_error(event, *args, **kwargs)
 
     async def close(self):
         await super().close()
@@ -293,3 +294,12 @@ class BotMyBot(discord.Client):
             self.tracked_messages[request.id].append(response)
         else:
             logger.debug('Request outdated, not registering')
+
+    def dispatch(self, event, *args, **kwargs):
+        super().dispatch(event, *args, **kwargs)
+
+        for module in self.mm.modules.values():
+            handler = module.events.get(event)
+            if handler:
+                coro = self._run_event(handler, event, *args, **kwargs)
+                discord.compat.create_task(coro, loop=self.loop)

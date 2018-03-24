@@ -46,8 +46,8 @@ class Module(ModuleBase):
             colour=Colour.gold()
         )
         if guild.icon_url:
-            e.description = f'[avatar url]({guild.icon_url_as()})'
-            e.set_thumbnail(url=guild.icon_url_as())
+            e.description = f'[avatar url]({guild.icon_url})'
+            e.set_thumbnail(url=guild.icon_url)
         else:
             # TODO: custom thumbnail for this case
             pass

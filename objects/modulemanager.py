@@ -30,7 +30,7 @@ class ModuleManager:
             module_name = module_path[module_path.rfind(os.sep) + 8:-3]
             try:
                 module = await self.load_module(module_path)
-                await self.init_module(module)
+                await self.init_module(module, from_reload=False)
             except Exception:
                 logger.info(f'Failed to load module {module_name}')
                 logger.info(traceback.format_exc())
@@ -52,6 +52,7 @@ class ModuleManager:
         return module
 
     async def init_modules(self, from_reload=True):
+        print(from_reload)
         for module in self.modules.values():
             await self.init_module(module, from_reload=from_reload)
 
@@ -143,6 +144,6 @@ class ModuleManager:
 
     def get_module(self, alias):
         for name, module in self.bot.mm.modules.items():
-            if alias in module.aliases:
+            if alias in module.aliases or alias == module.name:
                 return module
         return None
