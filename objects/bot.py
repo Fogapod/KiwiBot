@@ -127,7 +127,12 @@ class BotMyBot(discord.Client):
         await self.init_prefixes()
 
         self.start_time = time.time()
-        logger.info('Bot ready')
+        logger.info(' ___      _   __  __      ___      _   ')
+        logger.info('| _ ) ___| |_|  \/  |_  _| _ ) ___| |_ ')
+        logger.info('| _ \/ _ \  _| |\/| | || | _ \/ _ \  _|')
+        logger.info('|___/\___/\__|_|  |_|\_, |___/\___/\__|')
+        logger.info('                      |__/             ')
+        logger.info('Bot ready, good luck!')
 
         if self.is_dev:
             logger.info('Is a dev instance')
