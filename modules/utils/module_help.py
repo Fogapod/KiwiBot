@@ -44,7 +44,7 @@ class Module(ModuleBase):
 
                 module_list.append((name, module))
 
-            lines = sorted([f'{m.aliases[0]:<20}{m.short_doc}' for n, m in module_list])
+            lines = sorted([f'{m.name:<20}{m.short_doc}' for n, m in module_list])
             lines_per_chunk = 20
             chunks = [lines[i:i + lines_per_chunk] for i in range(0, len(lines), lines_per_chunk)]
 
