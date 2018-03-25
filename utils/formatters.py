@@ -2,9 +2,9 @@ async def format_response(response, message, bot):
     format_dict = {}
 
     if '{warning}' in response:
-        format_dict['warning'] = '❗'
+        format_dict['warning'] = '⚠'
     if '{error}' in response:
-        format_dict['error'] = '⛔'
+        format_dict['error'] = '❗'
     if '{guild}' in response and message.guild:
         format_dict['guild'] = message.guild.name
     if '{guild_id}' in response and message.guild:
