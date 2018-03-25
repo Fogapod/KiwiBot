@@ -89,7 +89,7 @@ async def find_user(pattern, msg, bot, strict_guild=False, max_count=1):
         key=lambda x: (
             _get_last_user_message_timestamp(x[0].id, msg.channel.id, bot),
             -x[1],  # index of match in string
-            x[0].status.name == 'online',
+            x[0].status.name != 'offline',
             x[0].joined_at
         ), reverse=True
     )

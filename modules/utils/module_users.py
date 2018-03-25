@@ -8,8 +8,8 @@ class Module(ModuleBase):
     usage_doc = '{prefix}{aliases} <user>'
     short_doc = 'Get matched users list.'
 
-    name = 'userlist'
-    aliases = (name, )
+    name = 'users'
+    aliases = (name, 'userlist')
     required_args = 1
 
     async def on_call(self, msg, *args, **flags):
