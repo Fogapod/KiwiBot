@@ -15,7 +15,7 @@ class Module(ModuleBase):
     short_doc = 'Get information about matched guild.'
 
     name = 'guild'
-    aliases = (name, 'server')
+    aliases = (name, 'guildinfo', 'server', 'serverinfo')
     required_perms = (PermissionEmbedLinks, )
 
     async def on_call(self, msg, *args, **flags):

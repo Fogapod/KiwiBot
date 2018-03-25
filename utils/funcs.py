@@ -53,12 +53,10 @@ async def find_user(pattern, msg, bot, strict_guild=False, max_count=1):
 
     if id_match is not None:
         user_id = int(id_match.group(1) or id_match.group(0))
-        if msg.guild is not None:
-            # check guild members
-            user = msg.guild.get_member(user_id)
-        elif not strict_guild:
-            # check all cached users
-            user = bot.get_user(user_id)
+        for guild in bot.guilds or []:
+            user = guild.get_member(user_id)
+            if user is not None:
+                break
 
         if user is None and not strict_guild:
             # user is not cached
