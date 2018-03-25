@@ -1,4 +1,4 @@
-import regex as re
+import re
 import datetime
 import asyncio
 
@@ -73,44 +73,33 @@ async def find_user(pattern, msg, bot, strict_guild=False, max_count=1):
 
     found = []
 
-    try:
-        input_regex = re.compile(pattern, re.I)
-    except Exception:
-        # invalid regex, trying to use 'in'
-        for member in msg.guild.members:
-            # check member nick
-            if pattern not in member.display_name:
-                # check user name#discrim
-                if pattern not in str(member):
-                    continue
-
-            found.append(member)
-    else:
-        for member in msg.guild.members:
-            # check member nick
-            if input_regex.search(member.display_name) is None:
-                # check user name#discrim
-                if input_regex.search(str(member)) is None:
-                    continue
-
-            found.append(member)
+    for member in msg.guild.members:
+        match_pos = -1
+        if member.nick is not None:
+            match_pos = member.nick.lower().find(pattern)
+        if match_pos == -1:
+            # name#discrim
+            match_pos = str(member).lower().find(pattern)
+        if match_pos == -1:
+            continue
+        found.append((member, match_pos))
 
     found.sort(
-        key=lambda m: (
-            _get_last_user_message_timestamp(m.id, msg.channel.id, bot),
-            m.status.name == 'online',
-            m.joined_at
-        ),
-        reverse=True
+        key=lambda x: (
+            _get_last_user_message_timestamp(x[0].id, msg.channel.id, bot),
+            -x[1],  # index of match in string
+            x[0].status.name == 'online',
+            x[0].joined_at
+        ), reverse=True
     )
 
     if found:
-        return found[0] if max_count == 1 else found[:max_count]
+        return found[0][0] if max_count == 1 else [u for u, mp in found[:max_count]]
 
     return None
 
 
-async def find_role(pattern, guild, bot):
+async def find_role(pattern, guild, bot, max_count=1):
     id_match = ROLE_OR_ID_REGEX.fullmatch(pattern)
     if id_match is not None:
         role_id = int(id_match.group(1) or id_match.group(0))
@@ -119,54 +108,47 @@ async def find_role(pattern, guild, bot):
         #     return role
         for role in guild.roles:
             if role.id == role_id:
-                return role
+                return role if max_count == 1 else [role]
 
     found = []
 
-    try:
-        input_regex = re.compile(pattern, re.I)
-    except Exception:
-        for role in guild.roles:
-            if pattern in role.name:
-                # found.append(role)
-                return role
     for role in guild.roles:
-        if input_regex.search(role.name) is None:
-            continue
-        # found.append(role)
-        return role
+        match_pos = role.name.lower().find(pattern)
+        if match_pos != -1:
+            found.append((role, match_pos))
 
-    return None  # found[0] if found else None
+    found.sort(key=lambda x: x[1])
+
+    if found:
+        return found[0][0] if max_count == 1 else [r for r, mp in found[:max_count]]
+
+    return None
 
 
-async def find_guild(pattern, bot):
+async def find_guild(pattern, bot, max_count=1):
     id_match = ID_REGEX.fullmatch(pattern)
     if id_match is not None:
         guild_id = int(id_match.group(0))
         guild = bot.get_guild(guild_id)
         if guild is not None:
-            return guild
+            return guild if max_count == 1 else [guild]
 
     found = []
 
-    try:
-        input_regex = re.compile(pattern, re.I)
-    except Exception:
-        # invalid regex, trying to use 'in'
-        for guild in bot.guilds:
-            if pattern in guild.name:
-                found.append(guild)
-    else:
-        for guild in bot.guilds:
-            if input_regex.search(guild.name) is not None:
-                found.append(guild)
+    for guild in bot.guilds:
+        match_pos = guild.name.lower().find(pattern)
+        if match_pos != -1:
+            found.append((guild, match_pos))
 
     found.sort(
-        key=lambda g: g.member_count,
+        key=lambda x: (x[0].member_count, x[1]),
         reverse=True
     )
 
-    return found[0] if found else None
+    if found:
+        return found[0][0] if max_count == 1 else [g for g, mp in found[:max_count]]
+
+    return None
 
 find_server = find_guild
 
