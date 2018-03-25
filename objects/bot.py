@@ -13,7 +13,7 @@ from objects.modulemanager import ModuleManager
 from objects.config import Config
 from objects.redisdb import RedisDB
 
-from constants import STOP_EXIT_CODE, ERROR_EXIT_CODE
+from constants import STOP_EXIT_CODE, ERROR_EXIT_CODE, RESTART_EXIT_CODE
 from utils.formatters import format_response, trim_message
 from utils import funcs
 
@@ -86,7 +86,7 @@ class BotMyBot(discord.Client):
         super().run(token, reconnect=True, fetch_offline_members=True)
 
     def restart(self):
-        self.stop(0)
+        self.stop(RESTART_EXIT_CODE)
 
     def stop(self, exit_code=STOP_EXIT_CODE, force=False):
         if force:
