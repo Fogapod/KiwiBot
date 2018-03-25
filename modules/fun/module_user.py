@@ -43,6 +43,7 @@ class Module(ModuleBase):
         if isinstance(user, Member):
             # function can return members from different guild
             if user.guild == msg.guild:
+                e.title += ' (member)'
                 e.add_field(
                     name='member since', inline=False,
                     value=f'`{user.joined_at.replace(microsecond=0)}` ({(datetime.now() - user.joined_at).days} days)'
@@ -52,8 +53,6 @@ class Module(ModuleBase):
 
                 if user.nick is not None:
                     e.add_field(name='nick', value=user.nick, inline=False)
-            else:
-                e.add_field(name='guild info', value='not a guild member')
 
             if user.activity is None:
                 e.add_field(
