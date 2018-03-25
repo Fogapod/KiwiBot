@@ -72,6 +72,7 @@ async def find_user(pattern, msg, bot, strict_guild=False, max_count=1):
         return None
 
     found = []
+    pattern = pattern.lower()
 
     for member in msg.guild.members:
         match_pos = -1
@@ -111,6 +112,7 @@ async def find_role(pattern, guild, bot, max_count=1):
                 return role if max_count == 1 else [role]
 
     found = []
+    pattern = pattern.lower()
 
     for role in guild.roles:
         match_pos = role.name.lower().find(pattern)
@@ -134,6 +136,7 @@ async def find_guild(pattern, bot, max_count=1):
             return guild if max_count == 1 else [guild]
 
     found = []
+    pattern = pattern.lower()
 
     for guild in bot.guilds:
         match_pos = guild.name.lower().find(pattern)
