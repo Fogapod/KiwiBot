@@ -26,7 +26,7 @@ class Module(ModuleBase):
         if os.path.isdir('.git'):
             program = ' && '.join((
                 'git config --get remote.origin.url',
-                'git show -s HEAD --format="latest commit made %cr by [%an]({domain}/%an): \`\`\`\n%s\n\`\`\`[commit %h]({repo_url}/commit/%H)"'
+                'git show -s HEAD --format="latest commit made %cr by **%cn**: \`\`\`\n%s\n\`\`\`[commit %h]({repo_url}/commit/%H)"'
             ))
             process, pid = await create_subprocess_shell(program)
             stdout, stderr = await execute_process(process, program)
