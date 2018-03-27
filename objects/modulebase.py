@@ -68,7 +68,7 @@ class ModuleBase:
 
     async def on_missing_bot_permissions(self, msg, missing):
         return (
-            '{error} I\'m missing the following permissions to execute commamd: '
+            '{error} I\'m missing the following permissions to execute command: '
             '[' + ', '.join([f'`{p.name}`' for p in missing]) + ']'
         )
 
