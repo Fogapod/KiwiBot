@@ -16,6 +16,8 @@ MENTION_REGEX = re.compile(f'<@!?({ID_EXPR})>')
 MENTION_OR_ID_REGEX = re.compile(f'(?:<@!?({ID_EXPR})>)|{ID_EXPR}')
 ROLE_OR_ID_REGEX = re.compile(f'(?:<@&({ID_EXPR})>)|{ID_EXPR}')
 
+COLOUR_REGEX = re.compile('#?([a-f0-9]{6})', re.I)
+
 
 async def create_subprocess_exec(
         *args,
@@ -53,13 +55,17 @@ async def find_user(pattern, msg, bot, strict_guild=False, max_count=1):
 
     if id_match is not None:
         user_id = int(id_match.group(1) or id_match.group(0))
-        for guild in bot.guilds or []:
-            user = guild.get_member(user_id)
-            if user is not None:
-                break
+        if msg.guild is not None:
+            user = msg.guild.get_member(user_id)
+        if user is None:
+            # double check of msg.guild, but we need to ensure we won't
+            # get member object from other guild by accident
+            for guild in bot.guilds or []:
+                user = guild.get_member(user_id)
+                if user is not None:
+                    break
 
         if user is None and not strict_guild:
-            # user is not cached
             try:
                 user = await bot.get_user_info(user_id)
             except discord.NotFound:
@@ -223,3 +229,10 @@ async def request_reaction_confirmation(msg, user, bot, emoji_accept='✅', emoj
         pass
 
     return False
+
+
+def colour_from_str(string):
+    match = COLOUR_REGEX.fullmatch(string)
+    if match is None:
+        raise ValueError('Not a colour')
+    return discord.Colour(int(match.group(1), 16))
