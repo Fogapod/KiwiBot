@@ -49,7 +49,7 @@ async def execute_process(process, code):
     return stdout, stderr
 
 
-async def find_user(pattern, msg, bot, strict_guild=False, max_count=1):
+async def find_user(pattern, msg, bot, strict_guild=False, max_count=1, global_search=False):
     user = None
     id_match = MENTION_OR_ID_REGEX.fullmatch(pattern)
 
@@ -80,28 +80,39 @@ async def find_user(pattern, msg, bot, strict_guild=False, max_count=1):
     found = []
     pattern = pattern.lower()
 
-    for member in msg.guild.members:
-        match_pos = -1
-        if member.nick is not None:
-            match_pos = member.nick.lower().find(pattern)
-        if match_pos == -1:
-            # name#discrim
-            match_pos = str(member).lower().find(pattern)
-        if match_pos == -1:
-            continue
-        found.append((member, match_pos))
+    for guild in bot.guilds if global_search else [msg.guild]:
+        for member in guild.members:
+            match_pos = -1
+            if member.nick is not None and not global_search:
+                match_pos = member.nick.lower().find(pattern)
+            if match_pos == -1:
+                # name#discrim
+                match_pos = str(member).lower().find(pattern)
+            if match_pos == -1:
+                continue
+            found.append((member, match_pos))
 
+    found = list(set(found))
     found.sort(
         key=lambda x: (
+            # last member message timestamp, lower delta is better
             _get_last_user_message_timestamp(x[0].id, msg.channel.id, bot),
-            -x[1],  # index of match in string
+            # index of match in string, smaller value is better
+            -x[1],
+            # member status, not 'offline' is better
             x[0].status.name != 'offline',
+            # guild join timestamp, lower delta is better
             x[0].joined_at
         ), reverse=True
     )
 
     if found:
-        return found[0][0] if max_count == 1 else [u for u, mp in found[:max_count]]
+        if max_count == 1:
+            return found[0][0]
+        elif max_count == -1:
+            return [u for u, mp in found]
+        else:
+            [u for u, mp in found[:max_count]]
 
     return None
 
