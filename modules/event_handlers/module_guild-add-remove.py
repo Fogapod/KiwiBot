@@ -24,12 +24,12 @@ class Module(ModuleBase):
 
     async def on_guild_join(self, guild):
         e = self.get_guild_info(guild)
-        e.title = f'Added to guild {guild}'
+        e.title = f'Added to guild: {guild}'
         await self.log_channel.send(embed=e)
 
     async def on_guild_remove(self, guild):
         e = self.get_guild_info(guild)
-        e.title = f'Removed from guild {guild}'
+        e.title = f'Removed from guild: {guild}'
         await self.log_channel.send(embed=e)
 
     def get_guild_info(self, guild):
@@ -42,6 +42,6 @@ class Module(ModuleBase):
         e.add_field(name='bot ratio', value=f'{bot_ratio}%')
         e.add_field(name='total guilds', value=len(self.bot.guilds))
         e.set_thumbnail(url=guild.icon_url or guild.owner.avatar_url)
-        e.set_footer(text=guild.owner, icon_url=guild.owner.avatar_url)
+        e.set_footer(text=f'owner: {guild.owner}', icon_url=guild.owner.avatar_url)
 
         return e

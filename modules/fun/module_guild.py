@@ -80,13 +80,26 @@ class Module(ModuleBase):
         e.add_field(name='roles', value=len(guild.roles))
 
         max_emoji = 30
-        emoji_num = len(guild.emojis)
+
+        static_emojis = []
+        animated_emojis = []
+        for em in guild.emojis or []:
+            (static_emojis, animated_emojis)[em.animated].append(em)
+
         e.add_field(
-            name='emojis',
+            name='static emojis',
             value=(
-                f'**{min(max_emoji, emoji_num)} / {emoji_num}** shown: ' +
-                ' '.join(str(e) for e in sorted(random.sample(guild.emojis, min(max_emoji, emoji_num)), key=lambda e: (e.animated, e.name)))
-            ) if guild.emojis else 'Guild does not have them :/',
+                f'**{min(max_emoji, len(static_emojis))} / {len(static_emojis)}** shown: ' +
+                ' '.join(str(e) for e in sorted(random.sample(static_emojis, min(max_emoji, len(static_emojis))), key=lambda e: e.name))
+            ) if static_emojis else 'Guild does not have them :/',
+            inline=False
+        )
+        e.add_field(
+            name='animated emojis',
+            value=(
+                f'**{min(max_emoji, len(animated_emojis))} / {len(animated_emojis)}** shown: ' +
+                ' '.join(str(e) for e in sorted(random.sample(animated_emojis, min(max_emoji, len(animated_emojis))), key=lambda e: e.name))
+            ) if animated_emojis else 'Guild does not have them :/',
             inline=False
         )
 
