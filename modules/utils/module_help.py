@@ -67,7 +67,7 @@ class Module(ModuleBase):
                 p.add_page(embed=make_embed(chunk), content=f'Help page **{i + 1}/{len(chunks)}**')
 
             m = await self.send(msg, **p.current_page)
-            await p.run_paginator(m, msg.author)
+            await p.run(m, target_user=msg.author)
             return
 
         if len(args) > 2:

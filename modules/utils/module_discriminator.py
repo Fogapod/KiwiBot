@@ -46,4 +46,4 @@ class Module(ModuleBase):
             p.add_page(embed=e)
 
         m = await self.send(msg, **p.current_page)
-        await p.run_paginator(m, msg.author)
+        await p.run(m, target_user=msg.author)
