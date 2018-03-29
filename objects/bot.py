@@ -273,12 +273,15 @@ class BotMyBot(discord.Client):
             exception = f'❗ Message edit failed\n```\n{exception}```'
             return await message.edit(content=exception)
     
-    async def delete_message(self, message):
+    async def delete_message(self, message, raise_on_errors=False):
         try:
             return await message.delete()
         except discord.errors.NotFound:
             logger.debug('delete_message: message not found')
             return
+        except Exception:
+            if raise_on_errors:
+                raise
 
     async def track_message(self, message):
         if message.id in self.tracked_messages:
