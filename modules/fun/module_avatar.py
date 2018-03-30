@@ -3,7 +3,7 @@ from objects.permissions import PermissionEmbedLinks
 
 from utils.funcs import find_user
 
-from discord import Embed
+from discord import Embed, Colour
 
 
 class Module(ModuleBase):
@@ -16,8 +16,6 @@ class Module(ModuleBase):
     required_perms = (PermissionEmbedLinks, )
 
     async def on_call(self, msg, *args, **flags):
-        format = flags.pop('format', 'png')
-
         if len(args) == 1:
             user = msg.author
         else:
@@ -29,10 +27,15 @@ class Module(ModuleBase):
         if user is None:
             return '{warning} User not found'
 
-        avatar_url = user.avatar_url_as(static_format=format)
+        formats = ['png', 'webp', 'jpg']
+        if user.is_avatar_animated():
+            formats.insert(0, 'gif')
 
-        e = Embed(title=f'{user.id}', url=avatar_url)
-        e.set_image(url=avatar_url)
+        e = Embed(
+            colour=Colour.gold(),
+            description=' | '.join(f'[{f}]({user.avatar_url_as(format=f)})' for f in formats)
+        )
+        e.set_image(url=user.avatar_url_as(static_format='png'))
         e.set_footer(text=user)
 
         await self.send(msg, embed=e)
