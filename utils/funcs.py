@@ -12,7 +12,8 @@ logger = Logger.get_logger()
 ID_EXPR = '\d{17,19}'
 
 ID_REGEX = re.compile(ID_EXPR)
-MENTION_REGEX = re.compile(f'<@!?({ID_EXPR})>')
+USER_MENTION_REGEX = re.compile(f'<@!?({ID_EXPR})>')
+ROLE_MENTION_REGEX = re.compile(f'<@&({ID_EXPR})>')
 MENTION_OR_ID_REGEX = re.compile(f'(?:<@!?({ID_EXPR})>)|{ID_EXPR}')
 ROLE_OR_ID_REGEX = re.compile(f'(?:<@&({ID_EXPR})>)|{ID_EXPR}')
 
@@ -173,19 +174,34 @@ async def find_guild(pattern, bot, max_count=1):
 find_server = find_guild
 
 
-async def replace_mentions(content, bot):
-    mentions = MENTION_REGEX.findall(content)
-    if mentions:
-        for m in mentions:
-            m = int(m)
-            user = discord.utils.get(bot.users, id=m)
-            if user is None:
-                try:
-                    user = await bot.get_user_info(m)
-                except discord.NotFound:
-                    return content
+async def replace_mentions(content, channel, bot):
+    for mid in USER_MENTION_REGEX.findall(content):
+        mid = int(mid)
+        user = None
+        if getattr(channel, 'guild', None) is not None:
+            user = channel.guild.get_member(mid)
+        if user is None:
+            user = discord.utils.get(bot.users, id=mid)
+        if user is None:
+            try:
+                user = await bot.get_user_info(mid)
+            except discord.NotFound:
+                continue
 
-            content = re.sub(f'(<@!?{user.id}>)', f'@{user}', content)
+        content = re.sub(f'<@!?{user.id}>', f'@{user}', content)
+
+    for rim in ROLE_MENTION_REGEX.findall(content):
+        rim = int(rim)
+        if getattr(channel, 'guild', None) is not None:
+            role = discord.utils.get(channel.guild.roles, id=rim)
+        else:
+            break
+
+        if role is None:
+            continue
+
+        content = content.replace(f'<@&{role.id}>', f'@{role}')
+
     return content
 
 

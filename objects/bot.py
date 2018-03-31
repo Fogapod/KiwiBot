@@ -217,7 +217,7 @@ class BotMyBot(discord.Client):
             content = content.replace('@everyone', '@\u200beveryone')
             content = content.replace('@here', '@\u200bhere')
         if replace_mentions:
-            content = await funcs.replace_mentions(content, self)
+            content = await funcs.replace_mentions(content, msg.channel, self)
 
         content = trim_message(content)
         fields['content'] = content
@@ -249,7 +249,7 @@ class BotMyBot(discord.Client):
 
             return message
 
-    async def edit_message(self, message, replace_everyone=True, replace_mentions=True, **fields):
+    async def edit_message(self, msg, replace_everyone=True, replace_mentions=True, **fields):
         content = fields.pop('content', '')
         content = content.replace(self.token, 'TOKEN_LEAKED')
 
@@ -257,13 +257,13 @@ class BotMyBot(discord.Client):
             content = content.replace('@everyone', '@\u200beveryone')
             content = content.replace('@here', '@\u200bhere')
         if replace_mentions:
-            content = await funcs.replace_mentions(content, self)
+            content = await funcs.replace_mentions(content, msg.channel, self)
 
         content = trim_message(content)
         fields['content'] = content
 
         try:
-            return await message.edit(**fields)
+            return await msg.edit(**fields)
         except discord.errors.NotFound:
             logger.debug('edit_message: message not found')
             return None
@@ -271,7 +271,7 @@ class BotMyBot(discord.Client):
             exception = traceback.format_exc()
             exception = '\n'.join(exception.split('\n')[-4:])
             exception = f'❗ Message edit failed\n```\n{exception}```'
-            return await message.edit(content=exception)
+            return await msg.edit(content=exception)
     
     async def delete_message(self, message, raise_on_errors=False):
         try:
