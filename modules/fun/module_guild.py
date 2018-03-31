@@ -18,7 +18,7 @@ class Module(ModuleBase):
     aliases = (name, 'guildinfo', 'server', 'serverinfo')
     required_perms = (PermissionEmbedLinks, )
 
-    async def on_call(self, msg, *args, **flags):
+    async def on_call(self, msg, args, **flags):
         if len(args) == 1:
             guild = msg.guild
         else:
@@ -27,8 +27,9 @@ class Module(ModuleBase):
         if guild is None:
             return '{warning} Guild not found'
 
+        invite = ''
+
         if guild == msg.guild:
-            invite = ''
             top_role = guild.role_hierarchy[0].mention
         else:
             if guild.me.guild_permissions.create_instant_invite:
