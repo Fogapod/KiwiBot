@@ -35,14 +35,14 @@ class Module(ModuleBase):
         presence = Activity(name=last_status, type=last_status_type)
         await self.bot.change_presence(activity=presence)
 
-    async def on_call(self, msg, *args, **flags):
+    async def on_call(self, msg, args, **flags):
         status = ''
 
         if len(args) == 1:
             presence = Activity(name='')
         else:
             subcommand = args[1].lower()
-            status = msg.content.partition(args[1])[2].lstrip()
+            status = args[2:]
 
             if subcommand == 'playing':
                 presence = Activity(name=status)

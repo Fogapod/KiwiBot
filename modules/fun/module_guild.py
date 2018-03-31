@@ -22,10 +22,7 @@ class Module(ModuleBase):
         if len(args) == 1:
             guild = msg.guild
         else:
-            guild = await find_guild(
-                msg.content.partition(args[0])[2].lstrip(),
-                self.bot
-            )
+            guild = await find_guild(args[1:], self.bot)
 
         if guild is None:
             return '{warning} Guild not found'

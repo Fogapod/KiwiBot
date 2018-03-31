@@ -15,14 +15,11 @@ class Module(ModuleBase):
     aliases = (name, 'pfp')
     required_perms = (PermissionEmbedLinks, )
 
-    async def on_call(self, msg, *args, **flags):
+    async def on_call(self, msg, args, **flags):
         if len(args) == 1:
             user = msg.author
         else:
-            user = await find_user(
-                msg.content.partition(args[0])[2].lstrip(),
-                msg, self.bot
-            )
+            user = await find_user(args[1:], msg, self.bot)
 
         if user is None:
             return '{warning} User not found'

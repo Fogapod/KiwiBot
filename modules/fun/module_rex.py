@@ -95,7 +95,7 @@ class Module(ModuleBase):
     aliases = (name, )
     required_args = 1
 
-    async def on_call(self, msg, *args, **options):
+    async def on_call(self, msg, args, **options):
         result = ''
 
         if args[1].lower() == 'list':
@@ -127,7 +127,7 @@ class Module(ModuleBase):
             return '{warning} Invalid language'
 
         params['CompilerArgs'] = COMPILE_OPTIONS.get(params['LanguageChoice'], '')
-        params['Program'] = msg.content.partition(args[1])[2].lstrip()
+        params['Program'] = args[2:]
 
         async with ClientSession() as s:
             async with s.post(API_URL, params=params) as r:

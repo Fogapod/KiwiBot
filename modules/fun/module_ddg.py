@@ -18,9 +18,9 @@ class Module(ModuleBase):
     aliases = (name, 'duckduckgo')
     required_args = 1
 
-    async def on_call(self, msg, *args, **options):
+    async def on_call(self, msg, args, **flags):
         params = {
-            'q': msg.content.partition(args[0])[2].lstrip(),
+            'q': args[1:],
             'o': 'json'
         }
 

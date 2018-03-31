@@ -18,12 +18,12 @@ class Module(ModuleBase):
     require_perms  = (PermissionBanMembers, )
     required_perms = (PermissionBanMembers, )
 
-    async def on_call(self, msg, *args, **flags):
+    async def on_call(self, msg, args, **flags):
         user = await find_user(args[1], msg, self.bot)
 
         if not user:
             return '{warning} User not found'
-        reason = msg.content[len(args[0]):].partition(args[1])[2].lstrip() or ''
+        reason = args[2:] or ''
 
         if isinstance(user, Member):
             if user == msg.guild.owner:

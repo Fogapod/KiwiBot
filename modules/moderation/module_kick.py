@@ -16,13 +16,13 @@ class Module(ModuleBase):
     require_perms  = (PermissionKickMembers, )
     required_perms = (PermissionKickMembers, )
 
-    async def on_call(self, msg, *args, **flags):
+    async def on_call(self, msg, args, **flags):
         guild_member = await find_user(args[1], msg, self.bot, strict_guild=True)
 
         if not guild_member:
             return '{warning} User not found'
 
-        reason = msg.content[len(args[0]):].partition(args[1])[2].lstrip() or ''
+        reason = args[2:] or ''
 
         if guild_member == msg.guild.owner:
             return '{warning} Can\'t kick guild owner'

@@ -16,8 +16,8 @@ class Module(ModuleBase):
     require_perms = (PermissionBotOwner, )
     hidden = True
 
-    async def on_call(self, msg, *args, **options):
-        command = msg.content.partition(args[0])[2].lstrip()
+    async def on_call(self, msg, args, **flags):
+        command = args[1:]
         process, pid = await create_subprocess_shell(command)
         
         start_message = await self.send(

@@ -17,11 +17,8 @@ class Module(ModuleBase):
     required_args = 1
     required_perms = (PermissionEmbedLinks, PermissionAddReactions)
 
-    async def on_call(self, msg, *args, **flags):
-        users = await find_user(
-            msg.content.partition(args[0])[2].lstrip(),
-            msg, self.bot, max_count=-1
-        )
+    async def on_call(self, msg, args, **flags):
+        users = await find_user(args[1:], msg, self.bot, max_count=-1)
 
         if not users:
             return '{warning} Users not found'

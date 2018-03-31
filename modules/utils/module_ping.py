@@ -13,7 +13,7 @@ class Module(ModuleBase):
     name = 'ping'
     aliases = (name, )
 
-    async def on_call(self, msg, *args, **flags):
+    async def on_call(self, msg, args, **flags):
         ping_msg = await self.send(msg, content='Pinging ...')
 
         if len(args) == 2:
@@ -38,7 +38,7 @@ class Module(ModuleBase):
 
         result = f'Pong, it took `{int(delta)}ms`'
 
-        target = msg.content.partition(args[0])[2].lstrip()
+        target = args[1:]
         result += f' to ping `{target}`' if target else ' to respond'
 
         await self.bot.edit_message(ping_msg, content=result)

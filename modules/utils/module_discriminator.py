@@ -14,7 +14,7 @@ class Module(ModuleBase):
     aliases = (name, 'discrim')
     required_perms = (PermissionEmbedLinks, PermissionAddReactions)
 
-    async def on_call(self, msg, *args, **flags):
+    async def on_call(self, msg, args, **flags):
         if len(args) == 1:
             discrim = msg.author.discriminator
         else:

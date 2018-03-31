@@ -42,7 +42,7 @@ class Module(ModuleBase):
             except Exception:
                 pass
 
-    async def on_call(self, msg, *args, **flags):
+    async def on_call(self, msg, args, **flags):
         target = args[1].lower()
 
         reload_message = await self.send(

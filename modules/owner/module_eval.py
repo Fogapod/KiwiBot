@@ -24,8 +24,8 @@ class Module(ModuleBase):
     async def on_load(self, from_reload):
         self._last_result = None
 
-    async def on_call(self, msg, *args, **flags):
-        program = msg.content.partition(args[0])[2].lstrip()
+    async def on_call(self, msg, args, **flags):
+        program = args[1:]
 
         glob = {
             'self': self,

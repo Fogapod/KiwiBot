@@ -16,7 +16,7 @@ class Module(ModuleBase):
     aliases = (name, )
     required_perms = (PermissionEmbedLinks, )
 
-    async def on_call(self, msg, *args, **options):
+    async def on_call(self, msg, args, **flags):
         e = Embed(
             title='My invite links', colour=Colour.gold(),
             description='   |   '.join((

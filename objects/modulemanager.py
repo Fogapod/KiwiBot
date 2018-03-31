@@ -6,6 +6,7 @@ import traceback
 from importlib import reload
 
 from objects.logger import Logger
+from objects.argparser import ArgParser
 
 
 logger = Logger.get_logger()
@@ -91,17 +92,14 @@ class ModuleManager:
         pass
 
     async def check_modules(self, message, clean_content):
-        try:
-            args = shlex.split(clean_content)
-        except ValueError:
-            args = clean_content.split()
+        args = ArgParser(clean_content)
 
         for name, module in self.modules.items():
             if module.disabled:
                 continue
 
             try:
-                if not await module.check_message(message, *args):
+                if not await module.check_message(message, args):
                     continue
 
                 if not module.check_guild(message):
@@ -130,7 +128,7 @@ class ModuleManager:
                     f'User {message.author} [{message.author.id}] called module {module.name} in ' +
                     (f'guild {message.guild} [{message.guild.id}]' if message.guild is not None else 'direct messages')
                 )
-                return await module.call_command(message, *args)
+                return await module.call_command(message, args)
             except Exception as e:
                 module_tb = traceback.format_exc()
                 logger.info(f'Exception occured calling {name}')

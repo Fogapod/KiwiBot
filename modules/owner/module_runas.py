@@ -16,14 +16,14 @@ class Module(ModuleBase):
     require_perms = (PermissionBotOwner, )
     hidden = True
 
-    async def on_call(self, msg, *args, **flags):
+    async def on_call(self, msg, args, **flags):
         user = await find_user(args[1], msg, self.bot, strict_guild=True)
 
         if user is None:
             return '{warning} User not found'
 
         prefix = await get_local_prefix(msg, self.bot)
-        new_content = msg.content.partition(args[1])[2].lstrip()
+        new_content = args[2:]
 
         msg.author = user
         msg.content = prefix + new_content

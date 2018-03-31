@@ -16,7 +16,7 @@ class Module(ModuleBase):
     aliases = (name, 'commands')
     required_perms = (PermissionEmbedLinks, PermissionAddReactions)
 
-    async def on_call(self, msg, *args, **flags):
+    async def on_call(self, msg, args, **flags):
         # temporary solution
         args = list(args)
         if '-d' in args:

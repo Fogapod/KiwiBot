@@ -13,7 +13,7 @@ class Module(ModuleBase):
     async def on_load(self, from_reload):
         self.start_time = time.time()
 
-    async def on_call(self, msg, *args, **flags):
+    async def on_call(self, msg, args, **flags):
         online_delta = time.time() - self.start_time
 
         return (

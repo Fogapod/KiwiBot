@@ -14,8 +14,8 @@ class Module(ModuleBase):
     aliases = (name, )
     required_args = 1
 
-    async def on_call(self, msg, *args, **flags):
-        subject = msg.content.partition(args[0])[2].lstrip()
+    async def on_call(self, msg, args, **flags):
+        subject = args[1:]
         user = await find_user(subject, msg, self.bot)
 
         if user is not None:
