@@ -1,7 +1,5 @@
 from objects.modulebase import ModuleBase
 
-from aiohttp import ClientSession
-
 
 API_URL = 'http://rextester.com/rundotnet/api'
 
@@ -129,14 +127,13 @@ class Module(ModuleBase):
         params['CompilerArgs'] = COMPILE_OPTIONS.get(params['LanguageChoice'], '')
         params['Program'] = args[2:]
 
-        async with ClientSession() as s:
-            async with s.post(API_URL, params=params) as r:
-                if r.status == 200:
-                    result_json = await r.json()
-                    result  = result_json['Result'] or ''
-                    result += result_json['Errors'] or ''
-                else:
-                    return '{error} Problem with rex response. Please, try again later'
+        async with self.bot.sess.post(API_URL, params=params) as r:
+            if r.status == 200:
+                result_json = await r.json()
+                result  = result_json['Result'] or ''
+                result += result_json['Errors'] or ''
+            else:
+                return '{error} Problem with rex response. Please, try again later'
 
         result = result.strip()
 
