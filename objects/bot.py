@@ -2,6 +2,8 @@ from objects.logger import Logger
 
 logger = Logger()
 
+from aiohttp import ClientSession
+
 import traceback
 import asyncio
 import time
@@ -14,6 +16,7 @@ from objects.config import Config
 from objects.redisdb import RedisDB
 
 from constants import STOP_EXIT_CODE, ERROR_EXIT_CODE, RESTART_EXIT_CODE
+
 from utils.formatters import format_response, trim_message
 from utils import funcs
 
@@ -34,6 +37,8 @@ class BotMyBot(discord.Client):
 
         # bot will react only to stored messages 
         self.tracked_messages = {}
+
+        self.sess = None
 
         self.config = Config('config.json', loop=self.loop)
         logger.verbosity = self.config.get('logger_verbosity', logger.VERBOSITY_INFO)
@@ -107,6 +112,8 @@ class BotMyBot(discord.Client):
             return
 
         self.is_first_on_ready_event = False
+
+        self.sess = ClientSession()
 
         redis_port = self.config.get('redis_port', None)
         try:
