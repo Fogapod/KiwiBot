@@ -11,7 +11,7 @@ API_URL = 'https://nekos.life/api/v2'
 
 SFW_IMG_TAGS = [
     'cuddle', 'feed', 'fox_girl', 'hug', 'kiss', 'lizard', 'meow', 'neko',
-     'pat', 'poke', 'slap', 'tickle'
+    'pat', 'poke', 'slap', 'tickle'
 ]
 NSFW_IMG_TAGS = [
     'random_hentai_gif', 'anal', 'bj', 'boobs', 'classic', 'cum', 'kuni',
@@ -63,23 +63,30 @@ class Module(ModuleBase):
             nsfw = True
         elif subcommand == 'owoify':
             if len(args) < 3:
-                return '{warning} Please, provide text to owoify'
+                return '{warning} Pwease, give me text to make kawaii'
             text = args[2:]
-            if len(text) > 100:
-                return '{error} oopsie whoopsie, seems like your text is longer than 100 chars~~'
-
+            if len(text) > 800:
+                return '{error} oopsie whoopsie, seems like youw text is longew thany 800 chaws~~'
+            chunks = [text[i:i + 100] for i in range(0, len(text), 100)]
+            owo = ''
             url = '/'.join((API_URL, 'owoify'))
-            data = { 'text': text }
-            response = await self.do_request(url, **data)
-            e = Embed(colour=Colour.gold(), title='OwO')
-            e.add_field(
-                name=f'{msg.author.display_name} just said...',
-                value=response['owo']
-            )
-            e.set_footer(text=msg.author, icon_url=msg.author.avatar_url)
+            for c in chunks:
+                data = { 'text': c }
+                response = await self.do_request(url, **data)
+                if response is None:
+                    owo = ''
+                    break
+                owo += response['owo']
+            if owo:
+                e = Embed(colour=Colour.gold(), title='OwO')
+                e.add_field(
+                    name=f'{msg.author.display_name} just said...',
+                    value=owo
+                )
+                e.set_footer(text=msg.author, icon_url=msg.author.avatar_url)
 
-            await self.send(msg, embed=e)
-            return
+                await self.send(msg, embed=e)
+                return
         elif subcommand == 'why':
             question = args[2:]
             if question.endswith('?'):
@@ -92,11 +99,12 @@ class Module(ModuleBase):
                 e.title = f'why {question}?'
             url = '/'.join((API_URL, 'why'))
             response = await self.do_request(url)
-            e.description = response['why']
-            e.set_footer(text=msg.author, icon_url=msg.author.avatar_url)
+            if response is not None:
+                e.description = response['why']
+                e.set_footer(text=msg.author, icon_url=msg.author.avatar_url)
 
-            await self.send(msg, embed=e)
-            return
+                await self.send(msg, embed=e)
+                return
         else:
             return await self.on_doc_request(msg)
 
@@ -124,4 +132,4 @@ class Module(ModuleBase):
                 result_json = await r.json()
                 return result_json
             else:
-                return ''
+                return None
