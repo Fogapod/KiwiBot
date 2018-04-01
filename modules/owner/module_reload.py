@@ -27,20 +27,18 @@ class Module(ModuleBase):
         if from_reload:
             return
 
-        reload_channel_id = self.bot.config.get('reload_channel_id', 0)
-        reload_message_id = self.bot.config.get('reload_message_id', 0)
+        data = await self.bot.redis.get('reload_data')
+        if data is None:
+            return
 
-        if reload_channel_id and reload_message_id:
-            await self.bot.config.remove('reload_channel_id')
-            await self.bot.config.remove('reload_message_id')
+        await self.bot.redis.delete('reload_data')
+        channel_id, message_id = data.split(':')
 
-            try:
-                await self.bot.http.edit_message(
-                    reload_message_id, reload_channel_id,
-                    content='Bot restarted'
-                )
-            except Exception:
-                pass
+        try:
+            await self.bot.http.edit_message(
+                int(message_id), int(channel_id), content='Bot restarted')
+        except Exception:
+            pass
 
     async def on_call(self, msg, args, **flags):
         target = args[1].lower()
@@ -50,8 +48,8 @@ class Module(ModuleBase):
         )
 
         if target == 'bot':
-            await self.bot.config.put('reload_channel_id', reload_message.channel.id)
-            await self.bot.config.put('reload_message_id', reload_message.id)
+            await self.bot.redis.set(
+                'reload_data', f'{reload_message.channel.id}:{reload_message.id}')
             self.bot.restart()
 
         if target == 'modules':
