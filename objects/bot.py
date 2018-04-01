@@ -35,9 +35,6 @@ class BotMyBot(discord.Client):
         # timestamp of bot launch, filled in first on_ready call
         self.start_time = 0
 
-        # bot will react only to stored messages 
-        self.tracked_messages = {}
-
         self.sess = None
 
         self.config = Config('config.json', loop=self.loop)
@@ -199,22 +196,29 @@ class BotMyBot(discord.Client):
             self._last_messages[msg.channel.id][msg.author.id] = msg
 
     async def on_message_edit(self, before, after):
+        if after.author.bot:
+            return
         if before.content == after.content:
             return
 
-        if before.id in self.tracked_messages:
-            await self.clear_responses_to_message(before.id)
+        if await self.redis.exists(f'tracked_message:{before.id}'):
+            await self.clear_responses_to_message(before)
+            ttl = await self.redis.ttl(f'tracked_message:{before.id}')
+            await self.redis.expire(f'tracked_message:{before.id}', ttl + 60)
+
             await self.on_message(after, from_edit=True)
 
-    async def on_message_delete(self, message):
-        if message.id in self.tracked_messages:
-            await self.clear_responses_to_message(message.id)
+    async def on_message_delete(self, msg):
+        if await self.redis.exists(f'tracked_message:{msg.id}'):
+            await self.clear_responses_to_message(msg)
+        await self.redis.delete(f'tracked_message:{msg.id}')
 
-    async def clear_responses_to_message(self, message_id):
-        if len(self.tracked_messages[message_id]) > 0:
-            for message in self.tracked_messages[message_id]:
-                await self.delete_message(message)
-            self.tracked_messages[message_id] = []
+    async def clear_responses_to_message(self, msg):
+        for mid in (await self.redis.smembers(f'tracked_message:{msg.id}'))[1:]:
+            try:
+                await self.http.delete_message(msg.channel.id, int(mid))
+            except Exception:
+                pass
 
     async def send_message(self, msg, response_to=None, replace_everyone=True, replace_mentions=True, **fields):
         content = fields.pop('content', '')
@@ -291,18 +295,15 @@ class BotMyBot(discord.Client):
                 raise
 
     async def track_message(self, message):
-        if message.id in self.tracked_messages:
+        if await self.redis.exists(f'tracked_message:{message.id}'):
             return
 
-        self.tracked_messages[message.id] = []
-        self.loop.call_later(300, self.release_tracked_message, message.id)
-
-    def release_tracked_message(self, message_id):
-        del self.tracked_messages[message_id]
+        await self.redis.sadd(f'tracked_message:{message.id}', '0')
+        await self.redis.expire(f'tracked_message:{message.id}', 300)
 
     async def register_response(self, request, response):
-        if request.id in self.tracked_messages:
-            self.tracked_messages[request.id].append(response)
+        if await self.redis.exists(f'tracked_message:{request.id}'):
+            await self.redis.sadd(f'tracked_message:{request.id}', response.id)
         else:
             logger.debug('Request outdated, not registering')
 

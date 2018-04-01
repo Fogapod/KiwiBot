@@ -42,6 +42,21 @@ class RedisDB:
     async def set(self, key, value, *args):
         return await self.execute('SET', key, value, *args)
 
+    async def sadd(self, key, *values):
+        return await self.execute('SADD', key, *values)
+
+    async def smembers(self, key):
+        return await self.execute('SMEMBERS', key)
+
+    async def expire(self, key, seconds):
+        return await self.execute('EXPIRE', key, seconds)
+
+    async def ttl(self, key):
+        return await self.execute('TTL', key)
+
+    async def delete(self, *keys):
+        return await self.execute('DEL', *keys)
+
     async def exists(self, *values):
         return await self.execute('EXISTS', *values) == len(values)
 
