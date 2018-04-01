@@ -58,6 +58,9 @@ class ArgParser:
     def __bool__(self):
         return len(self._args) != 0
 
+    def __str__(self):
+        return str(self._args)
+
     def __getitem__(self, value):
         if isinstance(value, slice):
             if value.step is not None:
