@@ -1,3 +1,5 @@
+from discord import DMChannel
+
 from utils.funcs import get_local_prefix
 
 
@@ -35,8 +37,10 @@ class ModuleBase:
     def check_guild(self, msg):
         return (msg.guild is not None) >= self.guild_only
 
-    def check_nsfw_permission(self, msg):
-        return getattr(msg.channel, 'nsfw', False) >= self.nsfw
+    def check_nsfw_permission(self, msg, nsfw=None):
+        if nsfw is None:
+            nsfw = self.nsfw
+        return getattr(msg.channel, 'is_nsfw', lambda: isinstance(msg.channel, DMChannel))() >= nsfw
 
     def check_argument_count(self, argc, msg):
         return argc - 1 >= self.required_args

@@ -108,7 +108,7 @@ class Module(ModuleBase):
         else:
             return await self.on_doc_request(msg)
 
-        if nsfw and not msg.channel.nsfw:
+        if not self.check_nsfw_permission(msg, nsfw=nsfw):
             return await self.on_nsfw_permission_denied(msg)
 
         if image_tag:
