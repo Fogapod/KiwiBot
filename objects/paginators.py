@@ -9,7 +9,7 @@ from discord.errors import Forbidden, NotFound
 
 class PaginatorABC:
 
-    def __init__(self, bot, looped=True, timeout=60):
+    def __init__(self, bot, looped=True, timeout=180):
         self.bot = bot
 
         self.looped = looped
@@ -153,7 +153,7 @@ class PaginatorABC:
 
                     await cb(*results)
 
-                self.start_time += 10
+                self.start_time += 30
                 time_left = self.timeout - (time.time() - self.start_time)
 
         await self.cleanup(target_message)

@@ -2,7 +2,7 @@ from objects.modulebase import ModuleBase
 from objects.permissions import PermissionEmbedLinks, PermissionAddReactions
 from objects.paginators import Paginator
 
-from discord import Embed
+from discord import Embed, Colour
 
 
 class Module(ModuleBase):
@@ -41,8 +41,8 @@ class Module(ModuleBase):
 
         p = Paginator(self.bot)
         for i, chunk in enumerate(chunks):
-            e = Embed(description=f'```\n' + '\n'.join(chunk) + '```')
-            e.set_footer(text=f'Page {i + 1}/{len(chunks)}')
+            e = Embed(description=f'```\n' + '\n'.join(chunk) + '```', colour=Colour.gold())
+            e.set_footer(text=f'Page {i + 1}/{len(chunks)} ({len(lines)}) results')
             p.add_page(embed=e)
 
         m = await self.send(msg, **p.current_page)
