@@ -36,28 +36,30 @@ class Module(ModuleBase):
         await self.bot.change_presence(activity=presence)
 
     async def on_call(self, msg, args, **flags):
-        status = ''
+        a_type = 0
+        a_name = ''
 
         if len(args) == 1:
             presence = Activity(name='')
         else:
             subcommand = args[1].lower()
-            status = args[2:]
+            a_name = args[2:]
 
             if subcommand == 'playing':
-                presence = Activity(name=status)
+                pass
             elif subcommand == 'streaming':
-                presence = Activity(name=status, type=1)
+                a_type = 1
             elif subcommand == 'listening':
-                presence = Activity(name=status, type=2)
+                a_type = 2
             elif subcommand == 'watching':
-                presence = Activity(name=status, type=3)
+                a_type = 3
             else:
-                status = msg.content.partition(args[0])[2].lstrip()
-                presence = Activity(name=status)
+                a_name = args[1:]
+
+        presence = Activity(name=a_name, type=a_type)
 
         await self.bot.change_presence(activity=presence)
-        await self.bot.redis.set('last_status', status)
+        await self.bot.redis.set('last_status', presence.name)
         await self.bot.redis.set('last_status_type', presence.type.value)
 
         return f'Status switched to `{presence.name}`' if presence.name else 'Status removed'
