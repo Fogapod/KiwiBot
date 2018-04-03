@@ -64,7 +64,10 @@ class Module(ModuleBase):
 
             p = Paginator(self.bot)
             for i, chunk in enumerate(chunks):
-                p.add_page(embed=make_embed(chunk), content=f'Help page **{i + 1}/{len(chunks)}**')
+                p.add_page(
+                    embed=make_embed(chunk),
+                    content=f'Page **{i + 1}/{len(chunks)}** ({len(lines)}) commands'
+                )
 
             m = await self.send(msg, **p.current_page)
             await p.run(m, target_user=msg.author)

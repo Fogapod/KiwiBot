@@ -93,7 +93,7 @@ class Module(ModuleBase):
                 value=' | '.join(f'[{f}]({guild.icon_url_as(format=f)})' for f in formats)
             )
         e.add_field(
-            name='static emotes',
+            name='static emotes', inline=False,
             value=(
                 f'**{min(max_emoji, len(static_emojis))} / {len(static_emojis)}** shown: ' +
                 ' '.join(
@@ -103,7 +103,7 @@ class Module(ModuleBase):
             ) if static_emojis else 'Guild does not have them :/'
         )
         e.add_field(
-            name='animated emotes',
+            name='animated emotes', inline=False,
             value=(
                 f'**{min(max_emoji, len(animated_emojis))} / {len(animated_emojis)}** shown: ' +
                 ' '.join(
