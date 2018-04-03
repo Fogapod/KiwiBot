@@ -1,75 +1,98 @@
 class ArgParser:
 
     def __init__(self, string):
-        self._args = []
+        self.args = []
+        self.flags = {}
         self._separators = []
 
-        self._args, self._separators = self._split(string)
+        self._split(string)
+        self._parse_flags()
+
+    @classmethod
+    def parse(cls, string):
+        return cls(string)
 
     def _split(self, string):
         args, seps = [], []
         index = 0
+        quote = None
         is_previous_space = True
-        last_c = ''
-        opened_quote = None
-        escape = False
 
-        for c in string.strip():
-            if last_c == '\\':
-                escape = True
-                if c == '\\':
-                    c = ''
-            else:
-                escape = False 
+        s = string.strip()
 
-            if c in ['"', '\'']:
-                if escape:
-                    args[index] = ''.join([ch for ch in args[index][:-1]])
+        while s:
+            q_buff = ''
+            c = s[:1]
+
+            while c in ('\'', '"'):
+                if not q_buff or q_buff[0] == c:
+                    q_buff += c
                 else:
-                    if opened_quote is None:
-                        opened_quote = c
-                        last_c = c
-                        continue
-                    if opened_quote == c:
-                        opened_quote = None
-                        last_c = c
-                        continue
+                    break
 
-            if c.isspace() and opened_quote is None:
+                if len(s) > len(q_buff):
+                    c = s[len(q_buff)]
+                else:
+                    c = ''
+
+            s = s[len(q_buff):]
+
+            if quote == q_buff and s and s[0].isspace():
+                quote = None
+            elif quote is None and q_buff and is_previous_space:
+                quote = q_buff
+            elif q_buff:
+                c = q_buff + c
+
+            if c.isspace() and not quote:
                 if is_previous_space:
                     seps[index - 1] += c
                 else:
                     seps.append(c)
                     index += 1
                 is_previous_space = True
-            else:
+            elif c != quote:
                 if is_previous_space:
                     args.append(c)
                 else:
                     args[index] += c
                 is_previous_space = False
-            last_c = c
+
+            s = s[1:]
+
+            # print(f'Char {"[" + c + "]":<3} Str {"[" + s + "]":<20} Quote {quote}')
+
+        self.args = args
+        self._separators = seps
 
         return args, seps
 
+    def _parse_flags(self):
+        flags = {}
+
+        self.flags = flags
+
+        return flags
+
     def __len__(self):
-        return len(self._args)
+        return len(self.args)
 
     def __bool__(self):
-        return len(self._args) != 0
+        return len(self.args) != 0
 
     def __str__(self):
-        return str(self._args)
+        return str(self.args)
 
     def __getitem__(self, value):
         if isinstance(value, slice):
             if value.step is not None:
                 raise ValueError('Arguments object does not support slicing with step')
+
+            seps = self._separators + ['']
             result = ''
-            for i in range(value.start or 0, value.stop or len(self._args)):
-                result += self._args[i]
-                if len(self._separators) > i:
-                    result += self._separators[i]
+
+            for i in range(value.start or 0, value.stop or len(self.args)):
+                result += self.args[i] + seps[i]
             return result
         else:
-            return self._args[value]
+            return self.args[value]

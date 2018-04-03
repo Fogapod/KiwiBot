@@ -17,7 +17,7 @@ class Module(ModuleBase):
     hidden = True
 
     async def on_call(self, msg, args, **flags):
-        command = args._args[1:]
+        command = args.args[1:]
         process, pid = await create_subprocess_exec(*command)
         
         start_message = await self.send(
