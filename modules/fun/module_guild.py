@@ -32,12 +32,16 @@ class Module(ModuleBase):
         if guild == msg.guild:
             top_role = guild.role_hierarchy[0].mention
         else:
-            if guild.me.guild_permissions.create_instant_invite:
+            try:
                 invite = await guild.channels[0].create_invite(
                     reason=f'requested by {msg.author} ({msg.author.id})' + (f' in guild {msg.guild} {msg.guild.id})' if msg.guild else ''),
                     max_age=3600 * 12  # 12 hours
                 )
+            except Forbidden:
+                pass
+            else:
                 invite = invite.url
+
             top_role = f'@{guild.role_hierarchy[0]}'
 
         bot_count = sum(1 for m in guild.members if m.bot)
