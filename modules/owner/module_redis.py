@@ -16,7 +16,7 @@ class Module(ModuleBase):
     hidden = True
 
     async def on_call(self, msg, args, **flags):
-        value = await self.bot.redis.execute(*args._args[1:])
+        value = await self.bot.redis.execute(*args.args[1:])
 
         return 'Return value: ' + self.to_string(value)
     
