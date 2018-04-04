@@ -78,7 +78,9 @@ class Module(ModuleBase):
                     break
                 owo += response['owo']
             if owo:
-                e = Embed(colour=Colour.gold(), title='OwO')
+                title = await self.do_request('/'.join([API_URL, 'cat']))
+                e = Embed(
+                    colour=Colour.gold(), title=title.get('cat', None) or 'OwO')
                 e.add_field(
                     name=f'{msg.author.display_name} just said...',
                     value=owo
