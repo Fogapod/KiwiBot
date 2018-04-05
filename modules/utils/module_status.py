@@ -153,7 +153,10 @@ class Module(ModuleBase):
     async def _change_precense(self, a_type, a_name, status):
         a = Activity(
             name=self.format_activity_name(a_name), type=int(a_type))
-        await self.bot.change_presence(activity=a, status=status)
+        try:
+            await self.bot.change_presence(activity=a, status=status)
+        except Exception:
+            pass
 
     def format_activity_name(self, name):
         name = name.replace('{guilds}', str(len(self.bot.guilds)))
