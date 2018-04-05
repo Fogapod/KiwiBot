@@ -45,6 +45,9 @@ class RedisDB:
     async def sadd(self, key, *values):
         return await self.execute('SADD', key, *values)
 
+    async def srem(self, key, *values):
+        return await self.execute('SREM', key, *values)
+
     async def smembers(self, key):
         return await self.execute('SMEMBERS', key)
 

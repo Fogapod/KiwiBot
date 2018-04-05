@@ -107,6 +107,7 @@ class ModuleManager:
                 if not module.check_nsfw_permission(message):
                     return await module.on_nsfw_permission_denied(message)
 
+                args.parse_flags(known_flags=module._call_flags)
                 if not module.check_argument_count(len(args), message):
                     return await module.on_not_enough_arguments(message)
 
@@ -117,8 +118,6 @@ class ModuleManager:
                 missing_user_permissions = await module.get_missing_user_permissions(message)
                 if missing_user_permissions:
                     return await module.on_missing_user_permissions(message, missing_user_permissions)
-
-                args.parse_flags(known_flags=module._call_flags)
             except Exception:
                 logger.info(f'Failed to check command, stopped on module {name}')
                 logger.info(traceback.format_exc())

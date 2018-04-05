@@ -59,6 +59,9 @@ class PaginatorABC:
         return self.current_page
 
     async def init_reactions(self, msg):
+        if len(self._pages) <= 1:
+            return
+
         for emoji in self.events.keys():
             await msg.add_reaction(emoji)
 

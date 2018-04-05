@@ -87,8 +87,7 @@ async def find_user(pattern, msg, bot, strict_guild=False, max_count=1, global_s
             if member.nick is not None and not global_search:
                 match_pos = member.nick.lower().find(pattern)
             if match_pos == -1:
-                # name#discrim
-                match_pos = str(member).lower().find(pattern)
+                match_pos = (member.name + '#' + member.discriminator).lower().find(pattern)
             if match_pos == -1:
                 continue
             found.append((member, match_pos))
@@ -101,7 +100,7 @@ async def find_user(pattern, msg, bot, strict_guild=False, max_count=1, global_s
             # index of match in string, smaller value is better
             -x[1],
             # member status, not 'offline' is better
-            x[0].status.name != 'offline',
+            str(x[0].status) != 'offline',
             # guild join timestamp, lower delta is better
             x[0].joined_at
         ), reverse=True
