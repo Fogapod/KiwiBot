@@ -15,34 +15,38 @@ class Module(ModuleBase):
     name = 'help'
     aliases = (name, 'commands')
     required_perms = (PermissionEmbedLinks, PermissionAddReactions)
+    call_flags = {
+        'show-disabled': {
+            'alias': 'd',
+            'bool': True
+         },
+        'show-hidden': {
+            'alias': 'h',
+            'bool': True
+        },
+        'hide-normal': {
+            'alias': 'n',
+            'bool': True
+        }
+    }
 
     async def on_call(self, msg, args, **flags):
-        # temporary solution
-        args = list(args)
-        if '-d' in args:
-            args.remove('-d')
-            flags['show-disabled'] = True
-        if '--show-disabled' in args:
-            args.remove('--show-disabled')
-            flags['show-disabled'] = True
-        if '-h' in args:
-            args.remove('-h')
-            flags['show-hidden'] = True
-        if '--show-hidden' in args:
-            args.remove('--show-hidden')
-            flags['show-hidden'] = True
-
         if len(args) == 1:
             module_list = []
             for name, module in self.bot.mm.modules.items():
                 if module.disabled:
-                    if not flags.get('show-disabled', False):
+                    if not (flags.get('show-disabled', False)):
                         continue
                 if module.hidden:
-                    if not flags.get('show-hidden', False):
+                    if not (flags.get('show-hidden', False)):
                         continue
+                if not (module.disabled or module.hidden) and flags.get('hide-normal', False):
+                    continue
 
                 module_list.append((name, module))
+
+            if not module_list:
+                return '{error} No commands found'
 
             lines = sorted([f'{m.name:<20}{m.short_doc}' for n, m in module_list])
             lines_per_chunk = 20
@@ -59,7 +63,10 @@ class Module(ModuleBase):
                 return e
 
             if len(chunks) == 1:
-                await self.send(msg, embed=make_embed(chunks[0]))
+                await self.send(
+                    msg, content=f'{len(lines)} commands',
+                    embed=make_embed(chunks[0])
+                )
                 return
 
             p = Paginator(self.bot)

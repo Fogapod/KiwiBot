@@ -98,7 +98,7 @@ class ModuleManager:
                 continue
 
             try:
-                if not await module.check_message(message, args, **args.flags):
+                if not await module.check_message(message, args):
                     continue
 
                 if not module.check_guild(message):
@@ -117,6 +117,8 @@ class ModuleManager:
                 missing_user_permissions = await module.get_missing_user_permissions(message)
                 if missing_user_permissions:
                     return await module.on_missing_user_permissions(message, missing_user_permissions)
+
+                args.parse_flags(known_flags=module._call_flags)
             except Exception:
                 logger.info(f'Failed to check command, stopped on module {name}')
                 logger.info(traceback.format_exc())

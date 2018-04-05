@@ -14,6 +14,7 @@ class ModuleBase:
     required_perms   = ()     # permissions required for bot
     require_perms    = ()     # permissions required from user
     required_args    = 0      # number if required arguments
+    call_flags       = {}     # flags can be customized there
     guild_only       = False  # can only be used in guild
     nsfw             = False  # can only be used in nsfw channel
     hidden           = False  # would be hidden when possible
@@ -33,6 +34,17 @@ class ModuleBase:
             self.require_perms = (self.require_perms(bot), )
         else:
             self.require_perms = tuple(p(bot) for p in self.require_perms)
+
+        # format call_flags dict
+        self._call_flags = {}
+
+        for k, v in self.call_flags.items():
+            alias = v.get('alias', None)
+            bool  = v.get('bool', False)
+
+            if alias is not None:
+                self._call_flags[alias] = { 'alias': k }
+            self._call_flags[k] = { 'alias': k, 'bool': bool }
 
     def check_guild(self, msg):
         return (msg.guild is not None) >= self.guild_only
@@ -86,12 +98,12 @@ class ModuleBase:
     async def on_load(self, from_reload):
         pass
 
-    async def check_message(self, msg, args, **flags):
+    async def check_message(self, msg, args):
         if self.disabled:
             return False
-        return await self.on_check_message(msg, args, **flags)
+        return await self.on_check_message(msg, args)
 
-    async def on_check_message(self, msg, args, **flags):
+    async def on_check_message(self, msg, args):
         return args and args[0].lower() in self.aliases
 
     async def call_command(self, msg, args, **flags):

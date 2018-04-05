@@ -6,7 +6,6 @@ class ArgParser:
         self._separators = []
 
         self._split(string)
-        self._parse_flags()
 
     @classmethod
     def parse(cls, string):
@@ -67,9 +66,52 @@ class ArgParser:
 
         return args, seps
 
-    def _parse_flags(self):
+    def parse_flags(self, known_flags={}):
+        args = []
         flags = {}
+        flag = ''
 
+        def try_to_add_flag(name, arg=''):
+            flag = known_flags.get(name, name)
+
+            if not flag:
+                return 0
+
+            if isinstance(flag, dict):
+                alias = flag['alias']
+
+                if known_flags[alias]['bool']:
+                    flags[alias] = 1
+                else:
+                    flags[alias] = arg
+                    return 1
+            else:  # unkniwn flag
+                flags[flag] = True
+
+            return 0
+
+        for i, arg in enumerate(self.args + ['']):
+            if try_to_add_flag(flag, arg):
+                flag = ''
+                continue
+
+            flag = ''
+
+            if arg[:1] == '-':
+                if arg[:2] == '--':
+                    flag = arg[2:]
+                    if not flag:
+                        args += self.args[i + 1:] + ['']
+                        break
+                else:
+                    for c in arg[1:-1]:
+                        try_to_add_flag(c)
+
+                    flag = arg[-1]
+            else:
+                args.append(arg)
+
+        self.args = args[:-1]
         self.flags = flags
 
         return flags
