@@ -1,4 +1,5 @@
 from objects.modulebase import ModuleBase
+from objects.permissions import PermissionExternalEmojis
 
 from utils.funcs import find_user
 
@@ -54,12 +55,12 @@ class Module(ModuleBase):
             if user.activity is None:
                 e.add_field(
                     name='status',
-                    value=f'{STATUS_EMOTES[user.status.name]} {user.status.name}'
-            )
+                    value=(STATUS_EMOTES[user.status.name] if await PermissionExternalEmojis(self.bot).check(msg, check_myself=True) else '') + user.status.name
+                )
             else:
                 e.add_field(
                     name='activity',
-                    value=f'{STATUS_EMOTES[user.status.name]} **{user.activity.type.name}** {user.activity.name}'
+                    value=(STATUS_EMOTES[user.status.name] if await PermissionExternalEmojis(self.bot).check(msg, check_myself=True) else '') + f'**{user.activity.type.name}** {user.activity.name}'
                 )
 
         e.add_field(name='robot', value='yes' if user.bot else 'no')

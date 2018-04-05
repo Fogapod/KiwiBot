@@ -1,5 +1,5 @@
 from objects.modulebase import ModuleBase
-from objects.permissions import PermissionEmbedLinks
+from objects.permissions import PermissionEmbedLinks, PermissionExternalEmojis
 
 from utils.funcs import find_guild
 
@@ -92,28 +92,32 @@ class Module(ModuleBase):
                 name='avatar',
                 value=' | '.join(f'[{f}]({guild.icon_url_as(format=f)})' for f in formats)
             )
-        e.add_field(
-            name='static emotes', inline=False,
-            value=(
-                f'**{min(max_emoji, len(static_emojis))} / {len(static_emojis)}** shown: ' +
-                ' '.join(
-                    str(e) for e in sorted(
-                        random.sample(static_emojis, min(max_emoji, len(static_emojis))),
-                        key=lambda e: e.name))
-            ) if static_emojis else 'Guild does not have them :/'
-        )
-        e.add_field(
-            name='animated emotes', inline=False,
-            value=(
-                f'**{min(max_emoji, len(animated_emojis))} / {len(animated_emojis)}** shown: ' +
-                ' '.join(
-                    str(e) for e in sorted(
-                        random.sample(animated_emojis, min(max_emoji, len(animated_emojis))),
-                        key=lambda e: e.name
+        if guild == msg.guild or await PermissionExternalEmojis(self.bot).check(msg, check_myself=True):
+            e.add_field(
+                name='static emotes', inline=False,
+                value=(
+                    f'**{min(max_emoji, len(static_emojis))} / {len(static_emojis)}** shown: ' +
+                    ' '.join(
+                        str(e) for e in sorted(
+                            random.sample(static_emojis, min(max_emoji, len(static_emojis))),
+                            key=lambda e: e.name))
+                ) if static_emojis else 'Guild does not have them :/'
+            )
+            e.add_field(
+                name='animated emotes', inline=False,
+                value=(
+                    f'**{min(max_emoji, len(animated_emojis))} / {len(animated_emojis)}** shown: ' +
+                    ' '.join(
+                        str(e) for e in sorted(
+                            random.sample(animated_emojis, min(max_emoji, len(animated_emojis))),
+                            key=lambda e: e.name
+                        )
                     )
-                )
-            ) if animated_emojis else 'Guild does not have them :/'
-        )
+                ) if animated_emojis else 'Guild does not have them :/'
+            )
+        else:
+            e.add_field(
+                name='emojis', value='I have no permission to show external emojis', inline=False)
         e.set_footer(text=guild.id)
 
         await self.send(msg, embed=e)
