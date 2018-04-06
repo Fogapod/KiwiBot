@@ -18,7 +18,7 @@ class Module(ModuleBase):
     name = 'eval'
     aliases = (name, )
     required_args = 1
-    require_perms = (PermissionBotOwner, )
+    require_perms = (PermissionBotOwner(), )
     hidden = True
 
     async def on_load(self, from_reload):

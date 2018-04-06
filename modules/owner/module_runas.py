@@ -13,7 +13,7 @@ class Module(ModuleBase):
     aliases = (name, )
     guild_only = True
     required_args = 2
-    require_perms = (PermissionBotOwner, )
+    require_perms = (PermissionBotOwner(), )
     hidden = True
 
     async def on_call(self, msg, args, **flags):

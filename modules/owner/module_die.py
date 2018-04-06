@@ -11,7 +11,7 @@ class Module(ModuleBase):
 
     name = 'stop'
     aliases = (name, 'die', '!')
-    require_perms = (PermissionBotOwner, )
+    require_perms = (PermissionBotOwner(), )
     hidden = True
 
     async def on_call(self, message, args, **options):

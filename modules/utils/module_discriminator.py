@@ -12,7 +12,7 @@ class Module(ModuleBase):
 
     name = 'discriminator'
     aliases = (name, 'discrim')
-    required_perms = (PermissionEmbedLinks, PermissionAddReactions)
+    required_perms = (PermissionEmbedLinks(), PermissionAddReactions())
 
     async def on_call(self, msg, args, **flags):
         if len(args) == 1:

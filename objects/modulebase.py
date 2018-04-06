@@ -24,16 +24,11 @@ class ModuleBase:
     def __init__(self, bot):
         self.bot = bot
 
-        # init permission classes
         if type(self.required_perms) is not tuple:
-            self.required_perms = (self.required_perms(bot), )
-        else:
-            self.required_perms = tuple(p(bot) for p in self.required_perms)
+            self.required_perms = (self.required_perms, )
 
         if type(self.require_perms) is not tuple:
-            self.require_perms = (self.require_perms(bot), )
-        else:
-            self.require_perms = tuple(p(bot) for p in self.require_perms)
+            self.require_perms = (self.require_perms, )
 
         # format call_flags dict
         self._call_flags = {}
@@ -60,7 +55,7 @@ class ModuleBase:
     async def get_missing_bot_permissions(self, msg):
         missing = []
         for permission in self.required_perms:
-            if not await permission.check(msg, check_myself=True):
+            if not await permission.check(msg.channel, self.bot.user):
                 missing.append(permission)
 
         return missing
@@ -68,7 +63,7 @@ class ModuleBase:
     async def get_missing_user_permissions(self, msg):
         missing = []
         for permission in self.require_perms:
-            if not await permission.check(msg, check_myself=False):
+            if not await permission.check(msg.channel, msg.author):
                 missing.append(permission)
 
         return missing

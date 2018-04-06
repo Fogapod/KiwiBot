@@ -16,7 +16,7 @@ class Module(ModuleBase):
 
     name = 'guild'
     aliases = (name, 'guildinfo', 'server', 'serverinfo')
-    required_perms = (PermissionEmbedLinks, )
+    required_perms = (PermissionEmbedLinks(), )
 
     async def on_call(self, msg, args, **flags):
         if len(args) == 1:

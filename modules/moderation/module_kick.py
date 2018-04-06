@@ -13,8 +13,8 @@ class Module(ModuleBase):
     aliases = (name, )
     required_args = 1
     guild_only = True
-    require_perms  = (PermissionKickMembers, )
-    required_perms = (PermissionKickMembers, )
+    require_perms  = (PermissionKickMembers(), )
+    required_perms = (PermissionKickMembers(), )
 
     async def on_call(self, msg, args, **flags):
         guild_member = await find_user(args[1], msg, self.bot, strict_guild=True)

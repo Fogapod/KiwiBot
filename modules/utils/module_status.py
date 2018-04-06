@@ -26,7 +26,7 @@ class Module(ModuleBase):
 
     name = 'status'
     aliases = (name, 'presence', 'activity')
-    require_perms = (PermissionBotOwner, PermissionAddReactions)
+    require_perms = (PermissionBotOwner(), PermissionAddReactions())
     call_flags = {
         'status': {
             'alias': 's',

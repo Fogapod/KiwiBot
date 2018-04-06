@@ -14,7 +14,7 @@ class Module(ModuleBase):
 
     name = 'help'
     aliases = (name, 'commands')
-    required_perms = (PermissionEmbedLinks, PermissionAddReactions)
+    required_perms = (PermissionEmbedLinks(), PermissionAddReactions())
     call_flags = {
         'show-disabled': {
             'alias': 'd',

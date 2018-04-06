@@ -15,8 +15,8 @@ class Module(ModuleBase):
     aliases = (name, 'hackban')
     required_args = 1
     guild_only = True
-    require_perms  = (PermissionBanMembers, )
-    required_perms = (PermissionBanMembers, )
+    require_perms  = (PermissionBanMembers(), )
+    required_perms = (PermissionBanMembers(), )
 
     async def on_call(self, msg, args, **flags):
         user = await find_user(args[1], msg, self.bot)

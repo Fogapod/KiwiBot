@@ -10,7 +10,7 @@ class Module(ModuleBase):
     name = 'say'
     aliases = (name, 'sayd')
     required_args = 1
-    required_perms = (PermissionManageMessages, )
+    required_perms = (PermissionManageMessages(), )
 
     async def on_call(self, msg, args, **flags):
         await msg.delete()

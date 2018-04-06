@@ -9,7 +9,7 @@ class Module(ModuleBase):
 
     name = 'test'
     aliases = (name, )
-    require_perms = (PermissionBotOwner, )
+    require_perms = (PermissionBotOwner(), )
     hidden = True
 
     async def on_call(self, msg, args, **flags):

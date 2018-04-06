@@ -17,7 +17,7 @@ class Module(ModuleBase):
 
     name = 'info'
     aliases = (name, 'information', 'stats')
-    required_perms = (PermissionEmbedLinks, )
+    required_perms = (PermissionEmbedLinks(), )
 
     async def on_call(self, msg, args, **flags):
         git_url = None

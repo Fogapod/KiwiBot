@@ -14,7 +14,7 @@ class Module(ModuleBase):
 
     name = 'invite'
     aliases = (name, )
-    required_perms = (PermissionEmbedLinks, )
+    required_perms = (PermissionEmbedLinks(), )
 
     async def on_call(self, msg, args, **flags):
         e = Embed(

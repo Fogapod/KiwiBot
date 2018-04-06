@@ -13,7 +13,7 @@ class Module(ModuleBase):
 
     name = 'avatar'
     aliases = (name, 'pfp')
-    required_perms = (PermissionEmbedLinks, )
+    required_perms = (PermissionEmbedLinks(), )
 
     async def on_call(self, msg, args, **flags):
         if len(args) == 1:

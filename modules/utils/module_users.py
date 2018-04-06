@@ -15,7 +15,7 @@ class Module(ModuleBase):
     name = 'users'
     aliases = (name, 'userlist')
     required_args = 1
-    required_perms = (PermissionEmbedLinks, PermissionAddReactions)
+    required_perms = (PermissionEmbedLinks(), PermissionAddReactions())
 
     async def on_call(self, msg, args, **flags):
         users = await find_user(args[1:], msg, self.bot, max_count=-1)
