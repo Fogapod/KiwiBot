@@ -9,10 +9,11 @@ from datetime import datetime
 
 
 STATUS_EMOTES = {
-    'online':  '<:online:427209268240973854>',
-    'idle':    '<:idle:427209268203094017>',
-    'dnd':     '<:dnd:427209268043841537>',
-    'offline': '<:offline:427209267687194625>'
+    'online':    '<:online:427209268240973854>',
+    'idle':      '<:idle:427209268203094017>',
+    'dnd':       '<:dnd:427209268043841537>',
+    'offline':   '<:offline:427209267687194625>',
+    'invisible': '<:offline:427209267687194625>'
 }
 
 class Module(ModuleBase):
@@ -55,12 +56,12 @@ class Module(ModuleBase):
             if user.activity is None:
                 e.add_field(
                     name='status',
-                    value=(STATUS_EMOTES[user.status.name] if await PermissionExternalEmojis(self.bot).check(msg, check_myself=True) else '') + user.status.name
+                    value=(STATUS_EMOTES[str(user.status)] if await PermissionExternalEmojis().check(msg.channel, self.bot.user) else '') + str(user.status)
                 )
             else:
                 e.add_field(
                     name='activity',
-                    value=(STATUS_EMOTES[user.status.name] if await PermissionExternalEmojis(self.bot).check(msg, check_myself=True) else '') + f'**{user.activity.type.name}** {user.activity.name}'
+                    value=(STATUS_EMOTES[str(user.status)] if await PermissionExternalEmojis().check(msg.channel, self.bot.user) else '') + f'**{user.activity.type.name}** {user.activity.name}'
                 )
 
         e.add_field(name='robot', value='yes' if user.bot else 'no')

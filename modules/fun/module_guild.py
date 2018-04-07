@@ -92,7 +92,7 @@ class Module(ModuleBase):
                 name='avatar',
                 value=' | '.join(f'[{f}]({guild.icon_url_as(format=f)})' for f in formats)
             )
-        if guild == msg.guild or await PermissionExternalEmojis(self.bot).check(msg, check_myself=True):
+        if guild == msg.guild or await PermissionExternalEmojis().check(msg.channel, self.bot.user):
             e.add_field(
                 name='static emotes', inline=False,
                 value=(
