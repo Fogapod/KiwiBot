@@ -21,7 +21,7 @@ from utils.formatters import format_response, trim_message
 from utils import funcs
 
 
-class BotMyBot(discord.Client):
+class BotMyBot(discord.AutoShardedClient):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -132,6 +132,8 @@ class BotMyBot(discord.Client):
         logger.info('| _ \/ _ \  _| |\/| | || | _ \/ _ \  _|')
         logger.info('|___/\___/\__|_|  |_|\_, |___/\___/\__|')
         logger.info('                      |__/             ')
+        logger.info('                                       ')
+        logger.info(f'Logged in as {self.user} with {len(self.guilds)} guilds')
         logger.info('Bot ready, good luck!')
 
         if self.is_dev:

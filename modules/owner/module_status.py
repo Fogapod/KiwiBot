@@ -43,11 +43,10 @@ class Module(ModuleBase):
         return 'not dogsong or notsosuper'
 
     async def on_load(self, from_reload):
-        if not from_reload:
-            self.interval = int(
-                await self.bot.redis.get('activity_interval', 60))
-            self._task = asyncio.ensure_future(
-                self.update_presence_task(), loop=self.bot.loop)
+        self.interval = int(
+            await self.bot.redis.get('activity_interval', 60))
+        self._task = asyncio.ensure_future(
+            self.update_presence_task(), loop=self.bot.loop)
 
     async def on_unload(self):
         self._task.cancel()
