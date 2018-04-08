@@ -189,7 +189,7 @@ class BotMyBot(discord.AutoShardedClient):
 
         if module_response:
             await self.send_message(
-                msg, content=module_response, response_to=msg)
+                msg.channel, content=module_response, response_to=msg)
 
     def register_last_user_message(self, msg):
         if msg.channel.id not in self._last_messages:
@@ -222,7 +222,7 @@ class BotMyBot(discord.AutoShardedClient):
             except Exception:
                 pass
 
-    async def send_message(self, msg, response_to=None, replace_everyone=True, replace_mentions=True, **fields):
+    async def send_message(self, channel, response_to=None, replace_everyone=True, replace_mentions=True, **fields):
         content = fields.pop('content', '')
         content = content.replace(self.token, 'TOKEN_LEAKED')
 
@@ -230,35 +230,37 @@ class BotMyBot(discord.AutoShardedClient):
             content = content.replace('@everyone', '@\u200beveryone')
             content = content.replace('@here', '@\u200bhere')
         if replace_mentions:
-            content = await funcs.replace_mentions(content, msg.channel, self)
+            content = await funcs.replace_mentions(content, channel, self)
 
         content = trim_message(content)
         fields['content'] = content
 
-        message = dm_message = None
+        message = None
+        # dm_message = None
 
         try:
-            message = await msg.channel.send(**fields)
+            message = await channel.send(**fields)
         except discord.Forbidden:
-            try:
-                dm_message = await msg.author.send(
-                    f'I was not able to send this message to channel '
-                    f'{msg.channel.mention} in guild **{msg.guild}**, result is below'
-                )
-                message = await msg.author.send(**fields)
-            except Exception:
-                pass
+            # try:
+            #     dm_message = await msg.author.send(
+            #         f'I was not able to send this message to channel '
+            #         f'{msg.channel.mention} in guild **{msg.guild}**, result is below'
+            #     )
+            #     message = await msg.author.send(**fields)
+            # except Exception:
+            #     pass
+            pass
         except Exception:
             exception = traceback.format_exc()
             exception = '\n'.join(exception.split('\n')[-4:])
             exception = f'❗ Message delivery failed\n```\n{exception}```'
-            message = await msg.channel.send(exception)
+            message = await channel.send(exception)
         finally:
             if response_to is not None:
                 if message is not None:
                     await self.register_response(response_to, message)
-                if dm_message is not None:
-                    await self.register_response(response_to, dm_message)
+                # if dm_message is not None:
+                #     await self.register_response(response_to, dm_message)
 
             return message
 

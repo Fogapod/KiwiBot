@@ -143,5 +143,5 @@ class ModuleBase:
     async def on_unload(self):
         pass
 
-    async def send(self, msg, **kwargs):
-        return await self.bot.send_message(msg, response_to=msg, **kwargs)
+    async def send(self, msg, channel=None, **kwargs):
+        return await self.bot.send_message(channel or msg.channel, response_to=msg, **kwargs)
