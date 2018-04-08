@@ -72,8 +72,9 @@ class Module(ModuleBase):
         try:
             m = await channel.send(args[1:])
         except Exception as e:
-            return '{error} Failed to deliver message: **%s**' % e.__class__.__name__
+            return '{error} Failed to deliver message: **%s**: %s' % (e.__class__.__name__, e)
         else:
+            await self.bot.register_response(msg, m)
             if not is_same_place:
                 if isinstance(m.channel, DMChannel):
                     destination = m.channel.recipient
