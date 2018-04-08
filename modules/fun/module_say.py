@@ -3,6 +3,8 @@ from objects.permissions import PermissionBotOwner
 
 from utils.funcs import find_user
 
+from discord import DMChannel
+
 
 class Module(ModuleBase):
 
@@ -59,7 +61,8 @@ class Module(ModuleBase):
         if channel is None:
             channel = msg.channel
 
-        if getattr(channel, 'guild', None) != msg.guild:
+        is_same_place = getattr(channel, 'guild', None) == getattr(msg, 'guild', None)
+        if not is_same_place:
             if not await PermissionBotOwner().check(msg.channel, msg.author):
                 return '{warning} Can\'t send messages to other guilds or users'
 
@@ -67,6 +70,13 @@ class Module(ModuleBase):
             await self.bot.delete_message(msg)
 
         try:
-            await channel.send(args[1:])
+            m = await channel.send(args[1:])
         except Exception as e:
             return '{error} Failed to deliver message: **%s**' % e.__class__.__name__
+        else:
+            if not is_same_place:
+                if isinstance(m.channel, DMChannel):
+                    destination = m.channel.recipient
+                else:
+                    destination = f'{channel.mention}** on **{m.guild}'
+                return f'Sent message to **{destination}**'
