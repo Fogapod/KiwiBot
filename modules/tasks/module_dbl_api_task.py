@@ -31,12 +31,15 @@ class Module(ModuleBase):
 
     async def guild_size_task(self):
         headers = {'Authorization': self.dbl_token}
-        params = {'server_count': len(self.bot.guilds)}
 
         while True:
+            data = {
+                'server_count': len(self.bot.guilds),
+                'shard_count':  len(self.bot.shards)
+            }
             try:
-                await self.bot.sess.post(API_URL, params=params, headers=headers)
+                await self.bot.sess.post(API_URL, headers=headers, data=data)
             except Exception as e:
                 pass
 
-            await asyncio.sleep(10)
+            await asyncio.sleep(300)
