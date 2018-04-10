@@ -54,6 +54,9 @@ class Module(ModuleBase):
             if user is None:
                 return '{warning} User not found'
 
+            if user.bot:
+                return '{warning} Can\'t send message to bot'
+
             channel = user.dm_channel
             if channel is None:
                 channel = await user.create_dm()
@@ -69,10 +72,9 @@ class Module(ModuleBase):
         if flags.get('delete', False):
             await self.bot.delete_message(msg)
 
-        try:
-            m = await channel.send(args[1:])
-        except Exception as e:
-            return '{error} Failed to deliver message: **%s**: %s' % (e.__class__.__name__, e)
+        m = await self.send(msg, channel=channel, content=args[1:])
+        if m is None:
+            return '{error} Failed to deliver message. (blocked by user / no common servers)'
         else:
             await self.bot.register_response(msg, m)
             if not is_same_place:
