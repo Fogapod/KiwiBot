@@ -18,12 +18,17 @@ class Module(ModuleBase):
         'Available flags:\n'
         '\tt: show permissions set to true only\n'
         '\tf: show permissions set to false only\n'
-        '\tg or global: show guild permissions'
+        '\tg or global: show guild permissions\n'
+        '\tv or value: use custom permission value'
     )
 
     name = 'permissions'
     aliases = (name, 'perms')
     call_flags = {
+        'value': {
+            'alias': 'v',
+            'bool': False
+        },
         't': {
             'bool': True
         },
@@ -38,14 +43,29 @@ class Module(ModuleBase):
     guild_only = True
 
     async def on_call(self, msg, args, **flags):
-        only_true  = flags.get('t', False)
-        only_false = flags.get('f', False)
-        use_global = flags.get('global', False)
+        value = flags.pop('value', None)
+
+        if value:
+            if flags:
+                return '{error} value flag conflict with all other flags'
+
+            if not value.isdigit():
+                return '{error} value is not integer'
+
+            permissions = Permissions(permissions=int(value))
+        else:
+            permissions = None
+
+        only_true  = flags.pop('t', False)
+        only_false = flags.pop('f', False)
+        use_global = flags.pop('global', False)
 
         if only_true and only_false:
             return '{error} t and f flags conflict'
 
-        if len(args) == 1:
+        if permissions is not None:
+            target = value
+        elif len(args) == 1:
             if use_global:
                 permissions = msg.author.guild_permissions
             else:
