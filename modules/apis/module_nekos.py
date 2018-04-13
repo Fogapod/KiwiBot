@@ -65,9 +65,9 @@ class Module(ModuleBase):
             if len(args) < 3:
                 return '{warning} Pwease, give me text to make kawaii'
             text = args[2:]
-            if len(text) > 800:
-                return '{error} oopsie whoopsie, seems like youw text is longew thany 800 chaws~~'
-            chunks = [text[i:i + 100] for i in range(0, len(text), 100)]
+            if len(text) > 1000:
+                return '{error} oopsie whoopsie, seems like youw text is longew thany 1000 chaws~~'
+            chunks = [text[i:i + 200] for i in range(0, len(text), 200)]
             owo = ''
             url = '/'.join((API_URL, 'owoify'))
             for c in chunks:
