@@ -85,7 +85,7 @@ class ArgParser:
                 else:
                     flags[alias] = arg
                     return 1
-            else:  # unkniwn flag
+            else:  # unknown flag
                 flags[flag] = True
 
             return 0
