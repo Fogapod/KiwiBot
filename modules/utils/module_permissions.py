@@ -112,14 +112,14 @@ class Module(ModuleBase):
                             setattr(permissions, k, v)
             else:
                 member = await find_user(args[1:], msg, self.bot, strict_guild=True)
+                if member is None:
+                    return '{warning} Role or member not found'
+
                 if use_global:
                     permissions = member.guild_permissions
                 else:
                     permissions = channel.permissions_for(member)
                 target = str(member)
-
-                if member is None:
-                    return '{warning} Role or member not found'
 
         if only_true:
             p = [(k, v) for k, v in permissions if v]
