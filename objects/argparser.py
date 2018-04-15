@@ -103,6 +103,8 @@ class ArgParser:
                     flag = arg[2:]
                     if not flag:
                         args += self.args[i + 1:] + ['']
+                        if i > 0:
+                            seps += self._separators[i - 1:]
                         break
                 else:
                     for c in arg[1:-1]:
