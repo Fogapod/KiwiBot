@@ -1,8 +1,8 @@
 from objects.modulebase import ModuleBase
 
-from utils.funcs import find_role, find_user
+from utils.funcs import find_role, find_user, find_channel
 
-from discord import Permissions
+from discord import Permissions, TextChannel, VoiceChannel
 
 
 PERM_MISSING = '❌'
@@ -16,6 +16,7 @@ class Module(ModuleBase):
     short_doc = 'Show list of member or role permissions.'
     additional_doc = (
         'Available flags:\n'
+        '\tc or channel: channel to check permissions in\n'
         '\tt: show permissions set to true only\n'
         '\tf: show permissions set to false only\n'
         '\tg or global: show guild permissions\n'
@@ -27,6 +28,10 @@ class Module(ModuleBase):
     call_flags = {
         'value': {
             'alias': 'v',
+            'bool': False
+        },
+        'channel': {
+            'alias': 'c',
             'bool': False
         },
         't': {
@@ -56,6 +61,14 @@ class Module(ModuleBase):
         else:
             permissions = None
 
+        channel_flag = flags.pop('channel', None)
+        if channel_flag is None:
+            channel = msg.channel
+        else:
+            channel = await find_channel(channel_flag, msg.guild, self.bot)
+            if channel is None:
+                return '{warning} Channel not found'
+
         only_true  = flags.pop('t', False)
         only_false = flags.pop('f', False)
         use_global = flags.pop('global', False)
@@ -69,22 +82,11 @@ class Module(ModuleBase):
             if use_global:
                 permissions = msg.author.guild_permissions
             else:
-                permissions = msg.channel.permissions_for(msg.author)
+                permissions = channel.permissions_for(msg.author)
             target = str(msg.author)
         else:
-            member = await find_user(args[1:], msg, self.bot, strict_guild=True)
-            if member is not None:
-                if use_global:
-                    permissions = member.guild_permissions
-                else:
-                    permissions = msg.channel.permissions_for(member)
-                target = str(member)
-            else:
-                role = await find_role(args[1:], msg.guild, self.bot)
-
-                if role is None:
-                    return '{warning} Role or member not found'
-
+            role = await find_role(args[1:], msg.guild, self.bot)
+            if role is not None:
                 permissions = role.permissions
                 target = str(role)
 
@@ -92,11 +94,32 @@ class Module(ModuleBase):
                     if permissions.administrator:
                         permissions = Permissions.all()
                 elif permissions.administrator:
-                    permissions = Permissions(Permissions.all().value & ~Permissions.voice().value)
+                    if isinstance(channel, VoiceChannel):
+                        permissions = Permissions(
+                            Permissions.all().value & ~Permissions.text().value)
+                    elif isinstance(channel, TextChannel):
+                        permissions = Permissions(
+                            Permissions.all().value & ~Permissions.voice().value)
+                    else:
+                        permissions = Permissions(
+                            Permissions.all().value
+                            & ~Permissions.text().value
+                            & ~Permissions.voice().value
+                        )
                 else:
-                    for k, v in msg.channel.overwrites_for(role):
+                    for k, v in channel.overwrites_for(role):
                         if v is not None:
                             setattr(permissions, k, v)
+            else:
+                member = await find_user(args[1:], msg, self.bot, strict_guild=True)
+                if use_global:
+                    permissions = member.guild_permissions
+                else:
+                    permissions = channel.permissions_for(member)
+                target = str(member)
+
+                if member is None:
+                    return '{warning} Role or member not found'
 
         if only_true:
             p = [(k, v) for k, v in permissions if v]
@@ -105,4 +128,4 @@ class Module(ModuleBase):
         else:
             p = permissions
 
-        return f'Permissions of **{target}**```\n' + '\n'.join(f'{PERM_THERE if v else PERM_MISSING} | {k}' for k, v in p) + '```'
+        return f'Permissions of **{target}** in {channel.mention}```\n' + '\n'.join(f'{PERM_THERE if v else PERM_MISSING} | {k}' for k, v in p) + '```'

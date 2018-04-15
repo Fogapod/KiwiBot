@@ -119,6 +119,7 @@ async def find_user(pattern, msg, bot, strict_guild=False, max_count=1, global_s
 
 async def find_role(pattern, guild, bot, max_count=1):
     id_match = ROLE_OR_ID_REGEX.fullmatch(pattern)
+
     if id_match is not None:
         role_id = int(id_match.group(1) or id_match.group(0))
         # role = guild.get_role(role_id)
@@ -139,13 +140,19 @@ async def find_role(pattern, guild, bot, max_count=1):
     found.sort(key=lambda x: x[1])
 
     if found:
-        return found[0][0] if max_count == 1 else [r for r, mp in found[:max_count]]
+        if max_count == 1:
+            return found[0][0]
+        elif max_count == -1:
+            return [r for r, mp in found]
+        else:
+            [r for r, mp in found[:max_count]]
 
     return None
 
 
 async def find_guild(pattern, bot, max_count=1):
     id_match = ID_REGEX.fullmatch(pattern)
+
     if id_match is not None:
         guild_id = int(id_match.group(0))
         guild = bot.get_guild(guild_id)
@@ -166,17 +173,62 @@ async def find_guild(pattern, bot, max_count=1):
     )
 
     if found:
-        return found[0][0] if max_count == 1 else [g for g, mp in found[:max_count]]
+        if max_count == 1:
+            return found[0][0]
+        elif max_count == -1:
+            return [g for g, mp in found]
+        else:
+            [g for g, mp in found[:max_count]]
 
     return None
 
 find_server = find_guild
 
 
+async def find_channel(
+    pattern, guild, bot, max_count=1,
+    global_search=False, include_text=True, include_voice=True, include_category=True
+    ):
+    found = []
+    id_match = ID_REGEX.fullmatch(pattern)
+
+    if id_match is not None:
+        channel_id = int(id_match.group(0))
+        if global_search:
+            found.append((bot.get_channel(channel_id), 0))
+        else:
+            found.append((guild.get_channel(channel_id), 0))
+    else:
+        for channel in bot.channels if global_search else guild.channels:
+            if isinstance(channel, discord.TextChannel) and not include_text:
+                continue
+            if isinstance(channel, discord.VoiceChannel) and not include_voice:
+                continue
+            if isinstance(channel, discord.CategoryChannel) and not include_category:
+                continue
+
+            match_pos = channel.name.lower().find(pattern)
+            if match_pos != -1:
+                found.append((channel, match_pos))
+
+    found.sort(key=lambda x: (x[1], x[0].name))
+
+    if found:
+        if max_count == 1:
+            return found[0][0]
+        elif max_count == -1:
+            return [c for c, mp in found]
+        else:
+            [c for c, mp in found[:max_count]]
+
+    return None
+
+
 async def replace_mentions(content, channel, bot):
     for mid in USER_MENTION_REGEX.findall(content):
         mid = int(mid)
         user = None
+
         if getattr(channel, 'guild', None) is not None:
             user = channel.guild.get_member(mid)
         if user is None:

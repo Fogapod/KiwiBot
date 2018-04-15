@@ -68,6 +68,7 @@ class ArgParser:
 
     def parse_flags(self, known_flags={}):
         args = []
+        seps = []
         flags = {}
         flag = ''
 
@@ -110,8 +111,11 @@ class ArgParser:
                     flag = arg[-1]
             else:
                 args.append(arg)
+                if i > 0 and len(self._separators) >= i:
+                    seps.append(self._separators[i - 1])
 
         self.args = args[:-1]
+        self._separators = seps
         self.flags = flags
 
         return flags
