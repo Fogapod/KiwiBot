@@ -67,7 +67,7 @@ class Module(ModuleBase):
         is_same_place = getattr(channel, 'guild', None) == getattr(msg, 'guild', None)
         if not is_same_place:
             if not await PermissionBotOwner().check(msg.channel, msg.author):
-                return '{warning} Can\'t send messages to other guilds or users'
+                return '{warning} Only bot owner can send messages to other guilds or users'
 
         if flags.get('delete', False):
             await self.bot.delete_message(msg)
