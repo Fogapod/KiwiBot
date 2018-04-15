@@ -128,4 +128,4 @@ class Module(ModuleBase):
         else:
             p = permissions
 
-        return f'Permissions of **{target}** in {channel.mention}```\n' + '\n'.join(f'{PERM_THERE if v else PERM_MISSING} | {k}' for k, v in p) + '```'
+        return f'Permissions of **{target}** in **{channel.mention if not use_global else msg.guild}**```\n' + '\n'.join(f'{PERM_THERE if v else PERM_MISSING} | {k}' for k, v in p) + '```'
