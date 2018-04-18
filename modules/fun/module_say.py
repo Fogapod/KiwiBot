@@ -1,7 +1,7 @@
 from objects.modulebase import ModuleBase
 from objects.permissions import PermissionBotOwner
 
-from utils.funcs import find_user
+from utils.funcs import find_user, find_channel
 
 from discord import DMChannel
 
@@ -43,10 +43,7 @@ class Module(ModuleBase):
             return '{warning} channel and user flags are conflicting'
 
         if channel:
-            if channel.isdigit():
-                channel = self.bot.get_channel(int(channel))
-            else:
-                return '{warning} Invalid channel id given'
+            channel = await find_channel(channel, msg.guild, self.bot)
             if channel is None:
                 return '{warning} Channel not found'
         elif user:
@@ -74,7 +71,7 @@ class Module(ModuleBase):
 
         m = await self.send(msg, channel=channel, content=args[1:])
         if m is None:
-            return '{error} Failed to deliver message. (blocked by user / no common servers)'
+            return '{error} Failed to deliver message. (blocked by user / no common servers/ no permission to send messages in channel)'
         else:
             await self.bot.register_response(msg, m)
             if not is_same_place:
