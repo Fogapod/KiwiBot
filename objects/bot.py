@@ -183,7 +183,7 @@ class BotMyBot(discord.AutoShardedClient):
 
         module_response = await self.mm.check_modules(msg, clean_content)
 
-        if module_response:
+        if module_response and not isinstance(module_response, discord.Message):
             module_response = await format_response(
                 module_response, msg, self)
 

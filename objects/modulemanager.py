@@ -6,6 +6,9 @@ from importlib import reload
 
 from objects.logger import Logger
 from objects.argparser import ArgParser
+from objects.permissions import Permission
+from objects.modulebase import (
+    GuildOnly, MissingPermissions, NSFWPermissionDenied, NotEnoughArgs)
 
 
 logger = Logger.get_logger()
@@ -90,34 +93,23 @@ class ModuleManager:
     async def unload_module(self, name):
         pass
 
-    async def check_modules(self, message, clean_content):
+    async def check_modules(self, msg, clean_content):
         args = ArgParser.parse(clean_content)
 
         for name, module in self.modules.items():
             if module.disabled:
                 continue
-
             try:
-                if not await module.check_message(message, args):
+                if not await module.check_message(msg, args):
                     continue
-
-                if not module.check_guild(message):
-                    return await module.on_guild_check_failed(message)
-
-                if not module.check_nsfw_permission(message):
-                    return await module.on_nsfw_permission_denied(message)
-
-                args.parse_flags(known_flags=module._call_flags)
-                if not module.check_argument_count(len(args), message):
-                    return await module.on_not_enough_arguments(message)
-
-                missing_bot_permissions = await module.get_missing_bot_permissions(message)
-                if missing_bot_permissions:
-                    return await module.on_missing_bot_permissions(message, missing_bot_permissions)
-
-                missing_user_permissions = await module.get_missing_user_permissions(message)
-                if missing_user_permissions:
-                    return await module.on_missing_user_permissions(message, missing_user_permissions)
+            except GuildOnly:
+                return await module.on_guild_check_failed(msg)
+            except NSFWPermissionDenied:
+                return await module.on_nsfw_permission_denied(msg)
+            except NotEnoughArgs:
+                return await module.on_not_enough_arguments(msg)
+            except MissingPermissions as e:
+                return await module.on_missing_permissions(msg, *e.missing)
             except Exception:
                 logger.info(f'Failed to check command, stopped on module {name}')
                 logger.info(traceback.format_exc())
@@ -125,17 +117,19 @@ class ModuleManager:
                 self.bot.restart()
             try:
                 logger.trace(
-                    f'User {message.author} [{message.author.id}] called module {module.name} in ' +
-                    (f'guild {message.guild} [{message.guild.id}]' if message.guild is not None else 'direct messages')
+                    f'User {msg.author} [{msg.author.id}] called module {module.name} in ' +
+                    (f'guild {msg.guild} [{msg.guild.id}]' if msg.guild is not None else 'direct messages')
                 )
-                return await module.call_command(message, args, **args.flags)
+                return await module.call_command(msg, args, **args.flags)
+            except Permission as p:
+                return await module.on_missing_permissions(msg, p)
             except Exception as e:
                 module_tb = traceback.format_exc()
                 logger.info(f'Exception occured calling {name}')
                 logger.info(module_tb)
                 logger.trace(f'Calling {name} on_error')
                 try:
-                    return await module.on_error(e, module_tb, message)
+                    return await module.on_error(e, module_tb, msg)
                 except Exception:
                     logger.debug(f'Exception occured calling {name} on_error')
                     logger.debug(traceback.format_exc())

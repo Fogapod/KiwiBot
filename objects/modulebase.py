@@ -41,33 +41,6 @@ class ModuleBase:
                 self._call_flags[alias] = { 'alias': k }
             self._call_flags[k] = { 'alias': k, 'bool': bool }
 
-    def check_guild(self, msg):
-        return (msg.guild is not None) >= self.guild_only
-
-    def check_nsfw_permission(self, msg, nsfw=None):
-        if nsfw is None:
-            nsfw = self.nsfw
-        return getattr(msg.channel, 'is_nsfw', lambda: isinstance(msg.channel, DMChannel))() >= nsfw
-
-    def check_argument_count(self, argc, msg):
-        return argc - 1 >= self.required_args
-
-    async def get_missing_bot_permissions(self, msg):
-        missing = []
-        for permission in self.required_perms:
-            if not await permission.check(msg.channel, self.bot.user):
-                missing.append(permission)
-
-        return missing
-
-    async def get_missing_user_permissions(self, msg):
-        missing = []
-        for permission in self.require_perms:
-            if not await permission.check(msg.channel, msg.author):
-                missing.append(permission)
-
-        return missing
-
     async def on_guild_check_failed(self, msg):
         return '{error} This command can only be used in guild'
 
@@ -77,29 +50,60 @@ class ModuleBase:
     async def on_not_enough_arguments(self, msg):
         return await self.on_doc_request(msg)
 
-    async def on_missing_bot_permissions(self, msg, missing):
-        return (
-            '{error} I\'m missing the following permissions to execute command: '
-            '[' + ', '.join([f'`{p.name}`' for p in missing]) + ']'
-        )
+    async def on_missing_permissions(self, msg, *missing):
+        user_missing, bot_missing = [], []
 
-    async def on_missing_user_permissions(self, msg, missing):
-        return (
-            '{error} Access demied.\n'
-            'You\'re missing the following permissions to use this command: '
-            '[' + ', '.join([f'`{p.name}`' for p in missing]) + ']'
-        )
+        for p in missing:
+            (user_missing, bot_missing)[p.is_bot_missing].append(p)
+
+        response = ''
+
+        if bot_missing:
+            response += (
+                '{error} I\'m missing the following permission' + ('s' if len(bot_missing) > 1 else '') +
+                ' to execute command: ' + '[' + ', '.join([f'`{p.name}`' for p in bot_missing]) + ']\n'
+            )
+        if user_missing:
+            response += (
+                '{error} You\'re missing the following permission' + ('s' if len(user_missing) > 1 else '') +
+                ' to use command: ' + '[' + ', '.join([f'`{p.name}`' for p in user_missing]) + ']'
+            )
+
+        return response
 
     async def on_load(self, from_reload):
         pass
 
     async def check_message(self, msg, args):
-        if self.disabled:
+        if not (args and args[0].lower() in self.aliases):
             return False
         return await self.on_check_message(msg, args)
 
     async def on_check_message(self, msg, args):
-        return args and args[0].lower() in self.aliases
+        if (msg.guild is not None) < self.guild_only:
+            raise GuildOnly
+
+        if getattr(msg.channel, 'is_nsfw', lambda: isinstance(msg.channel, DMChannel))() < self.nsfw:
+            raise NSFWPermissionDenied
+
+        args.parse_flags(known_flags=self._call_flags)
+
+        if len(args) - 1 < self.required_args:
+            raise NotEnoughArgs
+
+        missing_permissions = []
+        for permission in self.required_perms:
+            if not await permission.check(msg.channel, self.bot.user):
+                missing_permissions.append(permission)
+
+        for permission in self.require_perms:
+            if not await permission.check(msg.channel, msg.author):
+                missing_permissions.append(permission)
+
+        if missing_permissions:
+            raise MissingPermissions(*missing_permissions)
+
+        return True
 
     async def call_command(self, msg, args, **flags):
         return await self.on_call(msg, args, **flags)
@@ -145,3 +149,24 @@ class ModuleBase:
 
     async def send(self, msg, channel=None, **kwargs):
         return await self.bot.send_message(channel or msg.channel, response_to=msg, **kwargs)
+
+
+class ModuleCallError(Exception):
+    pass
+
+
+class GuildOnly(ModuleCallError):
+    pass
+
+
+class NSFWPermissionDenied(ModuleCallError):
+    pass
+
+
+class NotEnoughArgs(ModuleCallError):
+    pass
+
+
+class MissingPermissions(ModuleCallError):
+    def __init__(self, *missing):
+        self.missing = missing
