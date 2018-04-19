@@ -15,7 +15,7 @@ from objects.modulemanager import ModuleManager
 from objects.config import Config
 from objects.redisdb import RedisDB
 
-from constants import STOP_EXIT_CODE, ERROR_EXIT_CODE, RESTART_EXIT_CODE
+from constants import *
 
 from utils.formatters import format_response, trim_message
 from utils import funcs
@@ -127,12 +127,7 @@ class BotMyBot(discord.AutoShardedClient):
         await self.init_prefixes()
 
         self.start_time = time.time()
-        logger.info(' ___      _   __  __      ___      _   ')
-        logger.info('| _ ) ___| |_|  \/  |_  _| _ ) ___| |_ ')
-        logger.info('| _ \/ _ \  _| |\/| | || | _ \/ _ \  _|')
-        logger.info('|___/\___/\__|_|  |_|\_, |___/\___/\__|')
-        logger.info('                      |__/             ')
-        logger.info('                                       ')
+        logger.info(ASCII_ART)
         logger.info(f'Logged in as {self.user} with {len(self.guilds)} guilds')
         logger.info('Bot ready, good luck!')
 

@@ -2,7 +2,7 @@ from objects.modulebase import ModuleBase
 from objects.permissions import PermissionEmbedLinks
 
 from utils.funcs import create_subprocess_shell, execute_process, get_local_prefix
-from constants import BOT_OWNER_ID
+from constants import BOT_OWNER_ID, DEV_GUILD_INVITE, ASCII_ART
 
 from discord import Colour, Embed
 import discord
@@ -48,7 +48,7 @@ class Module(ModuleBase):
         else:
             git_url = 'https://github.com/Fogapod/BotMyBot'
             git_commit = 'Could not get information.'
-            repo_name = 'NameBotName'
+            repo_name = 'Unnamed Bot'
 
         try:
             user = await self.bot.get_user_info(BOT_OWNER_ID)
@@ -60,23 +60,30 @@ class Module(ModuleBase):
         prefix = await get_local_prefix(msg, self.bot)
 
         embed = Embed(
-            colour=Colour.gold(), title=repo_name,
+            colour=Colour.gold(), title='Information',
             url=git_url,
             description=(
-                f'Hello, my name is **{repo_name}**!\n'
-                f'I\'m a discord bot created by **{author}**'
+                f'Hello, I\'m a discord bot created by **{author}**'
+                f'```\n{ASCII_ART}```'
             )
         )
         if self.bot.is_dev:
             embed.add_field(name='Warning', value='This is a dev instance of bot')
         embed.add_field(
-            name='Here is some useful info about me', value=(
+            name='Some useful info about me', value=(
                 f'Local prefix: **{prefix}**\n'
                 f'Bot is currently in **{len(self.bot.guilds)}** guilds with **{len(self.bot.users)}** unique users'
             ), inline=False
         )
         embed.add_field(
-            name='environment status', value=(
+            name='Useful links', value=(
+                f'[Support guild invite]({DEV_GUILD_INVITE})\n'
+                f'[Github repository]({git_url})\n'
+                f'[discordbots.org profile](https://discordbots.org/bot/{self.bot.user.id})'
+            )
+        )
+        embed.add_field(
+            name='Environment status', value=(
                 f'Python version: **{sys.version[:5]}**\n'
                 f'discord.py version: **{discord.__version__}**'
             ), inline=False
