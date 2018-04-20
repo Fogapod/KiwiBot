@@ -42,4 +42,4 @@ class Module(ModuleBase):
             except Exception as e:
                 pass
 
-            await asyncio.sleep(300)
+            await asyncio.sleep(1800)
