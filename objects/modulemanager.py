@@ -55,7 +55,6 @@ class ModuleManager:
         return module
 
     async def init_modules(self, from_reload=True):
-        print(from_reload)
         for module in self.modules.values():
             await self.init_module(module, from_reload=from_reload)
 

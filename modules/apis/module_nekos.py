@@ -4,7 +4,7 @@ from itertools import zip_longest
 
 import random
 
-from discord import Embed, Colour
+from discord import Embed, Colour, DMChannel
 
 
 API_URL = 'https://nekos.life/api/v2'
@@ -110,7 +110,7 @@ class Module(ModuleBase):
         else:
             return await self.on_doc_request(msg)
 
-        if not self.check_nsfw_permission(msg, nsfw=nsfw):
+        if getattr(msg.channel, 'is_nsfw', lambda: isinstance(msg.channel, DMChannel))() < nsfw:
             return await self.on_nsfw_permission_denied(msg)
 
         if image_tag:
