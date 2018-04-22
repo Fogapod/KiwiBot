@@ -56,12 +56,12 @@ class Module(ModuleBase):
             if user.activity is None:
                 e.add_field(
                     name='status',
-                    value=(STATUS_EMOTES[str(user.status)] if await PermissionExternalEmojis().check(msg.channel, self.bot.user) else '') + str(user.status)
+                    value=(STATUS_EMOTES[str(user.status)] if PermissionExternalEmojis().check(msg.channel, self.bot.user) else '') + str(user.status)
                 )
             else:
                 e.add_field(
                     name='activity',
-                    value=(STATUS_EMOTES[str(user.status)] if await PermissionExternalEmojis().check(msg.channel, self.bot.user) else '') + f'**{user.activity.type.name}** {user.activity.name}'
+                    value=(STATUS_EMOTES[str(user.status)] if PermissionExternalEmojis().check(msg.channel, self.bot.user) else '') + f'**{user.activity.type.name}** {user.activity.name}'
                 )
 
         e.add_field(name='robot', value='yes' if user.bot else 'no')
