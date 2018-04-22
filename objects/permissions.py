@@ -1,5 +1,4 @@
-from discord import ClientUser, TextChannel
-from discord.utils import get
+from discord import ClientUser
 
 from constants import BOT_OWNER_ID
 
@@ -9,11 +8,9 @@ class Permission(Exception):
     name = ''
     is_bot_missing = True
 
-    async def check(self, channel, user):
-        if isinstance(channel, TextChannel) and isinstance(user, ClientUser):
-            user = get(channel.members, id=user.id)
-            if user is None:
-                return False
+    def check(self, channel, user):
+        if isinstance(user, ClientUser) and channel.guild is not None:
+            user = channel.guild.me
 
         self.is_bot_missing = user.id == getattr(channel, 'guild', channel).me.id
 
@@ -25,13 +22,13 @@ class PermissionBotOwner(Permission):
     name = 'BOT_OWNER'
     is_bot_missing = False
 
-    async def check(self, channel, user):
+    def check(self, channel, user):
         return user.id == BOT_OWNER_ID
 
 
 class PermissionGuildOwner(Permission):
 
-    async def check(channel, user):
+    def check(channel, user):
         self.is_bot_missing = user.id == (channel.guild if channel.guild is not None else channel).me.id
 
         return channel.guild is not None and channel.guild.owner == user

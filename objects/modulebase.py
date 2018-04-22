@@ -93,11 +93,11 @@ class ModuleBase:
 
         missing_permissions = []
         for permission in self.required_perms:
-            if not await permission.check(msg.channel, self.bot.user):
+            if not permission.check(msg.channel, self.bot.user):
                 missing_permissions.append(permission)
 
         for permission in self.require_perms:
-            if not await permission.check(msg.channel, msg.author):
+            if not permission.check(msg.channel, msg.author):
                 missing_permissions.append(permission)
 
         if missing_permissions:
