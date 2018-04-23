@@ -43,9 +43,16 @@ class Module(ModuleBase):
             return '{warning} channel and user flags are conflicting'
 
         if channel:
-            channel = await find_channel(channel, msg.guild, self.bot)
+            channel = await find_channel(
+                channel, msg.guild, self.bot,
+                include_voice=False, include_category=False
+            )
             if channel is None:
                 return '{warning} Channel not found'
+
+            if not channel.permissions_for(msg.author).send_messages:
+                return '{warning} You don\'t have permission to send messages to this channel'
+
         elif user:
             user = await find_user(user, msg, self.bot)
             if user is None:
@@ -71,7 +78,7 @@ class Module(ModuleBase):
 
         m = await self.send(msg, channel=channel, content=args[1:])
         if m is None:
-            return '{error} Failed to deliver message. (blocked by user / no common servers/ no permission to send messages in channel)'
+            return '{error} Failed to deliver message. (blocked by user/no common servers/no permission to send messages to this channel)'
         else:
             await self.bot.register_response(msg, m)
             if not is_same_place:
