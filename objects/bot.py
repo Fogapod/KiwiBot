@@ -221,11 +221,11 @@ class BotMyBot(discord.AutoShardedClient):
         content = fields.pop('content', '')
         content = content.replace(self.token, 'TOKEN_LEAKED')
 
+        if replace_mentions:
+            content = await funcs.replace_mentions(content, channel, self)
         if replace_everyone:
             content = content.replace('@everyone', '@\u200beveryone')
             content = content.replace('@here', '@\u200bhere')
-        if replace_mentions:
-            content = await funcs.replace_mentions(content, channel, self)
 
         content = trim_message(content)
         fields['content'] = content
