@@ -116,8 +116,8 @@ class ModuleManager:
                 self.bot.restart()
             try:
                 logger.trace(
-                    f'User {msg.author} [{msg.author.id}] called module {module.name} in ' +
-                    (f'guild {msg.guild} [{msg.guild.id}]' if msg.guild is not None else 'direct messages')
+                    f'{msg.author}-{msg.author.id} called {module.name} in ' +
+                    (f'guild {msg.guild}-{msg.guild.id}' if msg.guild is not None else 'direct messages')
                 )
                 return await module.call_command(msg, args, **args.flags)
             except Permission as p:
