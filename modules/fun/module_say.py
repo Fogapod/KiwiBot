@@ -42,15 +42,15 @@ class Module(ModuleBase):
         if channel and user:
             return '{warning} channel and user flags are conflicting'
 
-        if channel:
+        if channel and msg.guild:
             channel = await find_channel(
-                channel, msg.guild, self.bot,
+                channel, msg.guild, self.bot, global_id_search=True,
                 include_voice=False, include_category=False
             )
             if channel is None:
                 return '{warning} Channel not found'
 
-            if not channel.permissions_for(msg.author).send_messages:
+            if msg.author not in getattr(getattr(channel, 'guild', None), 'members', {}) or not channel.permissions_for(msg.author).send_messages:
                 return '{warning} You don\'t have permission to send messages to this channel'
 
         elif user:
@@ -70,7 +70,7 @@ class Module(ModuleBase):
 
         is_same_place = getattr(channel, 'guild', None) == getattr(msg, 'guild', None)
         if not is_same_place:
-            if not await PermissionBotOwner().check(msg.channel, msg.author):
+            if not PermissionBotOwner().check(msg.channel, msg.author):
                 return '{warning} Only bot owner can send messages to other guilds or users'
 
         if flags.get('delete', False):

@@ -9,7 +9,7 @@ class Permission(Exception):
     is_bot_missing = True
 
     def check(self, channel, user):
-        if isinstance(user, ClientUser) and channel.guild is not None:
+        if isinstance(user, ClientUser) and getattr(channel, 'guild', None) is not None:
             user = channel.guild.me
 
         self.is_bot_missing = user.id == getattr(channel, 'guild', channel).me.id

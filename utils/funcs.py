@@ -186,7 +186,7 @@ find_server = find_guild
 
 
 async def find_channel(
-    pattern, guild, bot, max_count=1,
+    pattern, guild, bot, max_count=1, global_id_search=False,
     global_search=False, include_text=True, include_voice=True, include_category=True
     ):
     found = []
@@ -194,7 +194,7 @@ async def find_channel(
 
     if id_match is not None:
         channel_id = int(id_match.group(0))
-        if global_search:
+        if global_id_search:
             found.append((bot.get_channel(channel_id), 0))
         else:
             found.append((guild.get_channel(channel_id), 0))
