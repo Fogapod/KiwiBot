@@ -194,12 +194,16 @@ async def find_channel(
 
     if id_match is not None:
         channel_id = int(id_match.group(0))
+        channel = None
+
         if global_id_search:
-            found.append((bot.get_channel(channel_id), 0))
-        else:
-            found.append((guild.get_channel(channel_id), 0))
+            channel = bot.get_channel(channel_id)
+        elif guild is not None:
+            channel = guild.get_channel(channel_id)
+        if channel is not None:
+            found.append((channel, 0))
     else:
-        for channel in bot.channels if global_search else guild.channels:
+        for channel in bot.get_all_channels() if global_search else guild.channels if guild is not None else ():
             if isinstance(channel, discord.TextChannel) and not include_text:
                 continue
             if isinstance(channel, discord.VoiceChannel) and not include_voice:

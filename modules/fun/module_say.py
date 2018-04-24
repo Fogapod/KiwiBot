@@ -42,7 +42,7 @@ class Module(ModuleBase):
         if channel and user:
             return '{warning} channel and user flags are conflicting'
 
-        if channel and msg.guild:
+        if channel:
             channel = await find_channel(
                 channel, msg.guild, self.bot, global_id_search=True,
                 include_voice=False, include_category=False
