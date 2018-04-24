@@ -1,7 +1,7 @@
 from objects.modulebase import ModuleBase
 from objects.permissions import PermissionExternalEmojis
 
-from utils.funcs import find_user
+from utils.funcs import find_user, _get_last_user_message_timestamp
 
 from discord import Embed, Colour, Member
 
@@ -47,21 +47,30 @@ class Module(ModuleBase):
                     name='member since', inline=False,
                     value=f'`{user.joined_at.replace(microsecond=0)}` ({(datetime.now() - user.joined_at).days} days)'
                 )
+                last_msg_ts = _get_last_user_message_timestamp(user.id, msg.channel.id, self.bot)
+                if last_msg_ts != datetime.fromtimestamp(0):
+                    last_msg_ts = last_msg_ts.replace(microsecond=0)
+                    e.add_field(
+                        name='last message sent', inline=False,
+                        value=f'`{last_msg_ts}`'
+                    )
                 e.add_field(name='top role', value=user.top_role.mention)
                 e.add_field(name='total roles', value=len(user.roles))
 
                 if user.nick is not None:
                     e.add_field(name='nick', value=user.nick, inline=False)
 
+            external_emoji_perm = PermissionExternalEmojis().check(msg.channel, self.bot.user)
+
             if user.activity is None:
                 e.add_field(
                     name='status',
-                    value=(STATUS_EMOTES[str(user.status)] if PermissionExternalEmojis().check(msg.channel, self.bot.user) else '') + str(user.status)
+                    value=(STATUS_EMOTES[str(user.status)] if external_emoji_perm else '') + str(user.status)
                 )
             else:
                 e.add_field(
                     name='activity',
-                    value=(STATUS_EMOTES[str(user.status)] if PermissionExternalEmojis().check(msg.channel, self.bot.user) else '') + f'**{user.activity.type.name}** {user.activity.name}'
+                    value=(STATUS_EMOTES[str(user.status)] if external_emoji_perm else '') + f'**{user.activity.type.name}** {user.activity.name}'
                 )
 
         e.add_field(name='robot', value='yes' if user.bot else 'no')
