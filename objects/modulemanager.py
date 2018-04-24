@@ -117,7 +117,7 @@ class ModuleManager:
             try:
                 logger.trace(
                     f'{msg.author}-{msg.author.id} called {module.name} in ' +
-                    (f'guild {msg.guild}-{msg.guild.id}' if msg.guild is not None else 'direct messages')
+                    ('direct messages' if msg.guild is None else f'{msg.guild}-{msg.guild.id}')
                 )
                 return await module.call_command(msg, args, **args.flags)
             except Permission as p:
