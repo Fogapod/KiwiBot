@@ -66,6 +66,10 @@ class Module(ModuleBase):
                 {
                     'name': 'Bitrate',
                     'value': channel.bitrate
+                },
+                {
+                    'name': 'Category',
+                    'value': channel.category.name
                 }
             ]
         else:
