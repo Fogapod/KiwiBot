@@ -140,7 +140,8 @@ class ModuleBase:
     async def on_error(self, e, tb_text, msg):
         return (
             '{error} Error appeared during execution **'
-            + self.name + '**: **' + e.__class__.__name__ + '**'
+            + self.name + '**: **' + e.__class__.__name__ + '**\n'
+            + 'Please report this to bot owner\n'
             + '```\n' + '\n'.join(tb_text.split('\n')[-4:]) + '\n```'
         )
 

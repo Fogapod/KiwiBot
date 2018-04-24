@@ -132,7 +132,7 @@ async def find_role(pattern, guild, bot, max_count=1):
     found = []
     pattern = pattern.lower()
 
-    for role in guild.roles:
+    for role in guild.roles if guild is not None else []:
         match_pos = role.name.lower().find(pattern)
         if match_pos != -1:
             found.append((role, match_pos))
