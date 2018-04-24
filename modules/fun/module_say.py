@@ -50,9 +50,6 @@ class Module(ModuleBase):
             if channel is None:
                 return '{warning} Channel not found'
 
-            if msg.author not in getattr(getattr(channel, 'guild', None), 'members', {}) or not channel.permissions_for(msg.author).send_messages:
-                return '{warning} You don\'t have permission to send messages to this channel'
-
         elif user:
             user = await find_user(user, msg, self.bot)
             if user is None:
@@ -72,6 +69,8 @@ class Module(ModuleBase):
         if not is_same_place:
             if not PermissionBotOwner().check(msg.channel, msg.author):
                 return '{warning} Only bot owner can send messages to other guilds or users'
+        elif not channel.permissions_for(msg.author).send_messages:
+            return '{warning} You don\'t have permission to send messages to this channel'
 
         if flags.get('delete', False):
             await self.bot.delete_message(msg)
