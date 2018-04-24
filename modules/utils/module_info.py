@@ -57,38 +57,40 @@ class Module(ModuleBase):
         else:
             author = str(user)
 
-        prefix = await get_local_prefix(msg, self.bot)
-
-        embed = Embed(
+        e = Embed(
             colour=Colour.gold(), title='Information',
             url=git_url,
             description=(
-                f'Hello, I\'m a discord bot created by **{author}**'
+                f'Hello, I\'m a discord bot created by **{author}**\n'
                 f'```\n{ASCII_ART}```'
             )
         )
         if self.bot.is_dev:
-            embed.add_field(name='Warning', value='This is a dev instance of bot')
-        embed.add_field(
-            name='Some useful info about me', value=(
-                f'Local prefix: **{prefix}**\n'
-                f'Bot is currently in **{len(self.bot.guilds)}** guilds with **{len(self.bot.users)}** unique users'
+            e.add_field(name='Warning', value='This is a dev instance of bot')
+        e.add_field(
+            name='Stats', value=(
+                f'Bot is currently in **{len(self.bot.guilds)}** guilds with **{len(self.bot.users)}** unique users\n'
+                f'**{len(tuple(self.bot.get_all_channels()))}** channels\n'
+                f'**{len(self.bot.emojis)}** custom emojis\n'
+                f'**{len(self.bot.shards)}** shards\n'
+                f'**{len(self.bot.voice_clients)}** active voice connections'
             ), inline=False
         )
-        embed.add_field(
+        e.add_field(
             name='Useful links', value=(
                 f'[Support guild invite]({DEV_GUILD_INVITE})\n'
                 f'[Github repository]({git_url})\n'
                 f'[discordbots.org profile](https://discordbots.org/bot/{self.bot.user.id})'
             )
         )
-        embed.add_field(
+        e.add_field(
             name='Environment status', value=(
                 f'Python version: **{sys.version[:5]}**\n'
                 f'discord.py version: **{discord.__version__}**'
             ), inline=False
         )
-        embed.add_field(name='git status', value=git_commit, inline=False)
-        embed.set_thumbnail(url=self.bot.user.avatar_url)
+        e.add_field(name='git status', value=git_commit, inline=False)
+        e.set_thumbnail(url=self.bot.user.avatar_url)
+        e.set_footer(text='Local prefix: ' + await get_local_prefix(msg, self.bot))
 
-        await self.send(msg, embed=embed)
+        await self.send(msg, embed=e)
