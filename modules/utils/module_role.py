@@ -2,7 +2,7 @@ from objects.modulebase import ModuleBase
 
 from utils.funcs import find_role
 
-from discord import Embed, Colour
+from discord import Embed
 
 from datetime import datetime
 
