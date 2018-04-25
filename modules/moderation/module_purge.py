@@ -61,4 +61,4 @@ class Module(ModuleBase):
             delete_after=7
         )
 
-        await msg.delete()
+        await self.bot.delete_message(msg)
