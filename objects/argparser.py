@@ -139,8 +139,16 @@ class ArgParser:
             seps = self._separators + ['']
             result = ''
 
-            for i in range(value.start or 0, value.stop or len(self.args)):
-                result += self.args[i] + seps[i]
+            start = value.start or 0
+            end = value = value.stop or len(self.args)
+
+            if start < 0:
+                start = len(self.args) + start
+            if end < 0:
+                end = len(self.args) + end
+
+            for i in range(start, end):
+                result += self.args[i] + (seps[i] if i != end - 1 else '')
             return result
         else:
             return self.args[value]
