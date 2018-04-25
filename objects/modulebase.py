@@ -14,7 +14,7 @@ class ModuleBase:
     required_perms   = ()     # permissions required for bot
     require_perms    = ()     # permissions required from user
     required_args    = 0      # number if required arguments
-    call_flags       = {}     # flags can be customized there
+    call_flags       = {}     # flags are specified here
     guild_only       = False  # can only be used in guild
     nsfw             = False  # can only be used in nsfw channel
     hidden           = False  # would be hidden when possible
