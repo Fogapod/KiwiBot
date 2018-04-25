@@ -5,7 +5,7 @@ from utils.funcs import find_user
 
 
 DEF_LIMIT = 100
-MAX_LIMIT = 1000
+MAX_LIMIT = 500
 
 class Module(ModuleBase):
 
@@ -30,7 +30,7 @@ class Module(ModuleBase):
         if len(args) > 1:
             if args[-1].isdigit():
                 limit = int(args[-1])
-                if limit > 1000:
+                if limit > MAX_LIMIT:
                     limit = MAX_LIMIT
                 if len(args) > 2:
                     user_string = args[1:-1]
@@ -57,7 +57,7 @@ class Module(ModuleBase):
         )
 
         await msg.channel.send(
-            f'Deleted {len(deleted)} messages from {" ".join(set("**" + str(m.author) + "**" for m in deleted))}' if deleted else 'No matched messages found',
+            f'Deleted {len(deleted)} messages from {", ".join(set("**" + str(m.author) + "**" for m in deleted))}' if deleted else 'No matched messages found',
             delete_after=7
         )
 
