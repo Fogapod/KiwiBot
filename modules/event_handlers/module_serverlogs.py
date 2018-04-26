@@ -1,7 +1,9 @@
 from objects.modulebase import ModuleBase
 from objects.permissions import PermissionManageGuild
 
-from utils.formatters import lazy_format
+from utils.formatters import replace_mass_mentions, trim_text
+
+from discord import File
 
 
 class Module(ModuleBase):
@@ -18,7 +20,9 @@ class Module(ModuleBase):
         self.events = {
             'command_use': self.on_command_use,
             'member_join': self.on_member_join,
-            'member_remove': self.on_member_leave
+            'member_remove': self.on_member_leave,
+            'message_delete': self.on_message_delete,
+            'message_edit': self.on_message_edit
         }
 
     async def get_logging_channel(self, guild):
@@ -52,6 +56,40 @@ class Module(ModuleBase):
             return
 
         await self.log(channel, f'**{member}**-`{member.id}` left guild')
+
+    async def on_message_delete(self, msg):
+        if msg.author.id == self.bot.user.id:
+            return
+
+        channel = await self.get_logging_channel(msg.guild)
+        if not channel:
+            return
+
+        content = '```\n{msg.content}```' if msg.content else ''
+        content = f'🗑 Message by **{msg.author}** deleted in {msg.channel.mention}{content}'
+        content = replace_mass_mentions(content)
+        content = trim_text(content)
+        await self.log(
+            channel, content, embed=msg.embeds[0] if msg.embeds else None,
+            files=[File(await (await self.bot.sess.get(a.url)).read(), filename=a.filename) for a in msg.attachments]
+        )
+    async def on_message_edit(self, before, after):
+        if after.author.id == self.bot.user.id:
+            return
+
+        if before.pinned != after.pinned:
+            return
+
+        channel = await self.get_logging_channel(after.guild)
+        if not channel:
+            return
+
+        before_content = f'Old```\n{before.content}```' if before.content else ''
+        after_content = f'New```\n{after.content}```' if after.content else ''
+        content = f'📝 **{after.author}** edited message `{after.id}` in {after.channel.mention}\n{before_content}{after_content}'
+        content = replace_mass_mentions(content)
+        content = trim_text(content)
+        await self.log(channel, content, embed=before.embeds[0] if before.embeds else None)
 
     async def on_call(self, msg, args, **flags):
         if len(args) == 1:
