@@ -17,8 +17,7 @@ from objects.redisdb import RedisDB
 
 from constants import *
 
-from utils.formatters import format_response, trim_message
-from utils import funcs
+from utils import formatters
 
 
 class BotMyBot(discord.AutoShardedClient):
@@ -178,7 +177,7 @@ class BotMyBot(discord.AutoShardedClient):
             if isinstance(module_response, discord.Message):
                 return
 
-            module_response = await format_response(
+            module_response = await formatters.format_response(
                 module_response, msg, self)
 
         if module_response:
@@ -216,17 +215,16 @@ class BotMyBot(discord.AutoShardedClient):
             except Exception:
                 pass
 
-    async def send_message(self, channel, response_to=None, replace_everyone=True, replace_mentions=True, **fields):
+    async def send_message(self, channel, response_to=None, replace_mass_mentions=True, replace_mentions=True, **fields):
         content = fields.pop('content', '')
         content = content.replace(self.token, 'TOKEN_LEAKED')
 
         if replace_mentions:
-            content = await funcs.replace_mentions(content, channel, self)
-        if replace_everyone:
-            content = content.replace('@everyone', '@\u200beveryone')
-            content = content.replace('@here', '@\u200bhere')
+            content = await formatters.replace_mentions(content, channel, self)
+        if replace_mass_mentions:
+            content = formatters.replace_mass_mentions(content)
 
-        content = trim_message(content)
+        content = formatters.trim_text(content)
         fields['content'] = content
 
         message = None
@@ -258,17 +256,16 @@ class BotMyBot(discord.AutoShardedClient):
 
             return message
 
-    async def edit_message(self, msg, replace_everyone=True, replace_mentions=True, **fields):
+    async def edit_message(self, msg, replace_mass_mentions=True, replace_mentions=True, **fields):
         content = fields.pop('content', '')
         content = content.replace(self.token, 'TOKEN_LEAKED')
 
-        if replace_everyone:
-            content = content.replace('@everyone', '@\u200beveryone')
-            content = content.replace('@here', '@\u200bhere')
         if replace_mentions:
-            content = await funcs.replace_mentions(content, msg.channel, self)
+            content = await formatters.replace_mentions(content, msg.channel, self)
+        if replace_mass_mentions:
+            content = formatters.replace_mass_mentions(content)
 
-        content = trim_message(content)
+        content = formatters.trim_text(content)
         fields['content'] = content
 
         try:

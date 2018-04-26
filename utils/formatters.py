@@ -1,3 +1,6 @@
+from utils.funcs import USER_MENTION_REGEX, ROLE_MENTION_REGEX
+
+
 async def format_response(response, message, bot):
     format_dict = {}
 
@@ -27,12 +30,47 @@ async def format_response(response, message, bot):
     return lazy_format(response, **format_dict)
 
 
-def trim_message(text):
-    MAX_LEN = 2000
-    if len(text) > MAX_LEN:
-        return text[:997] + '\n...\n' + text[-998:]
+def trim_text(text, max_len=2000):
+    if len(text) > max_len:
+        return text[:max_len // 2 - 3] + '\n...\n' + text[-max_len // 2 + 2:]
 
     return text
+
+
+async def replace_mentions(content, channel, bot):
+    for mid in USER_MENTION_REGEX.findall(content):
+        mid = int(mid)
+        user = None
+
+        if getattr(channel, 'guild', None) is not None:
+            user = channel.guild.get_member(mid)
+        if user is None:
+            user = discord.utils.get(bot.users, id=mid)
+        if user is None:
+            try:
+                user = await bot.get_user_info(mid)
+            except discord.NotFound:
+                continue
+
+        content = re.sub(f'<@!?{user.id}>', f'@{user}', content)
+
+    for rim in ROLE_MENTION_REGEX.findall(content):
+        rim = int(rim)
+        if getattr(channel, 'guild', None) is not None:
+            role = discord.utils.get(channel.guild.roles, id=rim)
+        else:
+            break
+
+        if role is None:
+            continue
+
+        content = content.replace(f'<@&{role.id}>', f'@{role}')
+
+    return content
+
+
+def replace_mass_mentions(text):
+	return text.replace('@everyone', '@\u200beveryone').replace('@here', '@\u200bhere')
 
 
 def lazy_format(s, *args, **kwargs):

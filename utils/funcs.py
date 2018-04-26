@@ -228,38 +228,6 @@ async def find_channel(
     return None
 
 
-async def replace_mentions(content, channel, bot):
-    for mid in USER_MENTION_REGEX.findall(content):
-        mid = int(mid)
-        user = None
-
-        if getattr(channel, 'guild', None) is not None:
-            user = channel.guild.get_member(mid)
-        if user is None:
-            user = discord.utils.get(bot.users, id=mid)
-        if user is None:
-            try:
-                user = await bot.get_user_info(mid)
-            except discord.NotFound:
-                continue
-
-        content = re.sub(f'<@!?{user.id}>', f'@{user}', content)
-
-    for rim in ROLE_MENTION_REGEX.findall(content):
-        rim = int(rim)
-        if getattr(channel, 'guild', None) is not None:
-            role = discord.utils.get(channel.guild.roles, id=rim)
-        else:
-            break
-
-        if role is None:
-            continue
-
-        content = content.replace(f'<@&{role.id}>', f'@{role}')
-
-    return content
-
-
 def _get_last_user_message_timestamp(user_id, channel_id, bot):
     if channel_id in bot._last_messages:
         if user_id in bot._last_messages[channel_id]:
