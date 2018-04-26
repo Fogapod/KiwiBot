@@ -65,7 +65,7 @@ class Module(ModuleBase):
         if not channel:
             return
 
-        content = '```\n{msg.content}```' if msg.content else ''
+        content = f'```\n{msg.content}```' if msg.content else ''
         content = f'🗑 Message by **{msg.author}** deleted in {msg.channel.mention}{content}'
         content = replace_mass_mentions(content)
         content = trim_text(content)
