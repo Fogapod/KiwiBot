@@ -22,7 +22,8 @@ class Module(ModuleBase):
             'member_join': self.on_member_join,
             'member_remove': self.on_member_leave,
             'message_delete': self.on_message_delete,
-            'message_edit': self.on_message_edit
+            'message_edit': self.on_message_edit,
+            'member_update': self.on_member_update
         }
 
     async def get_logging_channel(self, guild):
@@ -31,6 +32,7 @@ class Module(ModuleBase):
             return guild.get_channel(int(channel_id))
 
     async def log(self, channel, text, **kwargs):
+        text = trim_text(replace_mass_mentions(text))
         await self.bot.send_message(channel, content=text, **kwargs)
 
     async def on_command_use(self, module, msg, args):
@@ -67,8 +69,7 @@ class Module(ModuleBase):
 
         content = f'```\n{msg.content}```' if msg.content else ''
         content = f'🗑 Message by **{msg.author}** deleted in {msg.channel.mention}{content}'
-        content = replace_mass_mentions(content)
-        content = trim_text(content)
+
         await self.log(
             channel, content, embed=msg.embeds[0] if msg.embeds else None,
             files=[File(await (await self.bot.sess.get(a.url)).read(), filename=a.filename) for a in msg.attachments]
@@ -87,9 +88,16 @@ class Module(ModuleBase):
         before_content = f'Old```\n{before.content}```' if before.content else ''
         after_content = f'New```\n{after.content}```' if after.content else ''
         content = f'📝 **{after.author}** edited message `{after.id}` in {after.channel.mention}\n{before_content}{after_content}'
-        content = replace_mass_mentions(content)
-        content = trim_text(content)
+
         await self.log(channel, content)
+
+    async def on_member_update(self, before, after):
+        channel = await self.get_logging_channel(after.guild)
+        if not channel:
+            return
+
+        if str(before) != str(after):  # name or discriminator updated
+            await self.log(channel, f'🔎 Member updated: **{before}** -> **{after}**')
 
     async def on_call(self, msg, args, **flags):
         if len(args) == 1:

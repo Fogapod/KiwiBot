@@ -1,3 +1,7 @@
+import re
+
+import discord
+
 from utils.funcs import USER_MENTION_REGEX, ROLE_MENTION_REGEX
 
 
