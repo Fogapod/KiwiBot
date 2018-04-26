@@ -36,11 +36,11 @@ def trim_message(text):
 
 
 def lazy_format(s, *args, **kwargs):
-  while True:
-    try:
-        return s.format(*args, **kwargs)
-    except KeyError as e:
-        key = e.args[0]
-        kwargs[key] = "{%s}" % key
-    except (ValueError, AttributeError, IndexError, TypeError):
-        return s
+    while True:
+        try:
+            return s.format(*args, **kwargs)
+        except KeyError as e:
+            key = e.args[0]
+            kwargs[key] = "{%s}" % key
+        except (ValueError, AttributeError, IndexError, TypeError):
+            return s

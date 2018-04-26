@@ -177,11 +177,6 @@ class BotMyBot(discord.AutoShardedClient):
         if module_response:
             if isinstance(module_response, discord.Message):
                 return
-
-            module_response = await format_response(
-                module_response, msg, self)
-
-        if module_response:
             await self.send_message(
                 msg.channel, content=module_response, response_to=msg)
 
