@@ -116,9 +116,14 @@ class ModuleManager:
                 self.bot.restart()
             try:
                 logger.trace(
-                    f'{msg.author}-{msg.author.id} called {module.name} in ' +
+                    f'{msg.author}-{msg.author.id} -> {module.name} in ' +
                     ('direct messages' if msg.guild is None else f'{msg.guild}-{msg.guild.id}')
                 )
+                try:
+                    self.bot.dispatch('command_use', module, msg, args)
+                except Exception:
+                    logger.debug(f'Exception dispatching command_use event')
+                    logger.debug(traceback.format_exc())
                 return await module.call_command(msg, args, **args.flags)
             except Permission as p:
                 return await module.on_missing_permissions(msg, p)

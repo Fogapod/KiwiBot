@@ -30,9 +30,6 @@ class Module(ModuleBase):
     guild_only = True
 
     async def on_load(self, from_reload):
-        if from_reload:
-            return
-
         self.events = {
             'member_join': self.on_member_join
         }

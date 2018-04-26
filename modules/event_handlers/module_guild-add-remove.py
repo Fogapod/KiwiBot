@@ -12,9 +12,6 @@ class Module(ModuleBase):
     hidden = True
 
     async def on_load(self, from_reload):
-        if from_reload:
-            return
-
         self.events = {
             'guild_join':   self.on_guild_join,
             'guild_remove': self.on_guild_remove
