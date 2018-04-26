@@ -1,6 +1,7 @@
 from objects.modulebase import ModuleBase
 from objects.permissions import PermissionManageGuild
 
+from utils.funcs import find_channel
 from utils.formatters import lazy_format
 
 from discord import Forbidden, NotFound
@@ -22,11 +23,19 @@ class Module(ModuleBase):
         '\t{name} - user name\n'
         '\t{discrim} - user discriminator\n'
         '\t{guild} - guild name\n'
-        '\t{id} - user id'
+        '\t{id} - user id\n\n'
+        'Command flags:\n'
+        '\t--channel or -c <channel> - use matched channel'
     )
 
     name = 'leave'
     aliases = (name, )
+    call_flags = {
+        'channel': {
+            'alias': 'c',
+            'bool': False
+        }
+    }
     guild_only = True
 
     async def on_load(self, from_reload):
@@ -68,14 +77,25 @@ class Module(ModuleBase):
             await self.bot.redis.delete(f'leave_message:{msg.guild.id}')
             return 'Leave message removed'
 
+        channel_flag = flags.get('channel')
+        if channel_flag:
+            channel = await find_channel(
+                channel_flag, msg.guild, self.bot,
+                include_voice=False, include_category=False
+            )
+            if channel is None:
+                return '{error} Channel not found'
+        else:
+            channel = msg.channel
+
         text = args[1:]
         if not msg.channel.permissions_for(msg.author).mention_everyone:
             text = text.replace('@everyone', '@\u200beveryone')
             text = text.replace('@here', '@\u200bhere')
 
-        await self.bot.redis.set(f'leave_message:{msg.guild.id}', f'{msg.channel.id}:{text}')
+        await self.bot.redis.set(f'leave_message:{msg.guild.id}', f'{channel.id}:{text}')
         await self.bot.delete_message(msg)
         await self.send(
             msg, delete_after=7,
-            content='Set leave message in this channel.'
+            content=f'Set leave message in {channel.mention}'
         )

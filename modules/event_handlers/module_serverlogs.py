@@ -40,7 +40,7 @@ class Module(ModuleBase):
 
         await self.log(
             channel,
-            f'**{msg.author}**-`{msg.author.id}` used command **{module.name}** in channel {msg.channel.mention}'
+            f'**{msg.author}**-`{msg.author.id}` used command **{module.name}** in {msg.channel.mention}'
         )
 
     async def on_member_join(self, member):
@@ -77,8 +77,8 @@ class Module(ModuleBase):
         if after.author.id == self.bot.user.id:
             return
 
-        if before.pinned != after.pinned:
-            return
+        if before.content == after.content:
+            return  # pin/unpin or embed update
 
         channel = await self.get_logging_channel(after.guild)
         if not channel:
@@ -89,7 +89,7 @@ class Module(ModuleBase):
         content = f'📝 **{after.author}** edited message `{after.id}` in {after.channel.mention}\n{before_content}{after_content}'
         content = replace_mass_mentions(content)
         content = trim_text(content)
-        await self.log(channel, content, embed=before.embeds[0] if before.embeds else None)
+        await self.log(channel, content)
 
     async def on_call(self, msg, args, **flags):
         if len(args) == 1:
