@@ -40,10 +40,15 @@ class Module(ModuleBase):
         elif isinstance(channel, TextChannel):
             c_type = 'Text Channel'
             member_count = len(channel.members)
+            if channel.permissions_for(channel.guild.me).read_messages:
+                pins = len(await channel.pins())
+            else:
+                pins = 'No access'
+
             additional_fields = [
                 {
                     'name': 'Pins',
-                    'value': len(await channel.pins())
+                    'value': pins
                 },
                 {
                     'name': 'Category',

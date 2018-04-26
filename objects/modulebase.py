@@ -10,7 +10,7 @@ class ModuleBase:
     additional_doc = ''
 
     name             = ''     # name of module, should be same as in file name
-    aliases          = ()     # default on_check_message event would search for matches in this tuple
+    aliases          = ()     # default check_message event would search for matches in this tuple
     required_perms   = ()     # permissions required for bot
     require_perms    = ()     # permissions required from user
     required_args    = 0      # number if required arguments
@@ -109,12 +109,6 @@ class ModuleBase:
         return await self.on_call(msg, args, **flags)
 
     async def on_call(self, msg, args, **flags):
-        pass
-
-    async def on_message_edit(self, before, after, args, **flags):
-        pass
-
-    async def on_message_delete(self, msg, args, **flags):
         pass
 
     async def on_doc_request(self, msg):

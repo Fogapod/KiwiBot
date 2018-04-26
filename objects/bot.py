@@ -138,10 +138,6 @@ class BotMyBot(discord.AutoShardedClient):
         else:
             logger.info('Default prefixes: [' + ' '.join(self._default_prefixes) + ']')
 
-    async def on_error(self, event, *args, **kwargs):
-        if self.is_dev:
-            await super().on_error(event, *args, **kwargs)
-
     async def close(self):
         await super().close()
         logger.info('Connection closed')
@@ -178,7 +174,10 @@ class BotMyBot(discord.AutoShardedClient):
 
         module_response = await self.mm.check_modules(msg, clean_content)
 
-        if module_response and not isinstance(module_response, discord.Message):
+        if module_response:
+            if isinstance(module_response, discord.Message):
+                return
+
             module_response = await format_response(
                 module_response, msg, self)
 
