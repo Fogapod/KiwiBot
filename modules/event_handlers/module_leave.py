@@ -11,6 +11,10 @@ class Module(ModuleBase):
     usage_doc = '{prefix}{aliases} [leave text]'
     short_doc = 'Allows to set message on guild user leave.'
     additional_doc = (
+        'See current leave message:\n'
+        '\t{prefix}{aliases}\n\n'
+        'Remove leave message:\n'
+        '\t{prefix}{aliases} delete" or {prefix}{aliases} remove\n\n'
         'Leave message support several keys.\n'
         'Keys are replaced to match user.\n'
         'Currently available keys:\n'
@@ -67,7 +71,12 @@ class Module(ModuleBase):
             await self.bot.redis.delete(f'leave_message:{msg.guild.id}')
             return 'Leave message removed'
 
-        await self.bot.redis.set(f'leave_message:{msg.guild.id}', f'{msg.channel.id}:{args[1:]}')
+        text = args[1:]
+        if not msg.channel.permissions_for(msg.author).mention_everyone:
+            text = text.replace('@everyone', '@\u200beveryone')
+            text = text.replace('@here', '@\u200bhere')
+
+        await self.bot.redis.set(f'leave_message:{msg.guild.id}', f'{msg.channel.id}:{text}')
         await self.bot.delete_message(msg)
         await self.send(
             msg, delete_after=7,
