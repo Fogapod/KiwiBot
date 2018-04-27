@@ -27,6 +27,9 @@ class Module(ModuleBase):
         }
 
     async def get_logging_channel(self, guild):
+        if guild is None:
+            return
+
         channel_id = await self.bot.redis.get(f'serverlogs:{guild.id}')
         if channel_id:
             return guild.get_channel(int(channel_id))
