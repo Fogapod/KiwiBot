@@ -71,9 +71,9 @@ class BotMyBot(discord.AutoShardedClient):
         self.prefixes.extend([*self._default_prefixes, *self._mention_prefixes])
 
         self._guild_prefixes = {}
-        for p in await self.redis.execute('KEYS', 'guild_prefix:*'):
-            guild_id = int(p[len('guild_prefix:'):])
-            self._guild_prefixes[guild_id] = await self.redis.get(p)
+        for key in await self.redis.execute('KEYS', 'guild_prefix:*'):
+            guild_id = int(key.partition(':')[2])
+            self._guild_prefixes[guild_id] = await self.redis.get(key)
 
     def run(self, token=None):
         if token is None:
