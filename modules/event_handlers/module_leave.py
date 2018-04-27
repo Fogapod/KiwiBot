@@ -57,7 +57,9 @@ class Module(ModuleBase):
             )
             try:
                 await member.guild.get_channel(int(channel)).send(leave_message)
-            except (Forbidden, NotFound):
+            except NotFound:
+                await self.bot.redis.delete(f'leave_message:{member.guild.id}')
+            except Forbidden:
                 pass
 
     async def on_call(self, msg, args, **flags):

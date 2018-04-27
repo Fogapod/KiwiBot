@@ -30,9 +30,15 @@ class Module(ModuleBase):
         if guild is None:
             return
 
+        channel = None
         channel_id = await self.bot.redis.get(f'serverlogs:{guild.id}')
+
         if channel_id:
-            return guild.get_channel(int(channel_id))
+            channel = guild.get_channel(int(channel_id))
+            if channel is None:  # channel deleted
+                print(await self.bot.redis.delete(f'serverlogs:{guild.id}'))
+
+        return channel
 
     async def log(self, channel, text, **kwargs):
         text = trim_text(replace_mass_mentions(text))
