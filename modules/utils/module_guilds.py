@@ -14,7 +14,11 @@ class Module(ModuleBase):
     required_perms = (PermissionEmbedLinks(), PermissionAddReactions())
 
     async def on_call(self, msg, args, **flags):
-        lines = [f'{str(i + 1) + ")":<3}{g.name:<25} {g.id}' for i, g in enumerate(self.bot.guilds)]
+        guilds = sorted(
+            self.bot.guilds, reverse=True,
+            key=lambda g: (g.member_count, g.name)
+        )
+        lines = [f'{str(i + 1) + ")":<3}{g.name:<25} {g.id}' for i, g in enumerate(guilds)]
         lines_per_chunk = 20
         chunks = ['```\n' + '\n'.join(lines[i:i + lines_per_chunk]) + '```' for i in range(0, len(lines), lines_per_chunk)]
 
