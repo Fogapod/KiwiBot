@@ -11,11 +11,11 @@ API_URL = 'https://nekos.life/api/v2'
 
 SFW_IMG_TAGS = [
     'cuddle', 'feed', 'fox_girl', 'hug', 'kiss', 'lizard', 'meow', 'neko',
-    'pat', 'poke', 'slap', 'tickle'
+    'pat', 'poke', 'slap', 'tickle', 'avatar'
 ]
 NSFW_IMG_TAGS = [
     'random_hentai_gif', 'anal', 'bj', 'boobs', 'classic', 'cum', 'kuni',
-    'les', 'lewd', 'nsfw_neko_gif', 'pussy'
+    'les', 'lewd', 'nsfw_neko_gif', 'pussy', 'nsfw_avatar'
 ]
 
 
