@@ -29,6 +29,9 @@ class Module(ModuleBase):
             [g for g in self.bot.guilds if g.get_member(user.id) is not None],
             key=lambda g: (g.member_count, g.name), reverse=True
         )
+        if not guilds:
+            return '{warning} No common guilds'
+
         lines = [f'{str(i + 1) + ")":<3}{g.name}' for i, g in enumerate(guilds)]
         lines_per_chunk = 20
         chunks = ['```\n' + '\n'.join(lines[i:i + lines_per_chunk]) + '```' for i in range(0, len(lines), lines_per_chunk)]
