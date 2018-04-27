@@ -68,9 +68,9 @@ class Module(ModuleBase):
 
             e = Embed(colour=Colour.gold(), title='Guild autoroles')
             if human_roles:
-                e.add_field(name='Humans', value=', '.join(f'<&{r}>' for r in human_roles))
+                e.add_field(name='Humans', value=', '.join(f'<@&{r}>' for r in human_roles))
             if bot_roles:
-                e.add_field(name='Robots', value=', '.join(f'<&{r}>' for r in bot_roles))
+                e.add_field(name='Robots', value=', '.join(f'<@&{r}>' for r in bot_roles))
 
             return await self.send(msg, embed=e)
 
