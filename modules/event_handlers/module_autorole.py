@@ -89,6 +89,8 @@ class Module(ModuleBase):
                     return '{error} Role is higher or equal to your top role'
             if role.permissions > msg.author.guild_permissions:
                 return '{error} Role has higher permissions than you in guild'
+            if role.position >= msg.guild.me.top_role.position:
+                return '{error} Role is higher or equal to my top role, I won\'t be able to assign it'
 
             if bot_flag:
                 await self.bot.redis.sadd(f'autorole_bots:{msg.guild.id}', str(role.id))
