@@ -1,5 +1,6 @@
 from objects.modulebase import ModuleBase
-from objects.permissions import PermissionEmbedLinks, PermissionAddReactions
+from objects.permissions import (
+    PermissionEmbedLinks, PermissionAddReactions, PermissionReadMessageHistory)
 from objects.paginators import Paginator
 
 from utils.funcs import get_local_prefix
@@ -14,7 +15,10 @@ class Module(ModuleBase):
 
     name = 'help'
     aliases = (name, 'commands')
-    required_perms = (PermissionEmbedLinks(), PermissionAddReactions())
+    required_perms = (
+        PermissionEmbedLinks(), PermissionAddReactions(),
+        PermissionReadMessageHistory()
+    )
     call_flags = {
         'show-disabled': {
             'alias': 'd',

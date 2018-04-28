@@ -112,7 +112,10 @@ class Module(ModuleBase):
         if len(args) == 1:
             channel = msg.channel
         else:
-            channel = await find_channel(args[1:], msg.guild, self.bot)
+            channel = await find_channel(
+                args[1:], msg.guild, self.bot,
+                include_voice=False, include_category=False
+            )
             if channel is None:
                 return '{warning} Channel not found'
 
