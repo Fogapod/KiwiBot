@@ -119,6 +119,7 @@ class Module(ModuleBase):
         max_score = max(scores)
 
         e = Embed(colour=Colour.gold(), title=subject)
+        e.set_author(name=msg.author.name, icon_url=msg.author.avatar_url)
         e.description = 'Results\n'
         for s, c in sorted(zip(scores, choices), key=lambda x: (-x[0], x[1])):
             e.description += f'{c}: {s}'

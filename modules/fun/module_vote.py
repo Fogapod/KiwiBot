@@ -107,8 +107,11 @@ class Module(ModuleBase):
         percent_for = voted_for / total_votes * 100 if voted_for else 0.0
         percent_against = voted_against / total_votes * 100 if voted_against else 0.0
 
-        e = Embed(colour=Colour.gold(), title=f'Vote results ({total_votes}) votes')
-        e.description = f'For: **{voted_for}** (**{percent_for}**%)\n'
-        e.description += f'Against: **{voted_against}** (**{percent_against}**%)'
+        e = Embed(colour=Colour.gold(), title='Vote results', description=args[1:])
+        e.set_author(name=msg.author.name, icon_url=msg.author.avatar_url)
+        e.add_field(
+            name=f'{total_votes} votes',
+            value=f'For: **{voted_for}** (**{percent_for}**%)\nAgainst: **{voted_against}** (**{percent_against}**%)'
+        )
 
         await self.send(msg, embed=e)
