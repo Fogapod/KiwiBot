@@ -4,8 +4,12 @@ from objects.permissions import PermissionManageGuild
 
 class Module(ModuleBase):
 
-    usage_doc = '{prefix}{aliases} [set|remove] [prefix]'
+    usage_doc = '{prefix}{aliases} [prefix]'
     short_doc = 'Change bot guild prefix.'
+    additional_doc = (
+        'Subcommands:\n'
+        '\t{prefix}{aliases} [delete|remove|clear] - remove guild prefix'
+    )
 
     name = 'prefix'
     aliases = (name, )
@@ -16,7 +20,7 @@ class Module(ModuleBase):
             prefix = await self.bot.redis.get(f'guild_prefix:{msg.guild.id}')
 
             if not prefix:
-                return '{warning} Custom prefix not set'
+                return 'Custom prefix not set. Default is: **' + self.bot._default_prefix + '**'
             else:
                 return f'Prefix for this guild is: **{prefix}**'
 
@@ -24,18 +28,13 @@ class Module(ModuleBase):
         if not manage_guild_perm.check(msg.channel, msg.author):
             raise manage_guild_perm
 
-        if args[1:].lower() in ('remove', 'delete', 'clear', 'del', 'rem'):
+        if args[1:].lower() in ('remove', 'delete', 'clear'):
             await self.bot.redis.delete(f'guild_prefix:{msg.guild.id}')
             del self.bot._guild_prefixes[msg.guild.id]
-            return 'Guild prefix override removed'
+            return 'Guild prefix removed'
 
-        if len(args) < 3:
-            return await self.on_not_enough_arguments(msg)
+        prefix = args[1:][:200]  # 200 characters limit
+        await self.bot.redis.set(f'guild_prefix:{msg.guild.id}', prefix)
+        self.bot._guild_prefixes[msg.guild.id] = prefix.lower()
 
-        if args[1].lower() == 'set':
-            prefix = args[2:][:20]  # 20 characters limit
-            await self.bot.redis.set(f'guild_prefix:{msg.guild.id}', prefix)
-            self.bot._guild_prefixes[msg.guild.id] = prefix
-            return f'Guild prefix set to: **{prefix}**'
-
-        return await self.on_not_enough_arguments(msg)
+        return f'Guild prefix set to: **{prefix}**'

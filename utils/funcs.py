@@ -240,7 +240,7 @@ async def get_local_prefix(msg, bot):
         guild_prefix = bot._guild_prefixes.get(msg.guild.id)
         if guild_prefix is not None:
             return guild_prefix
-    return bot._default_prefixes[0]
+    return bot._default_prefix
 
 
 async def request_reaction_confirmation(msg, user, bot, emoji_accept='✅', emoji_cancel='❌', timeout=20):

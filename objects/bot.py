@@ -51,8 +51,8 @@ class BotMyBot(discord.AutoShardedClient):
         self.redis = RedisDB()
         logger.debug('RedisDB ................ connected')
 
-        self._default_prefixes = {}
-        self._mention_prefixes = {}
+        self._default_prefix = '+'
+        self._mention_prefixes = []
         self.prefixes = []
         self._guild_prefixes = {}
 
@@ -66,14 +66,14 @@ class BotMyBot(discord.AutoShardedClient):
         bot_id = self.user.id
 
         self.prefixes = []
-        self._default_prefixes = [await self.redis.get('prefix', default='+')]
+        self._default_prefix = (await self.redis.get('prefix', default='+')).lower()
         self._mention_prefixes = [f'<@{bot_id}>', f'<@!{bot_id}>']
-        self.prefixes.extend([*self._default_prefixes, *self._mention_prefixes])
+        self.prefixes.extend([self._default_prefix, *self._mention_prefixes])
 
         self._guild_prefixes = {}
         for key in await self.redis.execute('KEYS', 'guild_prefix:*'):
             guild_id = int(key.partition(':')[2])
-            self._guild_prefixes[guild_id] = await self.redis.get(key)
+            self._guild_prefixes[guild_id] = (await self.redis.get(key)).lower()
 
     def run(self, token=None):
         if token is None:
@@ -132,10 +132,8 @@ class BotMyBot(discord.AutoShardedClient):
 
         if self.is_dev:
             logger.info('Is a dev instance')
-        if len(self._default_prefixes) == 1:
-            logger.info('Default prefix: ' + self._default_prefixes[0])
-        else:
-            logger.info('Default prefixes: [' + ' '.join(self._default_prefixes) + ']')
+
+        logger.info('Default prefix: ' + self._default_prefix)
 
     async def close(self):
         await super().close()
