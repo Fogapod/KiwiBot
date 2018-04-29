@@ -301,14 +301,14 @@ def colour_from_str(string):
 
 def timedelta_from_string(string):
     if string.isdigit():  # use value as seconds
-        values = [0] * 5 + [int(string)]
+        values = [0] * 6 + [int(string)]
     else:
         matches = TIME_REGEX.findall(string)
         values = [sum(int(i) if i.isdigit() else 0 for i in row) for row in zip(*matches)]
         if sum(values) == 0:
             raise ValueError('Invalid input')
 
-    names = ['years', 'months', 'weeks', 'days', 'hours', 'seconds']
+    names = ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds']
     data = {n: v for n, v in zip(names, values)}
     now = datetime.utcnow()
 
