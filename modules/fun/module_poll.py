@@ -131,11 +131,13 @@ class Module(ModuleBase):
             text=f'React with {emojis[0]} - {emojis[-1]} to vote, poll ends at {wait_until.replace(microsecond=0)}UTC')
 
         try:
-            poll = await self.send(msg, embed=e)
+            poll = await self.bot.send_message(msg.channel, embed=e)
             for e in emojis:
                 await poll.add_reaction(e)
         except NotFound:
             return
+
+        await self.bot.delete_message(msg)
 
         await self.bot.redis.set(
             f'poll:{poll.channel.id}',

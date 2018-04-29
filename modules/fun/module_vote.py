@@ -118,11 +118,13 @@ class Module(ModuleBase):
             text=f'React with {REACTION_FOR} or {REACTION_AGAINST} to vote, vote ends at {wait_until.replace(microsecond=0)}UTC')
 
         try:
-            vote = await self.send(msg, embed=e)
+            vote = await self.bot.send_message(msg.channel, embed=e)
             for e in (REACTION_FOR, REACTION_AGAINST):
                 await vote.add_reaction(e)
         except NotFound:
             return
+
+        await self.bot.delete_message(msg)
 
         await self.bot.redis.set(
             f'vote:{vote.channel.id}',
