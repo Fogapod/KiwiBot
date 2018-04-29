@@ -11,7 +11,7 @@ from discord import Embed, Colour, NotFound, Forbidden
 import time
 import asyncio
 
-from datetime import datetime, timezone
+from datetime import timezone
 
 
 EMOJI_NUMBER_BASE = '{}⃣'

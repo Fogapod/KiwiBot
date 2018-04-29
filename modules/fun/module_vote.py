@@ -4,12 +4,14 @@ from objects.permissions import (
     PermissionReadMessageHistory, PermissionManageMessages
 )
 
-from utils.funcs import find_channel
+from utils.funcs import find_channel, timedelta_from_string
 
 from discord import Embed, Colour, NotFound, Forbidden
 
+import time
 import asyncio
 
+from datetime import timezone
 
 REACTION_FOR = '✅'
 REACTION_AGAINST = '❎'
@@ -22,7 +24,9 @@ class Module(ModuleBase):
         'Subcommands:\n'
         '\t{prefix}{aliases} cancel - cancels vote\n\n'
         'Command flags:\n'
-        '\t--timeout or -t <seconds> - set custom timeout, default is 30'
+        '\t--timeout or -t <time> - set custom timeout, default is 60\n\n'
+        'Time formatting examples:\n'
+        '\t1hour or 1h or 60m or 3600 will result in 1 hour'
     )
 
     name = 'vote'
@@ -43,55 +47,101 @@ class Module(ModuleBase):
     async def on_load(self, from_reload):
         self.votes = {}
 
+        for key in await self.bot.redis.keys('vote:*'):
+            value = await self.bot.redis.get(key)
+            channel_id = int(key[5:])
+            author_id, vote_id, expires_at = [int(i) for i in value.split(':')[:3]]
+
+            channel = self.bot.get_channel(channel_id)
+            author = self.bot.get_user(author_id)
+            try:
+                vote = await channel.get_message(vote_id)
+            except NotFound:
+                vote = None
+
+            if None in (channel, author, vote):
+                await self.bot.redis.delete(key)
+                return
+
+            self.votes[vote.channel.id] = self.bot.loop.create_task(
+                self.end_vote(expires_at, author, vote))
+
+    async def on_unload(self):
+        for task in self.votes.values():
+            task.cancel()
+
     async def on_call(self, msg, args, **flags):
         if args[1].lower() == 'cancel':
-            author, vote = self.votes.get(msg.channel.id, (None, None))
-            if not vote:
-                return '{warning} No active vote in channel'
+            task = self.votes.get(msg.channel.id)
+            if not task:
+                return '{warning} No active vote in channel found'
 
-            if msg.author != author:
+            value = await self.bot.redis.get(f'vote:{msg.channel.id}')
+            author_id, vote_id = [int(i) for i in value.split(':')[:2]]
+
+            if msg.author.id != author_id:
                 manage_messages_perm = PermissionManageMessages()
                 if not manage_messages_perm.check(msg.channel, msg.author):
                     raise manage_messages_perm
 
-            del self.votes[vote.channel.id]
-            return await self.bot.edit_message(vote, content='[CANCELLED]')
+            task.cancel()
+            await self.bot.redis.delete(f'vote:{msg.channel.id}')
+            del self.votes[msg.channel.id]
+
+            try:
+                vote = await msg.channel.get_message(vote_id)
+            except NotFound:
+                pass
+            else:
+                await self.bot.edit_message(vote, content='[CANCELLED]')
+
+            return await self.send(msg, content=f'**{msg.author}** cancelled vote.')
 
         if msg.channel.id in self.votes:
             return '{warning} Channel already have active vote'
 
-        timeout = flags.get('timeout', '30')
-        if not timeout.isdigit():
-            return '{error} Timeout is not a correct number'
+        try:
+            wait_until = timedelta_from_string(flags.get('timeout', '60'))
+        except:
+            return '{error} Failed to convert time'
 
-        timeout = int(timeout)
-        if not 10 <= timeout <= 3600:
-            return '{error} Timeout should be between **10** and **3600** seconds'
+        expires_at = wait_until.replace(tzinfo=timezone.utc).timestamp() + 1
 
-        e = Embed(colour=Colour.gold(), title='Vote', description=args[1:])
+        if not 10 <= expires_at - time.time() <= 3600 * 24 * 7 + 60:
+            return '{error} Timeout should be between **10** seconds and **1** week'
+
+        subject = args[1:]
+
+        e = Embed(colour=Colour.gold(), title='Vote', description=subject)
         e.set_author(name=msg.author.name, icon_url=msg.author.avatar_url)
         e.set_footer(
-            text=f'React with {REACTION_FOR} or {REACTION_AGAINST} to vote, {timeout} seconds')
-
-        vote = await self.send(msg, embed=e)
-        self.votes[vote.channel.id] = (msg.author, vote)
+            text=f'React with {REACTION_FOR} or {REACTION_AGAINST} to vote, vote ends at {wait_until.replace(microsecond=0)}UTC')
 
         try:
+            vote = await self.send(msg, embed=e)
             for e in (REACTION_FOR, REACTION_AGAINST):
                 await vote.add_reaction(e)
         except NotFound:
-            del self.votes[vote.channel.id]
             return
 
-        await asyncio.sleep(timeout)
+        await self.bot.redis.set(
+            f'vote:{vote.channel.id}',
+            f'{msg.author.id}:{vote.id}:{int(expires_at)}:{subject}'
+        )
+        self.votes[vote.channel.id] = self.bot.loop.create_task(
+            self.end_vote(expires_at, msg.author, vote))
 
-        if msg.channel.id not in self.votes:  # vote cancelled
-            return
+    async def end_vote(self, expires_at, author, vote):
+        await asyncio.sleep(expires_at - time.time())
 
+        value = await self.bot.redis.get(f'vote:{vote.channel.id}')
+        author_id, vote_id, expires_at, subject = value.split(':', 3)
+
+        await self.bot.redis.delete(f'vote:{vote.channel.id}')
         del self.votes[vote.channel.id]
 
         try:
-            vote = await msg.channel.get_message(vote.id)
+            vote = await vote.channel.get_message(vote.id)
             await vote.edit(content='[FINISHED]')
         except NotFound:
             return
@@ -104,14 +154,18 @@ class Module(ModuleBase):
                 voted_for = r.count - 1
 
         total_votes = voted_for + voted_against
-        percent_for = voted_for / total_votes * 100 if voted_for else 0.0
-        percent_against = voted_against / total_votes * 100 if voted_against else 0.0
+        percent_for = round(
+            voted_for / total_votes * 100 if voted_for else 0.0, 2)
+        percent_against = round(
+            voted_against / total_votes * 100 if voted_against else 0.0, 2)
 
-        e = Embed(colour=Colour.gold(), title='Vote results', description=args[1:])
-        e.set_author(name=msg.author.name, icon_url=msg.author.avatar_url)
+        author = self.bot.get_user(int(author_id))
+
+        e = Embed(colour=Colour.gold(), title='Vote results', description=subject)
+        e.set_author(name=author.name, icon_url=author.avatar_url)
         e.add_field(
             name=f'{total_votes} votes',
             value=f'For: **{voted_for}** (**{percent_for}**%)\nAgainst: **{voted_against}** (**{percent_against}**%)'
         )
 
-        await self.send(msg, embed=e)
+        await self.bot.send_message(vote.channel, embed=e)
