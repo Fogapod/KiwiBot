@@ -111,7 +111,7 @@ class Module(ModuleBase):
 
         expires_at = wait_until.replace(tzinfo=timezone.utc).timestamp() + 1
 
-        if not 10 <= expires_at - time.time() <= 3600 * 24 * 7:
+        if not 10 <= expires_at - time.time() <= 3600 * 24 * 7 + 60:
             return '{error} Timeout should be between **10** seconds and **1** week'
 
         if len(args) > 11:
