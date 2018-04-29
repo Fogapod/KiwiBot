@@ -141,7 +141,7 @@ class Module(ModuleBase):
             f'poll:{poll.channel.id}',
             f'{msg.author.id}:{poll.id}:{int(expires_at)}:{subject}'
         )
-        await self.bot.redis.sadd(f'poll_choices:{poll.channel.id}', *choices)
+        await self.bot.redis.rpush(f'poll_choices:{poll.channel.id}', *choices)
         self.polls[poll.channel.id] = self.bot.loop.create_task(
             self.end_poll(expires_at, msg.author, poll))
 
@@ -150,7 +150,8 @@ class Module(ModuleBase):
 
         value = await self.bot.redis.get(f'poll:{poll.channel.id}')
         author_id, poll_id, expires_at, subject = value.split(':', 3)
-        choices = await self.bot.redis.smembers(f'poll_choices:{poll.channel.id}')
+        choices = await self.bot.redis.lrange(
+            f'poll_choices:{poll.channel.id}', 0, 8)
 
         await self.bot.redis.delete(f'poll_choices:{poll.channel.id}')
         await self.bot.redis.delete(f'poll:{poll.channel.id}')

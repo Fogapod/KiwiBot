@@ -51,6 +51,12 @@ class RedisDB:
     async def smembers(self, key):
         return await self.execute('SMEMBERS', key)
 
+    async def rpush(self, key, *values):
+        return await self.execute('RPUSH', key, *values)
+
+    async def lrange(self, key, start, end):
+        return await self.execute('LRANGE', key, start, end)
+
     async def expire(self, key, seconds):
         return await self.execute('EXPIRE', key, seconds)
 
