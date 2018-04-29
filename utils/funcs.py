@@ -1,6 +1,8 @@
 import re
-import datetime
 import asyncio
+
+from dateutil.relativedelta import relativedelta
+from datetime import datetime
 
 import discord
 
@@ -18,6 +20,15 @@ MENTION_OR_ID_REGEX = re.compile(f'(?:<@!?({ID_EXPR})>)|{ID_EXPR}')
 ROLE_OR_ID_REGEX = re.compile(f'(?:<@&({ID_EXPR})>)|{ID_EXPR}')
 
 COLOUR_REGEX = re.compile('#?([a-f0-9]{6})', re.I)
+
+TIME_REGEX = re.compile('''(?:(?:([0-9]{1,2})(?:years?|y))|
+                           (?:([0-9]{1,2})(?:months?|mo))|
+                           (?:([0-9]{1,4})(?:weeks?|w))|
+                           (?:([0-9]{1,5})(?:days?|d))|
+                           (?:([0-9]{1,5})(?:hours?|h))|
+                           (?:([0-9]{1,5})(?:minutes?|m))|
+                           (?:([0-9]{1,5})(?:seconds?|s)))
+                           ''', re.VERBOSE + re.IGNORECASE)
 
 
 async def create_subprocess_exec(
@@ -232,7 +243,7 @@ def _get_last_user_message_timestamp(user_id, channel_id, bot):
     if channel_id in bot._last_messages:
         if user_id in bot._last_messages[channel_id]:
             return bot._last_messages[channel_id][user_id].edited_at or bot._last_messages[channel_id][user_id].created_at
-    return datetime.datetime.fromtimestamp(0)
+    return datetime.fromtimestamp(0)
 
 
 async def get_local_prefix(msg, bot):
@@ -286,3 +297,19 @@ def colour_from_str(string):
     if match is None:
         raise ValueError('Not a colour')
     return discord.Colour(int(match.group(1), 16))
+
+
+def timedelta_from_string(string):
+    if string.isdigit():  # use value as seconds
+        values = [0] * 5 + [int(string)]
+    else:
+        matches = TIME_REGEX.findall(string)
+        values = [sum(int(i) if i.isdigit() else 0 for i in row) for row in zip(*matches)]
+        if sum(values) == 0:
+            raise ValueError('Invalid input')
+
+    names = ['years', 'months', 'weeks', 'days', 'hours', 'seconds']
+    data = {n: v for n, v in zip(names, values)}
+    now = datetime.utcnow()
+
+    return now + relativedelta(**data)  # OverflowError possible

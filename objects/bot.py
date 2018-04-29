@@ -71,7 +71,7 @@ class BotMyBot(discord.AutoShardedClient):
         self.prefixes.extend([self._default_prefix, *self._mention_prefixes])
 
         self._guild_prefixes = {}
-        for key in await self.redis.execute('KEYS', 'guild_prefix:*'):
+        for key in await self.redis.keys('guild_prefix:*'):
             guild_id = int(key.partition(':')[2])
             self._guild_prefixes[guild_id] = (await self.redis.get(key)).lower()
 

@@ -63,6 +63,9 @@ class RedisDB:
     async def exists(self, *values):
         return await self.execute('EXISTS', *values) == len(values)
 
+    async def keys(self, pattern):
+        return await self.execute('KEYS', pattern)
+
     async def get_db_size(self):
         return await self.execute('DBSIZE')
 
