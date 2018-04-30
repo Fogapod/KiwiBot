@@ -55,6 +55,10 @@ class Module(ModuleBase):
                     'value': channel.category.name
                 },
                 {
+                    'name': 'NSFW',
+                    'value': channel.is_nsfw()
+                },
+                {
                     'name': 'Topic',
                     'value': channel.topic or 'Empty',
                     'inline': False
