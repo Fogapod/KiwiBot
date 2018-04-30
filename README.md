@@ -12,7 +12,8 @@ Use `help` command to get list of available commands.
 ## Running bot
 You can run bot with `bash run.sh` file from root directory.  
 Requirements:
-* python >= 3.6
-* discord.py python library, rewrite branch
-* aioredis python library
-* running redis server on default port
+* [python >= 3.6](https://www.python.org/downloads)
+* [discord.py python library, rewrite branch](https://github.com/Rapptz/discord.py/tree/rewrite)
+* [dateutil python library](https://dateutil.readthedocs.io/en/stable)
+* [aioredis python library](https://dateutil.readthedocs.io/en/stable)
+* running [redis server](https://redis.io) on default port
