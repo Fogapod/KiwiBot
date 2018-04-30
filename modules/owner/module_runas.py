@@ -3,6 +3,8 @@ from objects.permissions import PermissionBotOwner
 
 from utils.funcs import find_user, get_local_prefix
 
+from copy import copy
+
 
 class Module(ModuleBase):
 
@@ -25,8 +27,9 @@ class Module(ModuleBase):
         prefix = await get_local_prefix(msg, self.bot)
         new_content = args[2:]
 
-        msg.author = user
-        msg.content = prefix + new_content
-        await self.bot.on_message(msg)
+        new_msg = copy(msg)
+        new_msg.author = user
+        new_msg.content = prefix + new_content
+        await self.bot.on_message(new_msg)
 
         return f'Message processed as `{user}`'
