@@ -3,7 +3,7 @@ from objects.permissions import PermissionEmbedLinks, PermissionExternalEmojis
 
 from utils.funcs import find_guild
 
-from discord import Embed, Forbidden, VoiceChannel, TextChannel, Colour
+from discord import Embed, HTTPException, VoiceChannel, TextChannel, Colour
 
 import random
 from datetime import datetime
@@ -34,10 +34,10 @@ class Module(ModuleBase):
         else:
             try:
                 invite = await guild.channels[0].create_invite(
-                    reason=f'requested by {msg.author} ({msg.author.id})' + (f' in guild {msg.guild} {msg.guild.id})' if msg.guild else ''),
+                    reason=f'requested by {msg.author}-{msg.author.id}' + (f' in guild {msg.guild}-{msg.guild.id}' if msg.guild else ''),
                     max_age=3600 * 12  # 12 hours
                 )
-            except Forbidden:
+            except HTTPException:
                 pass
             else:
                 invite = invite.url
@@ -46,7 +46,7 @@ class Module(ModuleBase):
 
         bot_count = sum(1 for m in guild.members if m.bot)
 
-        voice_channels_num = text_channels_num = 0
+        voice_channels_num, text_channels_num = 0, 0
         for channel in guild.channels:
             if isinstance(channel, VoiceChannel):
                 voice_channels_num += 1
