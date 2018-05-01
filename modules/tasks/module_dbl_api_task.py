@@ -1,7 +1,11 @@
 from objects.modulebase import ModuleBase
 
+from objects.logger import Logger
+
 import asyncio
 
+
+logger = Logger()
 
 API_URL = 'https://discordbots.org/api/bots/{bot_id}/stats'
 
@@ -37,9 +41,12 @@ class Module(ModuleBase):
                 'server_count': len(self.bot.guilds),
                 'shard_count':  len(self.bot.shards)
             }
+
+            logger.debug(f'Sending data to DBL: {data}')
+
             try:
                 await self.bot.sess.post(API_URL, headers=headers, data=data)
             except Exception as e:
-                pass
+                logger.debug(f'Error sneding data: {e}')
 
             await asyncio.sleep(1800)

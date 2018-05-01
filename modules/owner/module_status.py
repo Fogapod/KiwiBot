@@ -13,14 +13,14 @@ class Module(ModuleBase):
     short_doc = 'Bot presence utils'
     additional_doc = (
         'Suncommands:\n'
-        '\tplaying   - set playing activity\n'
+        '\tplaying - set playing activity\n'
         '\tstreaming - set streaming activity\n'
         '\tlistening - set listening activity\n'
-        '\twatching  - set watching activity\n'
-        '\tlist      - show all activities\n'
-        '\tremove    - remove activity from list\n\n'
+        '\twatching - set watching activity\n'
+        '\tlist - show all activities\n'
+        '\tremove - remove activity from list\n\n'
         'Flags:\n'
-        '\t[--status|-s] <name>   - select status (online, dnd, etc)\n'
+        '\t[--status|-s] <name> - select status (online, dnd, etc)\n'
         '\t[--interval|-i] <time> - change activity change interval'
     )
 
@@ -44,7 +44,7 @@ class Module(ModuleBase):
 
     async def on_load(self, from_reload):
         self.interval = int(
-            await self.bot.redis.get('activity_interval', 60))
+            await self.bot.redis.get('activity_interval', default=60))
         self._task = asyncio.ensure_future(
             self.update_presence_task(), loop=self.bot.loop)
 
@@ -85,8 +85,7 @@ class Module(ModuleBase):
                 p.add_page(content='List of activities:```\n' + '\n'.join(chunk) + '```')
 
             m = await self.send(msg, **p.current_page)
-            await p.run(m, target_user=msg.author)
-            return
+            return await p.run(m, target_user=msg.author)
 
         elif subcommand == 'remove':
             items = await self.bot.redis.smembers('activity')
@@ -144,10 +143,11 @@ class Module(ModuleBase):
                 status, _, a_name = status_and_name.partition(':')
 
                 await self._change_precense(a_type, a_name, status)
-                await asyncio.sleep(self.interval)
                 i += 1
             else:
                 await self._change_precense(0, '', 'online')
+
+            await asyncio.sleep(self.interval)
 
     async def _change_precense(self, a_type, a_name, status):
         a = Activity(

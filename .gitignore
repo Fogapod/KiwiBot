@@ -1,6 +1,8 @@
 __pycache__/*
 *.pyc
 
+temp/
+
 *.config
 *.json
 *.log
