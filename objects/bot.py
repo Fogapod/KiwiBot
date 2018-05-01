@@ -57,6 +57,7 @@ class BotMyBot(discord.AutoShardedClient):
         self._guild_prefixes = {}
 
         self._last_messages = {}
+        self._leave_voice_channel_tasks = {}
 
     @property
     def uptime(self):
@@ -212,6 +213,30 @@ class BotMyBot(discord.AutoShardedClient):
                 await self.http.delete_message(msg.channel.id, int(mid))
             except Exception:
                 pass
+
+    async def on_voice_state_update(self, member, before, after):
+        if before.channel and after.channel != before.channel:  # user left or moved
+            if member.guild.me.voice:  # voice connection exists
+                if  member.guild.me.voice.channel == before.channel and not member.bot:  # same channel and not bot
+                    if sum(1 for m in before.channel.members if not m.bot) == 0:  # no users in channel left
+                        self._leave_voice_channel_tasks[before.channel.id] = self.loop.create_task(
+                            self._voice_disconnect_task(before.channel, member.guild.voice_client))
+        elif after.channel and not before.channel:  # user joined
+            if member.guild.me.voice:  # voice connection exists
+                if member.guild.me.voice.channel == after.channel and not member.bot:  # same channel and not bot
+                    if after.channel.id in self._leave_voice_channel_tasks:
+                        self._leave_voice_channel_tasks[after.channel.id].cancel()
+                        del self._leave_voice_channel_tasks[after.channel.id]
+
+    async def _voice_disconnect_task(self, channel, vc):
+        await asyncio.sleep(60)
+        if sum(1 for m in channel.members if not m.bot) > 0:  # there are users in channel
+            return
+
+        del self._leave_voice_channel_tasks[channel.id]
+
+        if vc.is_connected():
+            await vc.disconnect()
 
     async def send_message(self, channel, response_to=None, replace_mass_mentions=True, replace_mentions=True, **fields):
         content = fields.pop('content', '')
