@@ -4,11 +4,8 @@ from utils.funcs import create_subprocess_exec, execute_process
 
 from discord import File, FFmpegPCMAudio, PCMVolumeTransformer
 
-import os
-import time
+from tempfile import TemporaryFile
 
-
-TEMP_FILE = 'temp/tts/{}.wav'
 
 LANG_LIST = {
     'af': 'afrikaans' ,
@@ -134,8 +131,7 @@ class Module(ModuleBase):
         if vc.is_playing():
             vc.stop()
 
-        temp_file = TEMP_FILE.format(round(time.time()))
-        program = ['espeak', args[1:], '-w', temp_file]
+        program = ['espeak', args[1:], '--stdout']
 
         language_flag = flags.get('language')
         if language_flag:
@@ -147,9 +143,12 @@ class Module(ModuleBase):
         process, pid = await create_subprocess_exec(*program)
         stdout, stderr = await execute_process(process, program)
 
-        audio = PCMVolumeTransformer(FFmpegPCMAudio(temp_file), volume)
+        with TemporaryFile() as tmp:
+            tmp.write(stdout)
+            tmp.seek(0)
+            audio = PCMVolumeTransformer(FFmpegPCMAudio(tmp, pipe=True), volume)
 
-        if flags.get('file', False):
-            await self.send(msg, file=File(temp_file))
+            if flags.get('file', False):
+                await self.send(msg, file=File(stdout, filename='tts.wav'))
 
-        vc.play(audio, after=lambda e: os.remove(temp_file))
+        vc.play(audio)
