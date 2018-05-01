@@ -90,17 +90,17 @@ class Module(ModuleBase):
         'Command flags:\n'
         '\t[--file|-f] - respond with audio file\n'
         '\t[--volume|-v] <value> - set volume in %\n'
-        '\t[--voice|-o] <voice> - select prefered voice\n\n'
+        '\t[--language|-l] <language> - select prefered language\n\n'
         'Subcommands:\n'
-        '\t{prefix}{aliases} list - show list of languages'
+        '\t{prefix}{aliases} list - show list of voices'
     )
 
     name = 'tts'
     aliases = (name, )
     required_args = 1
     call_flags = {
-        'voice': {
-            'alias': 'o',
+        'language': {
+            'alias': 'l',
             'bool': False
         },
         'file': {
@@ -137,12 +137,12 @@ class Module(ModuleBase):
         temp_file = TEMP_FILE.format(round(time.time()))
         program = ['espeak', args[1:], '-w', temp_file]
 
-        voice_flag = flags.get('voice')
-        if voice_flag:
-            if voice_flag not in LANG_LIST:
-                return '{warning} Voice not found. Use `list` subcommand to get list of voices'
+        language_flag = flags.get('language')
+        if language_flag:
+            if language_flag not in LANG_LIST:
+                return '{warning} Language not found. Use `list` subcommand to get list of voices'
 
-            program.extend(('-v', LANG_LIST[voice_flag]))
+            program.extend(('-v', LANG_LIST[language_flag]))
 
         process, pid = await create_subprocess_exec(*program)
         stdout, stderr = await execute_process(process, program)
