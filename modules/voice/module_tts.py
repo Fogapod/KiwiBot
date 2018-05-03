@@ -2,7 +2,7 @@ from objects.modulebase import ModuleBase
 
 from utils.funcs import create_subprocess_exec, execute_process
 
-from discord import File, FFmpegPCMAudio, PCMVolumeTransformer
+from discord import DMChannel, File, FFmpegPCMAudio, PCMVolumeTransformer
 
 from tempfile import TemporaryFile
 
@@ -82,14 +82,15 @@ LANG_LIST = {
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} <text>'
-    short_doc = 'Make me say something'
+    short_doc = 'Make me say something.'
     additional_doc = (
         'Command flags:\n'
-        '\t[--file|-f] - respond with audio file\n'
-        '\t[--volume|-v] <value> - set volume in %\n'
-        '\t[--language|-l] <language> - select prefered language\n\n'
+        '\t[--file|-f]:                respond with audio file\n'
+        '\t[--no-voice|-n]:            don\'t use voice channel\n'
+        '\t[--volume|-v] <value>:      set volume in %\n'
+        '\t[--language|-l] <language>: select prefered language\n\n'
         'Subcommands:\n'
-        '\t{prefix}{aliases} list - show list of voices'
+        '\t{prefix}{aliases} list:     show list of voices'
     )
 
     name = 'tts'
@@ -104,29 +105,30 @@ class Module(ModuleBase):
             'alias': 'f',
             'bool': True
         },
-         'volume': {
+        'no-voice': {
+            'alias': 'n',
+            'bool': True
+        },
+        'volume': {
             'alias': 'v',
             'bool': False
         }
     }
-    guild_only = True
 
     async def on_call(self, msg, args, **flags):
         if args[1:].lower() == 'list':
             return '\n'.join(f'`{k}`: {v}' for k, v in LANG_LIST.items())
 
-        if not msg.author.voice:
+        voice_flag = not flags.get(
+            'no-voice', isinstance(msg.channel, DMChannel))
+
+        if voice_flag and not msg.author.voice:
             return '{warning} Please, join voice channel first'
 
         try:
             volume = float(flags.get('volume', 100)) / 100
         except ValueError:
             return '{error} Invalid volume value'
-
-        if msg.guild.voice_client is None: 
-            vc = await msg.author.voice.channel.connect()
-        else:
-            vc = msg.guild.voice_client
 
         program = ['espeak', args[1:], '--stdout']
 
@@ -145,10 +147,16 @@ class Module(ModuleBase):
             tmp.seek(0)
             audio = PCMVolumeTransformer(FFmpegPCMAudio(tmp, pipe=True), volume)
 
-            if flags.get('file', False):
+            if flags.get('file', not voice_flag):
                 await self.send(msg, file=File(stdout, filename='tts.wav'))
 
-        if vc.is_playing():
-            vc.stop()
+        if voice_flag:
+            if msg.guild.voice_client is None:
+                vc = await msg.author.voice.channel.connect()
+            else:
+                vc = msg.guild.voice_client
 
-        vc.play(audio)
+            if vc.is_playing():
+                vc.stop()
+
+            vc.play(audio)
