@@ -128,7 +128,7 @@ class Module(ModuleBase):
         e.description = '\n'.join(f'{emojis[i]}: {c}' for i, c in enumerate(choices))
         e.set_author(name=msg.author.name, icon_url=msg.author.avatar_url)
         e.set_footer(
-            text=f'React with {emojis[0]} - {emojis[-1]} to vote, poll ends at {wait_until.replace(microsecond=0)}UTC')
+            text=f'React with {emojis[0]} - {emojis[-1]} to vote, poll ends at {wait_until.replace(microsecond=0)} UTC')
 
         try:
             poll = await self.bot.send_message(msg.channel, embed=e)
