@@ -1,7 +1,7 @@
 from objects.modulebase import ModuleBase
-from objects.permissions import PermissionBotOwner
+from objects.permissions import PermissionBotOwner, PermissionSendTtsMessages
 
-from utils.funcs import find_user, find_channel
+from utils.funcs import find_user, find_channel, check_permission
 
 from discord import DMChannel
 
@@ -12,9 +12,10 @@ class Module(ModuleBase):
     short_doc = 'Let me say something for you, lazy human.'
     additional_doc = (
         'Command flags:\n'
-        '\t--delete  or -d:           Delete command message if added\n'
-        '\t--channel or -c <channel>: Channel where to send message\n'
-        '\t--user    or -u <user>:    Target user to send direct message'
+        '\t[--delete|-d]:            Delete command message if added\n'
+        '\t[--channel|-c] <channel>: Channel where to send message\n'
+        '\t[--user|-u] <user>:       Target user to send direct message\n'
+        '\t[--tts|-t]:               Send message as text-to-speech if added'
     )
 
     name = 'say'
@@ -32,12 +33,17 @@ class Module(ModuleBase):
         'user': {
             'alias': 'u',
             'bool': False
+        },
+        'tts': {
+            'alias': 't',
+            'bool': True
         }
     }
 
     async def on_call(self, msg, args, **flags):
         channel = flags.get('channel', None)
         user = flags.get('user', None)
+        tts = flags.get('tts', False)
 
         if channel and user:
             return '{warning} channel and user flags are conflicting'
@@ -65,6 +71,12 @@ class Module(ModuleBase):
         if channel is None:
             channel = msg.channel
 
+        if tts:
+            check_permission(
+                PermissionSendTtsMessages(), msg.channel, self.bot.user)
+            check_permission(
+                PermissionSendTtsMessages(), msg.channel, msg.author)
+
         is_same_place = getattr(channel, 'guild', None) == getattr(msg, 'guild', None)
         if not is_same_place:
             if not PermissionBotOwner().check(msg.channel, msg.author):
@@ -75,7 +87,7 @@ class Module(ModuleBase):
         if flags.get('delete', False):
             await self.bot.delete_message(msg)
 
-        m = await self.send(msg, channel=channel, content=args[1:])
+        m = await self.send(msg, channel=channel, content=args[1:], tts=tts)
         if m is None:
             return '{error} Failed to deliver message. (blocked by user/no common servers/no permission to send messages to this channel)'
         else:

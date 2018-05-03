@@ -313,3 +313,8 @@ def timedelta_from_string(string):
     now = datetime.utcnow()
 
     return now + relativedelta(**data)  # OverflowError possible
+
+
+def check_permission(permission, channel, user):
+	if not permission.check(channel, user):
+		raise permission
