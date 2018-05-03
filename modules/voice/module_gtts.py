@@ -66,9 +66,6 @@ class Module(ModuleBase):
         else:
             vc = msg.guild.voice_client
 
-        if vc.is_playing():
-            vc.stop()
-
         program = ['gtts-cli', args[1:]]
 
         language_flag = flags.get('language')
@@ -91,5 +88,8 @@ class Module(ModuleBase):
 
             if flags.get('file', False):
                 await self.send(msg, file=File(stdout, filename='tts.mp3'))
+
+        if vc.is_playing():
+            vc.stop()
 
         vc.play(audio)

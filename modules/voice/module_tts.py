@@ -128,9 +128,6 @@ class Module(ModuleBase):
         else:
             vc = msg.guild.voice_client
 
-        if vc.is_playing():
-            vc.stop()
-
         program = ['espeak', args[1:], '--stdout']
 
         language_flag = flags.get('language')
@@ -150,5 +147,8 @@ class Module(ModuleBase):
 
             if flags.get('file', False):
                 await self.send(msg, file=File(stdout, filename='tts.wav'))
+
+        if vc.is_playing():
+            vc.stop()
 
         vc.play(audio)
