@@ -41,7 +41,18 @@ class Module(ModuleBase):
         )
 
         if await request_reaction_confirmation(kick_msg, msg.author, self.bot):
-            await msg.guild.kick(guild_member, reason=reason + f' kicked by {msg.author}')
+            kick_notification = await self.bot.send_message(
+                guild_member,
+                f'You were kicked from **{msg.guild.name}**\n' +
+                (f'Reason:```\n{reason}```' if reason else 'No reason given')
+            )
+            try:
+                await msg.guild.kick(
+                    guild_member, reason=reason + f' kicked by {msg.author}')
+            except Exception:
+                await self.bot.delete_message(kick_notification)
+                raise
+
             await self.bot.edit_message(
                 kick_msg,
                 content=(

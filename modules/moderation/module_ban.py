@@ -43,10 +43,19 @@ class Module(ModuleBase):
         )
 
         if await request_reaction_confirmation(ban_msg, msg.author, self.bot):
-            await msg.guild.ban(
-                user, delete_message_days=0,
-                reason=reason + f' banned by {msg.author}'
+            ban_notification = await self.bot.send_message(
+                user,
+                f'You were banned on **{msg.guild.name}**\n' +
+                (f'Reason:```\n{reason}```' if reason else 'No reason given')
             )
+            try:
+                await msg.guild.ban(
+                    user, delete_message_days=0,
+                    reason=reason + f' banned by {msg.author}'
+                )
+            except Exception:
+                await self.bot.delete_message(ban_notification)
+                raise
 
             await self.bot.edit_message(
                 ban_msg,

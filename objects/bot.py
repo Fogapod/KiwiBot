@@ -238,8 +238,18 @@ class KiwiBot(discord.AutoShardedClient):
         if vc.is_connected():
             await vc.disconnect()
 
-    async def send_message(self, channel, response_to=None, replace_mass_mentions=True, replace_mentions=True, **fields):
-        content = fields.pop('content', '')
+    async def send_message(self, target, content=None, *, response_to=None, replace_mass_mentions=True, replace_mentions=True, **fields):
+        if isinstance(target, discord.Member) or isinstance(target, discord.User):
+            if target.dm_channel is None:
+                channel = await target.create_dm()
+            else:
+                channel = target.dm_channel
+        elif isinstance(target, discord.DMChannel) or isinstance(target, discord.TextChannel):
+            channel = target
+        else:
+            raise ValueError('Unknown target passed to send message')
+
+        content = str(content) if content is not None else ''
         content = content.replace(self.token, 'TOKEN_LEAKED')
 
         if replace_mentions:
@@ -247,8 +257,7 @@ class KiwiBot(discord.AutoShardedClient):
         if replace_mass_mentions:
             content = formatters.replace_mass_mentions(content)
 
-        content = formatters.trim_text(content)
-        fields['content'] = content
+        fields['content'] = formatters.trim_text(content)
 
         message = None
         # dm_message = None
@@ -279,8 +288,8 @@ class KiwiBot(discord.AutoShardedClient):
 
             return message
 
-    async def edit_message(self, msg, replace_mass_mentions=True, replace_mentions=True, **fields):
-        content = fields.pop('content', '')
+    async def edit_message(self, msg, content=None, *, replace_mass_mentions=True, replace_mentions=True, **fields):
+        content = str(content) if content is not None else ''
         content = content.replace(self.token, 'TOKEN_LEAKED')
 
         if replace_mentions:
@@ -288,8 +297,7 @@ class KiwiBot(discord.AutoShardedClient):
         if replace_mass_mentions:
             content = formatters.replace_mass_mentions(content)
 
-        content = formatters.trim_text(content)
-        fields['content'] = content
+        fields['content'] = formatters.trim_text(content)
 
         try:
             return await msg.edit(**fields)
@@ -303,6 +311,9 @@ class KiwiBot(discord.AutoShardedClient):
             return await msg.edit(content=exception)
     
     async def delete_message(self, message, raise_on_errors=False):
+        if message is None:
+            return
+
         try:
             return await message.delete()
         except discord.errors.NotFound:
