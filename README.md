@@ -1,4 +1,4 @@
-# BotMyBot
+# KiwiBot
 <img align=right height=256 src=.github/avatar.png/>
 Bot is currently in early stage of development, but it's already usable and has several useful commands.
 

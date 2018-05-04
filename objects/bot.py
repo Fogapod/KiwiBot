@@ -20,7 +20,7 @@ from constants import *
 from utils import formatters
 
 
-class BotMyBot(discord.AutoShardedClient):
+class KiwiBot(discord.AutoShardedClient):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

@@ -1,12 +1,12 @@
 import sys
 
-from objects.bot import BotMyBot
+from objects.bot import KiwiBot
 from objects.logger import Logger
 
 
 logger = Logger.get_logger()
 
-bot = BotMyBot()
+bot = KiwiBot()
 bot.run()
 
 if bot.exit_code is not None:
