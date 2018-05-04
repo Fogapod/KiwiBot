@@ -278,6 +278,7 @@ class KiwiBot(discord.AutoShardedClient):
                     dm_message = await response_to.author.send(**fields)
                     await self.register_response(response_to, dm_message)
                 except Exception:
+                    pass
         except Exception:
             exception = traceback.format_exc()
             exception = '\n'.join(exception.split('\n')[-4:])
