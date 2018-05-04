@@ -208,9 +208,10 @@ class KiwiBot(discord.AutoShardedClient):
         await self.redis.delete(f'tracked_message:{msg.id}')
 
     async def clear_responses_to_message(self, msg):
-        for mid in (await self.redis.smembers(f'tracked_message:{msg.id}'))[1:]:
+        for value in await self.redis.lrange(f'tracked_message:{msg.id}', 1, -1):
+            channel_id, _, message_id = value.partition(':')
             try:
-                await self.http.delete_message(msg.channel.id, int(mid))
+                await self.http.delete_message(int(channel_id), int(message_id))
             except Exception:
                 pass
 
@@ -244,6 +245,8 @@ class KiwiBot(discord.AutoShardedClient):
                 channel = await target.create_dm()
             else:
                 channel = target.dm_channel
+        elif isinstance(target, discord.Message):
+            channel = target.channel
         elif isinstance(target, discord.DMChannel) or isinstance(target, discord.TextChannel):
             channel = target
         else:
@@ -260,20 +263,21 @@ class KiwiBot(discord.AutoShardedClient):
         fields['content'] = formatters.trim_text(content)
 
         message = None
-        # dm_message = None
+        dm_message = None
 
         try:
             message = await channel.send(**fields)
         except discord.Forbidden:
-            # try:
-            #     dm_message = await msg.author.send(
-            #         f'I was not able to send this message to channel '
-            #         f'{msg.channel.mention} in guild **{msg.guild}**, result is below'
-            #     )
-            #     message = await msg.author.send(**fields)
-            # except Exception:
-            #     pass
-            pass
+            if response_to is not None:
+                try:
+                    error_dm_message = await response_to.author.send(
+                        f'I was not able to send this message to channel '
+                        f'{channel.mention} in guild **{response_to.guild}**, result is below'
+                    )
+                    await self.register_response(response_to, error_dm_message)
+                    dm_message = await response_to.author.send(**fields)
+                    await self.register_response(response_to, dm_message)
+                except Exception:
         except Exception:
             exception = traceback.format_exc()
             exception = '\n'.join(exception.split('\n')[-4:])
@@ -283,10 +287,8 @@ class KiwiBot(discord.AutoShardedClient):
             if response_to is not None:
                 if message is not None:
                     await self.register_response(response_to, message)
-                # if dm_message is not None:
-                #     await self.register_response(response_to, dm_message)
 
-            return message
+            return message or dm_message
 
     async def edit_message(self, msg, content=None, *, replace_mass_mentions=True, replace_mentions=True, **fields):
         content = str(content) if content is not None else ''
@@ -327,12 +329,13 @@ class KiwiBot(discord.AutoShardedClient):
         if await self.redis.exists(f'tracked_message:{message.id}'):
             return
 
-        await self.redis.sadd(f'tracked_message:{message.id}', '0')
+        await self.redis.rpush(f'tracked_message:{message.id}', 0)  # insert 0 to prevent key from deleting
         await self.redis.expire(f'tracked_message:{message.id}', 300)
 
     async def register_response(self, request, response):
         if await self.redis.exists(f'tracked_message:{request.id}'):
-            await self.redis.sadd(f'tracked_message:{request.id}', response.id)
+            await self.redis.rpush(
+                f'tracked_message:{request.id}', f'{response.channel.id}:{response.id}')
         else:
             logger.debug('Request outdated, not registering')
 
