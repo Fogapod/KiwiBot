@@ -57,6 +57,10 @@ class Module(ModuleBase):
         if args[1:].lower() == 'list':
             return '\n'.join(f'`{k}`: {v}' for k, v in self.langs.items())
 
+        text = args[1:]
+        if len(text) > 1000:
+            return '{warning} Text is too long (> 1000 characters)'
+
         voice_flag = not flags.get(
             'no-voice', isinstance(msg.channel, DMChannel))
 
@@ -68,7 +72,7 @@ class Module(ModuleBase):
         except ValueError:
             return '{error} Invalid volume value'
 
-        program = ['gtts-cli', args[1:]]
+        program = ['gtts-cli', text]
 
         language_flag = flags.get('language')
         if language_flag:

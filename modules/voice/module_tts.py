@@ -119,6 +119,10 @@ class Module(ModuleBase):
         if args[1:].lower() == 'list':
             return '\n'.join(f'`{k}`: {v}' for k, v in LANG_LIST.items())
 
+        text = args[1:]
+        if len(text) > 1000:
+            return '{warning} Text is too long (> 1000 characters)'
+
         voice_flag = not flags.get(
             'no-voice', isinstance(msg.channel, DMChannel))
 
@@ -130,7 +134,7 @@ class Module(ModuleBase):
         except ValueError:
             return '{error} Invalid volume value'
 
-        program = ['espeak', args[1:], '--stdout']
+        program = ['espeak', text, '--stdout']
 
         language_flag = flags.get('language')
         if language_flag:
