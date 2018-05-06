@@ -29,8 +29,9 @@ class Module(ModuleBase):
         e.add_field(
             name='Position', value=f'{len(msg.guild.roles) - role.position}/{len(msg.guild.roles)}')
         e.add_field(name='Members', value=len(role.members))
-        e.add_field(name='Permission scope', value=role.permissions.value)
+        e.add_field(name='Permission bitfield', value=role.permissions.value)
         e.add_field(name='Colour', value=f'#{role.colour.value:06x}')
         e.add_field(name='Mentionable', value=role.mentionable)
+        e.set_footer(text=role.id)
 
         await self.send(msg, embed=e)
