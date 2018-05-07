@@ -1,4 +1,7 @@
 from objects.modulebase import ModuleBase
+from objects.paginators import UpdatingPaginator
+from objects.permissions import (
+    PermissionEmbedLinks, PermissionAddReactions, PermissionReadMessageHistory)
 
 from itertools import zip_longest
 
@@ -36,6 +39,10 @@ class Module(ModuleBase):
     name = 'nekos'
     aliases = (name, 'neko')
     required_args = 1
+    required_perms = (
+        PermissionEmbedLinks(), PermissionAddReactions(),
+        PermissionReadMessageHistory()
+    )
 
     async def on_call(self, msg, args, **options):
         result = ''
@@ -87,8 +94,7 @@ class Module(ModuleBase):
                 )
                 e.set_footer(text=msg.author, icon_url=msg.author.avatar_url)
 
-                await self.send(msg, embed=e)
-                return
+                return await self.send(msg, embed=e)
         elif subcommand == 'why':
             question = args[2:]
             if question.endswith('?'):
@@ -105,8 +111,7 @@ class Module(ModuleBase):
                 e.description = response['why']
                 e.set_footer(text=msg.author, icon_url=msg.author.avatar_url)
 
-                await self.send(msg, embed=e)
-                return
+                return await self.send(msg, embed=e)
         else:
             return await self.on_doc_request(msg)
 
@@ -117,16 +122,23 @@ class Module(ModuleBase):
             if image_tag == 'random_hentai_gif':
                 image_tag = 'Random_hentai_gif'
             url = '/'.join((API_URL, 'img', image_tag))
-            response = await self.do_request(url)
-            if response is not None:
-                e = Embed(
-                    colour=Colour.gold(), title=image_tag, url=response['url']
-                )
-                e.set_image(url=response['url'])
-                await self.send(msg, embed=e)
-                return
+
+            p = UpdatingPaginator(self.bot)
+            return await p.run(
+                msg.channel, self.paginator_update_func, ((url, image_tag), {}),
+                target_user=msg.author
+            )
 
         return '{error} Problem with api response. Please, try again later'
+
+    async def paginator_update_func(self, url, image_tag):
+        response = await self.do_request(url)
+        if response is not None:
+            e = Embed(
+                colour=Colour.gold(), title=image_tag, url=response['url']
+            )
+            e.set_image(url=response['url'])
+            return { 'embed': e }
 
     async def do_request(self, url, **params):
         async with self.bot.sess.get(url, params=params) as r:

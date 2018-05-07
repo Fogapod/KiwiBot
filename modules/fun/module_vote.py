@@ -115,7 +115,8 @@ class Module(ModuleBase):
         e = Embed(colour=Colour.gold(), title='Vote', description=subject)
         e.set_author(name=msg.author.name, icon_url=msg.author.avatar_url)
         e.set_footer(
-            text=f'React with {REACTION_FOR} or {REACTION_AGAINST} to vote, vote ends at {wait_until.replace(microsecond=0)} UTC')
+            text=f'React with {REACTION_FOR} or {REACTION_AGAINST} to vote')
+        e.timestamp = wait_until
 
         try:
             vote = await self.bot.send_message(msg.channel, embed=e)

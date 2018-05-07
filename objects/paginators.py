@@ -9,11 +9,12 @@ from discord.errors import Forbidden, NotFound
 
 class PaginatorABC:
 
-    def __init__(self, bot, looped=True, timeout=180):
+    def __init__(self, bot, looped=True, timeout=180, additional_time=20):
         self.bot = bot
 
         self.looped = looped
         self.timeout = timeout
+        self.additional_time = additional_time
 
         self.index  = 0
         self._pages = []
@@ -58,8 +59,8 @@ class PaginatorABC:
 
         return self.current_page
 
-    async def init_reactions(self, msg):
-        if len(self._pages) <= 1:
+    async def init_reactions(self, msg, force=False):
+        if len(self._pages) <= 1 and not force:
             return
 
         for emoji in self.events.keys():
@@ -85,11 +86,13 @@ class PaginatorABC:
         Runs paginator session
         parameters:
             :target_message:
-                message attach paginator to. Usually bot message
+                message attach paginator to
             :target_user: (default: None)
                 user wait actions from. Can be User or Member object
             :target_users: (default: [])
                 list of users wait actions from. Can be User or Member object list
+            :force_run: (default: False(
+                force run paginator even if missing pages
             :events: (default: {})
                 dict of events to wait as keys and their callbacks as values
                 !events should be lambda functions creating actual coroutine on call!
@@ -100,6 +103,7 @@ class PaginatorABC:
 
         target_user = kwargs.pop('target_user', None)
         target_users = kwargs.pop('target_users', [])
+        force_run = kwargs.pop('force_run', False)
         events = kwargs.pop('events', {})
 
         if target_user is None and len(target_users) == 0:
@@ -110,7 +114,7 @@ class PaginatorABC:
             target_users.append(target_user)
 
         self.target_users = target_users
-        await self.init_reactions(target_message)
+        await self.init_reactions(target_message, force=force_run)
 
         def check(reaction, user):
             return all((
@@ -156,7 +160,7 @@ class PaginatorABC:
 
                     await cb(*results)
 
-                self.start_time += 30
+                self.start_time += self.additional_time
                 time_left = self.timeout - (time.time() - self.start_time)
 
         await self.cleanup(target_message)
@@ -265,3 +269,41 @@ class SelectionPaginator(Paginator):
         )
 
         return self.choice
+
+
+class UpdatingPaginator(PaginatorABC):
+
+    def __init__(self, *args, emoji_update='🆕', timeout=60, additional_time=10, **kwargs):
+        super().__init__(
+            *args, timeout=timeout, additional_time=additional_time, **kwargs)
+
+        self.events[emoji_update] = self.on_update
+
+    async def run(self, channel, update_func, update_func_parameters, **kwargs):
+        self.update_func = update_func
+        self.update_func_parameters = update_func_parameters
+
+        try:
+            fields = await update_func(
+                *update_func_parameters[0], **update_func_parameters[1])
+            if not fields:
+                return
+        except Exception:
+            return
+
+        m = await self.bot.send_message(channel, **fields)
+
+        await super().run(m, force_run=True, **kwargs)
+
+    async def on_update(self, reaction, user):
+        try:
+            fields = await self.update_func(
+                *self.update_func_parameters[0],
+                **self.update_func_parameters[1]
+            )
+            if not fields:
+                return
+        except Exception as e:
+            return print(e)
+
+        await self.bot.edit_message(self.target_message, **fields)
