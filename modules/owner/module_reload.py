@@ -50,7 +50,7 @@ class Module(ModuleBase):
         if target == 'bot':
             await self.bot.redis.set(
                 'reload_data', f'{reload_message.channel.id}:{reload_message.id}')
-            self.bot.restart()
+            return self.bot.restart()
 
         if target == 'modules':
             try:
