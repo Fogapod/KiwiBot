@@ -1,8 +1,12 @@
 import sys
+import uvloop
+import asyncio
 
 from objects.bot import KiwiBot
 from objects.logger import Logger
 
+
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 logger = Logger.get_logger()
 

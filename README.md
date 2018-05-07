@@ -15,5 +15,6 @@ Requirements:
 * [python >= 3.6](https://www.python.org/downloads)
 * [discord.py python library, rewrite branch](https://github.com/Rapptz/discord.py/tree/rewrite)
 * [dateutil python library](https://dateutil.readthedocs.io/en/stable)
-* [aioredis python library](https://dateutil.readthedocs.io/en/stable)
+* [aioredis python library](https://aioredis.readthedocs.io/en/v1.1.0)
+* [uvloop python library](https://uvloop.readthedocs.io)
 * running [redis server](https://redis.io) on default port
