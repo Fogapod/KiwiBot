@@ -33,5 +33,5 @@ class Module(ModuleBase):
                 url = await r.text()
                 e = Embed(colour=Colour.gold())
                 e.set_image(url=url)
-                e.set_footer(text='Powered by https://inspirebot.me')
+                e.set_footer(text='Powered by https://inspirobot.me')
                 return { 'embed': e }
