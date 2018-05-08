@@ -35,9 +35,13 @@ class RedisDB:
         self.connection.close()
 
     async def get(self, key, default=None):
-        if not await self.exists(key):
-            return default
+        if default is not None:
+            if not await self.exists(key):
+                return default
         return await self.execute('GET', key)
+
+    async def mget(self, *keys, default=None):
+        return [default if v is None else v for v in await self.execute('MGET', *keys)]
 
     async def set(self, key, value, *args):
         return await self.execute('SET', key, value, *args)
@@ -71,6 +75,9 @@ class RedisDB:
 
     async def keys(self, pattern):
         return await self.execute('KEYS', pattern)
+
+    async def incr(self, key):
+        return await self.execute('INCR', key)
 
     async def get_db_size(self):
         return await self.execute('DBSIZE')

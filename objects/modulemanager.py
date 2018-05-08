@@ -119,6 +119,7 @@ class ModuleManager:
                     f'{msg.author}-{msg.author.id} -> {module.name} in ' +
                     ('direct messages' if msg.guild is None else f'{msg.guild}-{msg.guild.id}')
                 )
+                await self.bot.redis.incr(f'command_usage:{module.name}')
                 try:
                     self.bot.dispatch('command_use', module, msg, args)
                 except Exception:
