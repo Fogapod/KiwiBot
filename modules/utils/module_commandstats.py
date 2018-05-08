@@ -39,7 +39,6 @@ class Module(ModuleBase):
         for k, u in zip(keys, usage):
             name = k[14:]
             module = self.bot.mm.get_module(name)
-            print(module.name)
             if module:
                 if module.disabled:
                     if not (flags.get('show-disabled', False)):
