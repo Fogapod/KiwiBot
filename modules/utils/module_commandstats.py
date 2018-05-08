@@ -16,20 +16,59 @@ class Module(ModuleBase):
         PermissionEmbedLinks(), PermissionAddReactions(),
         PermissionReadMessageHistory()
     )
+    call_flags = {
+        'show-disabled': {
+            'alias': 'd',
+            'bool': True
+         },
+        'show-hidden': {
+            'alias': 'h',
+            'bool': True
+        },
+        'hide-normal': {
+            'alias': 'n',
+            'bool': True
+        }
+    }
 
     async def on_call(self, msg, args, **flags):
         keys = await self.bot.redis.keys('command_usage:*')
         usage = await self.bot.redis.mget(*keys)
 
-        lines = [f'{k[14:]:<20}{u}' for k, u in sorted(zip(keys, usage), key=lambda x: int(x[1]), reverse=True)]
+        commands = []
+        for k, u in zip(keys, usage):
+            name = k[14:]
+            module = self.bot.mm.get_module(name)
+            print(module.name)
+            if module:
+                if module.disabled:
+                    if not (flags.get('show-disabled', False)):
+                        continue
+                if module.hidden:
+                    if not (flags.get('show-hidden', False)):
+                        continue
+                if not (module.disabled or module.hidden) and flags.get('hide-normal', False):
+                    continue
+                commands.append((name, int(u)))
+
+        if not commands:
+            return '{error} No commands found'
+
+        total_usage = sum(u for c, u in commands)
+        lines = [f'{c:<20}{u}' for c, u in sorted(commands, key=lambda x: int(x[1]), reverse=True)]
         lines_per_chunk = 30
         chunks = [lines[i:i + lines_per_chunk] for i in range(0, len(lines), lines_per_chunk)]
 
         def make_embed(chunk):
-            return Embed(
+            e = Embed(
                 colour=Colour.gold(), title='Command usage:',
                 description='```\n' + "\n".join(chunk) + '```'
             )
+            e.set_footer(
+                text=f'Commands used in total: {total_usage}',
+                icon_url=self.bot.user.avatar_url
+            )
+            return e
 
         if len(chunks) == 1:
             return await self.send(msg, embed=make_embed(chunks[0]))
