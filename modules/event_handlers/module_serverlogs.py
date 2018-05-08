@@ -9,11 +9,11 @@ from discord import File
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} [channel]'
-    short_doc = 'Enables/disables logging. Useful for moderation.'
+    short_doc = 'Enables/disables logging. Useful for moderation'
 
     name = 'serverlogs'
     aliases = (name, 'slogs')
-    require_perms = (PermissionManageGuild(), )
+    user_perms = (PermissionManageGuild(), )
     guild_only = True
 
     async def on_load(self, from_reload):

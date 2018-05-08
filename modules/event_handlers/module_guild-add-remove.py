@@ -6,7 +6,7 @@ from discord import Embed, Colour
 class Module(ModuleBase):
 
     usage_doc = ''
-    short_doc = 'Handler for guild add/remove events.'
+    short_doc = 'Handler for guild add/remove events'
 
     name = 'guild-add-remove'
     hidden = True

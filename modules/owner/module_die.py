@@ -7,11 +7,11 @@ from constants import STOP_EXIT_CODE
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} [exit_code]'
-    short_doc = 'Stop bot.'
+    short_doc = 'Terminate bot process'
 
     name = 'stop'
     aliases = (name, 'die', '!')
-    require_perms = (PermissionBotOwner(), )
+    user_perms = (PermissionBotOwner(), )
     hidden = True
 
     async def on_call(self, message, args, **options):

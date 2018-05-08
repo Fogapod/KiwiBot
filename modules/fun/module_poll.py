@@ -19,8 +19,8 @@ EMOJI_NUMBER_BASE = '{}⃣'
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} <subject> <choice 1> <choice 2> [choices 3-9]'
-    short_doc = 'Begin poll.'
-    additional_doc = (
+    short_doc = 'Begin poll'
+    long_doc = (
         'Subcommands:\n'
         '\t{prefix}{aliases} cancel - cancels poll\n\n'
         'Command flags:\n'
@@ -31,12 +31,12 @@ class Module(ModuleBase):
 
     name = 'poll'
     aliases = (name, )
-    required_perms = (
+    bot_perms = (
         PermissionEmbedLinks(), PermissionAddReactions(),
         PermissionReadMessageHistory()
     )
-    required_args = 1
-    call_flags = {
+    min_args = 1
+    flags = {
         'timeout': {
             'alias': 't',
             'bool': False

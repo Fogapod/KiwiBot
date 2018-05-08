@@ -8,7 +8,9 @@ from objects.logger import Logger
 from objects.argparser import ArgParser
 from objects.permissions import Permission
 from objects.modulebase import (
-    GuildOnly, MissingPermissions, NSFWPermissionDenied, NotEnoughArgs)
+    GuildOnly, MissingPermissions, NSFWPermissionDenied,
+    NotEnoughArgs, TooManyArgs
+)
 
 
 logger = Logger.get_logger()
@@ -107,6 +109,8 @@ class ModuleManager:
                 return await module.on_nsfw_permission_denied(msg)
             except NotEnoughArgs:
                 return await module.on_not_enough_arguments(msg)
+            except TooManyArgs:
+                return await module.on_too_many_arguments(msg)
             except MissingPermissions as e:
                 return await module.on_missing_permissions(msg, *e.missing)
             except Exception:

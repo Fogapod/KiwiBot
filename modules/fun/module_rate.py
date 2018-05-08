@@ -8,11 +8,11 @@ from hashlib import sha256
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} <subject>'
-    short_doc = 'Perform a comprehensive research and rate given subject.'
+    short_doc = 'Perform a comprehensive research and rate given subject'
 
     name = 'rate'
     aliases = (name, )
-    required_args = 1
+    min_args = 1
 
     async def on_call(self, msg, args, **flags):
         subject = args[1:]

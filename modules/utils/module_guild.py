@@ -12,11 +12,11 @@ from datetime import datetime
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} [guild]'
-    short_doc = 'Get information about matched guild.'
+    short_doc = 'Get information about matched guild'
 
     name = 'guild'
     aliases = (name, 'guildinfo', 'server', 'serverinfo')
-    required_perms = (PermissionEmbedLinks(), )
+    bot_perms = (PermissionEmbedLinks(), )
 
     async def on_call(self, msg, args, **flags):
         if len(args) == 1:

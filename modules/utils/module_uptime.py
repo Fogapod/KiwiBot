@@ -5,7 +5,7 @@ import time
 
 class Module(ModuleBase):
 
-    short_doc = 'Get bot uptime.'
+    short_doc = 'Get bot running time'
 
     name = 'uptime'
     aliases = (name, 'up')

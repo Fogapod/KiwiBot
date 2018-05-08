@@ -13,12 +13,12 @@ from contextlib import redirect_stdout
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} <code>'
-    short_doc = 'Eval python code.'
+    short_doc = 'Eval python code'
 
     name = 'eval'
     aliases = (name, )
-    required_args = 1
-    require_perms = (PermissionBotOwner(), )
+    min_args = 1
+    user_perms = (PermissionBotOwner(), )
     hidden = True
 
     async def on_load(self, from_reload):
@@ -32,6 +32,8 @@ class Module(ModuleBase):
             'bot': self.bot,
             'msg': msg,
             'message': msg,
+            'guild': msg.guild,
+            'channel': msg.channel,
             '_': self._last_result
         }
 
@@ -44,7 +46,7 @@ class Module(ModuleBase):
         try:
             exec(to_compile, glob)
         except Exception as e:
-            return '```py\n%s: %s\n```' % (e.__class__.__name__, e)
+            return f'```py\n{e.__class__.__name__}: {e}\n```'
 
         func = glob['func']
 
@@ -52,15 +54,14 @@ class Module(ModuleBase):
             with redirect_stdout(fake_stdout):
                 result = await func()
         except Exception as e:
-            output = fake_stdout.getvalue()
-            return '```py\n%s%s\n```' %(output, traceback.format_exc())
+            return f'```py\n{fake_stdout.getvalue()}{traceback.format_exc()}\n```'
         else:
             output = fake_stdout.getvalue()
 
             if result is None:
                 if output:
-                    return '```py\n%s\n```' % output
+                    return f'```py\n{output}s\n```'
             else:
                 self._last_result = result
 
-            return '```py\n%s%s\n```' % (output, result if result is not None else 'Evaluated')
+            return f'```py\n{output}{result if result is not None else "Evaluated"}\n```'

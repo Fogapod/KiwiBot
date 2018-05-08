@@ -9,11 +9,11 @@ from discord import Embed, Colour
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} [user]'
-    short_doc = 'Get user avatar.'
+    short_doc = 'Get user avatar'
 
     name = 'avatar'
     aliases = (name, 'pfp')
-    required_perms = (PermissionEmbedLinks(), )
+    bot_perms = (PermissionEmbedLinks(), )
 
     async def on_call(self, msg, args, **flags):
         if len(args) == 1:

@@ -83,15 +83,15 @@ COMPILE_OPTIONS = {
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} <language> <program>'
-    short_doc = 'Execute code using rex service.'
-    additional_doc = (
+    short_doc = 'Execute code using rex service'
+    long_doc = (
         'Subcommands:\n'
         '\tlist: show list of languages'
     )
 
     name = 'rex'
     aliases = (name, )
-    required_args = 1
+    min_args = 1
 
     async def on_call(self, msg, args, **options):
         result = ''
@@ -103,7 +103,7 @@ class Module(ModuleBase):
                 if v == last_code:
                     result += ', ' + k
                 else:
-                    result += '\n`{0}`: {1}'.format(v, k)
+                    result += f'\n`{v}`: {k}'
                     last_code = v
 
             return result.strip()
@@ -140,4 +140,4 @@ class Module(ModuleBase):
         if not result:
             result = 'Evaluated'
 
-        return '```\n' + result + '```'
+        return f'```\n{result}```'

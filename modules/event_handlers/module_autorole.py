@@ -9,8 +9,8 @@ from discord import Embed, Colour, Forbidden, NotFound
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} [add|remove] [role]'
-    short_doc = 'Allows to set or remove autorole(s).'
-    additional_doc = (
+    short_doc = 'Allows to set or remove autorole(s)'
+    long_doc = (
         'See current autoroles:\n'
         '\t{prefix}{aliases}\n\n'
         'Add autorole:\n'
@@ -23,9 +23,9 @@ class Module(ModuleBase):
 
     name = 'autorole'
     aliases = (name, 'autoroles')
-    require_perms = (PermissionManageRoles(), )
-    required_perms = (PermissionManageRoles(), )
-    call_flags = {
+    bot_perms = (PermissionManageRoles(), )
+    user_perms = (PermissionManageRoles(), )
+    flags = {
         'bots': {
             'alias': 'b',
             'bool': True

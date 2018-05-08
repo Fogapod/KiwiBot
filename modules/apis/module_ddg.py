@@ -12,11 +12,11 @@ API_URL = 'https://api.duckduckgo.com'
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} <query>'
-    short_doc = 'Web search using duckduckgo.'
+    short_doc = 'Web search using duckduckgo'
 
     name = 'ddg'
     aliases = (name, 'duckduckgo')
-    required_args = 1
+    min_args = 1
 
     async def on_call(self, msg, args, **flags):
         params = {
@@ -51,4 +51,4 @@ class Module(ModuleBase):
                 else:
                     result += '{error} failed to fetch image: ' + image_url
 
-        await self.send(msg, content=abstract_text, file=image)
+        await self.send(msg, abstract_text, file=image)

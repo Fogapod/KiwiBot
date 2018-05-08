@@ -11,11 +11,11 @@ API_URL = 'http://inspirobot.me/api?generate=true'
 
 class Module(ModuleBase):
 
-    short_doc = 'Very inspirational.'
+    short_doc = 'Very inspirational'
 
     name = 'inspire'
     aliases = (name, 'inspirebot')
-    required_perms = (
+    bot_perms = (
         PermissionEmbedLinks(), PermissionAddReactions(),
         PermissionReadMessageHistory()
     )

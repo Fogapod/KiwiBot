@@ -19,24 +19,24 @@ REACTION_AGAINST = '❎'
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} <subject>'
-    short_doc = 'Begin vote procedure.'
-    additional_doc = (
+    short_doc = 'Begin vote procedure'
+    long_doc = (
         'Subcommands:\n'
         '\t{prefix}{aliases} cancel - cancels vote\n\n'
         'Command flags:\n'
-        '\t--timeout or -t <time> - set custom timeout, default is 60\n\n'
+        '\t[--timeout|-t] <time>: set custom timeout, default is 60\n\n'
         'Time formatting examples:\n'
-        '\t1hour or 1h or 60m or 3600 will result in 1 hour'
+        '\t1hour or 1h or 60m or 3600s or 3600 will result in 1 hour'
     )
 
     name = 'vote'
     aliases = (name, )
-    required_perms = (
+    bot_perms = (
         PermissionEmbedLinks(), PermissionAddReactions(),
         PermissionReadMessageHistory()
     )
     required_args = 1
-    call_flags = {
+    flags = {
         'timeout': {
             'alias': 't',
             'bool': False

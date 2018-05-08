@@ -9,7 +9,7 @@ from discord import DMChannel
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} <text>'
-    short_doc = 'Let me say something for you, lazy human.'
+    short_doc = 'Let me say something for you, lazy human'
     additional_doc = (
         'Command flags:\n'
         '\t[--delete|-d]:            Delete command message if added\n'
@@ -20,8 +20,8 @@ class Module(ModuleBase):
 
     name = 'say'
     aliases = (name, )
-    required_args = 1
-    call_flags = {
+    min_args = 1
+    flags = {
         'delete': {
             'alias': 'd',
             'bool': True

@@ -5,8 +5,8 @@ from objects.permissions import PermissionManageGuild
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} [prefix]'
-    short_doc = 'Change bot guild prefix.'
-    additional_doc = (
+    short_doc = 'Change bot guild prefix'
+    long_doc = (
         'Subcommands:\n'
         '\t{prefix}{aliases} [delete|remove|clear] - remove guild prefix'
     )

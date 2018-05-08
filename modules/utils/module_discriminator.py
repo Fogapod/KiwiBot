@@ -1,5 +1,6 @@
 from objects.modulebase import ModuleBase
-from objects.permissions import PermissionEmbedLinks, PermissionAddReactions
+from objects.permissions import (
+    PermissionEmbedLinks, PermissionAddReactions, PermissionReadMessageHistory)
 from objects.paginators import Paginator
 
 from discord import Embed, Colour
@@ -8,11 +9,14 @@ from discord import Embed, Colour
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} [discriminator]'
-    short_doc = 'Get list of users with given discriminator.'
+    short_doc = 'Get list of users with given discriminator'
 
     name = 'discriminator'
     aliases = (name, 'discrim')
-    required_perms = (PermissionEmbedLinks(), PermissionAddReactions())
+    bot_perms = (
+        PermissionEmbedLinks(), PermissionAddReactions(),
+        PermissionReadMessageHistory()
+    )
 
     async def on_call(self, msg, args, **flags):
         if len(args) == 1:
@@ -32,12 +36,11 @@ class Module(ModuleBase):
             return '{warning} Users with discriminator **%s** not found' % discrim
 
         lines = sorted([str(u) for u in matched], key=lambda s: (len(s), s))
-        users_per_chunk = 25
+        users_per_chunk = 30
         chunks = [lines[i:i + users_per_chunk] for i in range(0, len(lines), users_per_chunk)]
 
         if len(chunks) == 1:
-            await self.send(msg, content='```\n' + '\n'.join(chunks[0]) + '```')
-            return
+            return await self.send(msg, '```\n' + '\n'.join(chunks[0]) + '```')
 
         p = Paginator(self.bot)
         for i, chunk in enumerate(chunks):

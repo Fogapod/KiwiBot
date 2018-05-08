@@ -9,8 +9,8 @@ import traceback
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} <target>'
-    short_doc = 'Reload parts of the bot.'
-    additional_doc = (
+    short_doc = 'Reload parts of the bot'
+    long_doc = (
         'Targets:\n'
         '\tbot: restarts bot\n'
         '\tmodules: reloads all modules\n'
@@ -19,14 +19,11 @@ class Module(ModuleBase):
 
     name = 'reload'
     aliases = (name, )
-    required_args = 1
-    require_perms = (PermissionBotOwner(), )
+    min_args = 1
+    user_perms = (PermissionBotOwner(), )
     hidden = True
 
     async def on_load(self, from_reload):
-        if from_reload:
-            return
-
         data = await self.bot.redis.get('reload_data')
         if data is None:
             return
@@ -58,26 +55,22 @@ class Module(ModuleBase):
             except Exception:
                 response = '{error} Failed to reload modules. Exception:```py\n' + traceback.format_exc() + '```'
                 response = await format_response(response, msg, self.bot)
-                await self.bot.edit_message(
+                return await self.bot.edit_message(
                     reload_message,
                     content=response
                 )
-                return
 
-            await self.bot.edit_message(
+            return await self.bot.edit_message(
                 reload_message, content='Reloaded {0} modules: [{1}]'.format(
                     len(self.bot.mm.modules),
                     ', '.join(self.bot.mm.modules.keys())
                 )
             )
-            return
-
         else:
             module = self.bot.mm.get_module(target)
             if module is None:
-                await self.bot.edit_message(
+                return await self.bot.edit_message(
                     reload_message, content=f'Unknown target `{target}`!')
-                return
 
             target = module.name
 
@@ -86,11 +79,10 @@ class Module(ModuleBase):
             except Exception:
                 response = '{error} ' + f'Failed to reload module `{target}`. Exception:```py\n{traceback.format_exc()}```'
                 response = await format_response(response, msg, self.bot)
-                await self.bot.edit_message(
+                return await self.bot.edit_message(
                     reload_message,
                     content=response
                 )
-                return
 
         await self.bot.edit_message(
             reload_message, content=f'Reloading `{target}` completed')

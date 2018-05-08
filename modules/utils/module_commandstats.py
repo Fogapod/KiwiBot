@@ -12,11 +12,11 @@ class Module(ModuleBase):
 
     name = 'commandstats'
     aliases = (name, 'cmdstats')
-    required_perms = (
+    bot_perms = (
         PermissionEmbedLinks(), PermissionAddReactions(),
         PermissionReadMessageHistory()
     )
-    call_flags = {
+    flags = {
         'show-disabled': {
             'alias': 'd',
             'bool': True

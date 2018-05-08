@@ -1,5 +1,5 @@
 from objects.modulebase import ModuleBase
-from objects.permissions import PermissionExternalEmojis
+from objects.permissions import PermissionExternalEmojis, PermissionEmbedLinks
 
 from utils.funcs import find_user, _get_last_user_message_timestamp
 
@@ -13,16 +13,17 @@ STATUS_EMOTES = {
     'idle':      '<:idle:427209268203094017>',
     'dnd':       '<:dnd:427209268043841537>',
     'offline':   '<:offline:427209267687194625>',
-    'invisible': '<:offline:427209267687194625>'
+    'invisible': '<:invisible:427209267687194625>'
 }
 
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} [user]'
-    short_doc = 'Get information about given user.'
+    short_doc = 'Get information about given user'
 
     name = 'user'
     aliases = (name, 'userinfo')
+    bot_perms = (PermissionEmbedLinks(), )
 
     async def on_call(self, msg, args, **flags):
         if len(args) == 1:

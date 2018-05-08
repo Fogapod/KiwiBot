@@ -8,13 +8,11 @@ from discord import Permissions, TextChannel, VoiceChannel
 PERM_MISSING = '❌'
 PERM_THERE   = '✅'
 
-
-
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} [member|role]'
-    short_doc = 'Show list of member or role permissions.'
-    additional_doc = (
+    short_doc = 'Show list of member or role permissions'
+    long_doc = (
         'Available flags:\n'
         '\tc or channel: channel to check permissions in\n'
         '\tt: show permissions set to true only\n'
@@ -25,7 +23,7 @@ class Module(ModuleBase):
 
     name = 'permissions'
     aliases = (name, 'perms')
-    call_flags = {
+    flags = {
         'value': {
             'alias': 'v',
             'bool': False

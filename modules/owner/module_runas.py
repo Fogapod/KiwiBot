@@ -9,13 +9,13 @@ from copy import copy
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} <user> <command>'
-    short_doc = 'Force bot to think command was sent by matched user.'
+    short_doc = 'Replace message author and run command'
 
     name = 'runas'
     aliases = (name, )
+    min_args = 2
+    user_perms = (PermissionBotOwner(), )
     guild_only = True
-    required_args = 2
-    require_perms = (PermissionBotOwner(), )
     hidden = True
 
     async def on_call(self, msg, args, **flags):

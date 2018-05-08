@@ -1,4 +1,5 @@
 from objects.modulebase import ModuleBase
+from objects.permissions import PermissionEmbedLinks
 
 from utils.funcs import find_role
 
@@ -10,11 +11,12 @@ from datetime import datetime
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} <role>'
-    short_doc = 'Get information about given role.'
+    short_doc = 'Get information about given role'
 
     name = 'role'
     aliases = (name, 'roleinfo')
-    required_args = 1
+    bot_perms = (PermissionEmbedLinks(), )
+    min_args = 1
     guild_only = True
 
     async def on_call(self, msg, args, **flags):

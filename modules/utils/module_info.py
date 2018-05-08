@@ -13,11 +13,11 @@ import sys
 
 class Module(ModuleBase):
 
-    short_doc = 'Get information about me.'
+    short_doc = 'Get information about me'
 
     name = 'info'
     aliases = (name, 'information', 'stats')
-    required_perms = (PermissionEmbedLinks(), )
+    bot_perms = (PermissionEmbedLinks(), )
 
     async def on_call(self, msg, args, **flags):
         git_url = None

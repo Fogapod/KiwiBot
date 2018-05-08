@@ -13,7 +13,7 @@ API_URL = 'https://discordbots.org/api/bots/{bot_id}/stats'
 class Module(ModuleBase):
 
     usage_doc = ''
-    short_doc = 'Sends server count to discord bot list.'
+    short_doc = 'Sends server count to discord bot list'
 
     name = 'dbl_api_task'
     hidden = True
@@ -34,7 +34,7 @@ class Module(ModuleBase):
             self._task.cancel()
 
     async def guild_size_task(self):
-        headers = {'Authorization': self.dbl_token}
+        headers = { 'Authorization': self.dbl_token }
 
         while True:
             data = {
@@ -47,6 +47,6 @@ class Module(ModuleBase):
             try:
                 await self.bot.sess.post(API_URL, headers=headers, data=data)
             except Exception as e:
-                logger.debug(f'Error sneding data: {e}')
+                logger.debug(f'Error sending data: {e}')
 
             await asyncio.sleep(1800)

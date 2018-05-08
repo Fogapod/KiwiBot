@@ -292,7 +292,7 @@ async def request_reaction_confirmation(msg, user, bot, emoji_accept='✅', emoj
     return False
 
 
-def colour_from_str(string):
+def colour_from_string(string):
     match = COLOUR_REGEX.fullmatch(string)
     if match is None:
         raise ValueError('Not a colour')

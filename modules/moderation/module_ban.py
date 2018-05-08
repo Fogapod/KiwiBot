@@ -9,14 +9,14 @@ from discord import Member
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} <user> [reason]'
-    short_doc = 'Ban user.'
+    short_doc = 'Ban user on server'
 
     name = 'ban'
     aliases = (name, 'hackban')
-    required_args = 1
+    min_args = 1
     guild_only = True
-    require_perms  = (PermissionBanMembers(), )
-    required_perms = (PermissionBanMembers(), )
+    bot_perms  = (PermissionBanMembers(), )
+    user_perms = (PermissionBanMembers(), )
 
     async def on_call(self, msg, args, **flags):
         user = await find_user(args[1], msg, self.bot)

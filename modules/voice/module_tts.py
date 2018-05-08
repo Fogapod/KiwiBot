@@ -82,8 +82,8 @@ LANG_LIST = {
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} <text>'
-    short_doc = 'Make me say something.'
-    additional_doc = (
+    short_doc = 'Make me say something'
+    long_doc = (
         'Command flags:\n'
         '\t[--file|-f]:                respond with audio file\n'
         '\t[--no-voice|-n]:            don\'t use voice channel\n'
@@ -95,8 +95,8 @@ class Module(ModuleBase):
 
     name = 'tts'
     aliases = (name, )
-    required_args = 1
-    call_flags = {
+    min_args = 1
+    flags = {
         'language': {
             'alias': 'l',
             'bool': False

@@ -8,7 +8,7 @@ from discord import Forbidden
 class Module(ModuleBase):
 
     usage_doc = ''
-    short_doc = 'Member nick handlermyhandler.'
+    short_doc = 'Member nick handlermyhandler'
 
     name = 'member-nicksmynicks'
     hidden = True

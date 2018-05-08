@@ -1,5 +1,6 @@
 from objects.modulebase import ModuleBase
-from objects.permissions import PermissionBotOwner, PermissionAddReactions
+from objects.permissions import (
+    PermissionBotOwner, PermissionAddReactions, PermissionReadMessageHistory)
 from objects.paginators import Paginator, SelectionPaginator
 
 from discord import Activity, Status
@@ -11,7 +12,7 @@ class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} [subcommand] [args...]'
     short_doc = 'Bot presence utils'
-    additional_doc = (
+    long_doc = (
         'Suncommands:\n'
         '\tplaying - set playing activity\n'
         '\tstreaming - set streaming activity\n'
@@ -26,8 +27,9 @@ class Module(ModuleBase):
 
     name = 'status'
     aliases = (name, 'presence', 'activity')
-    require_perms = (PermissionBotOwner(), PermissionAddReactions())
-    call_flags = {
+    bot_perms = (PermissionAddReactions(), PermissionReadMessageHistory())
+    user_perms = (PermissionBotOwner(), )
+    flags = {
         'status': {
             'alias': 's',
             'bool': False

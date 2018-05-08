@@ -10,8 +10,8 @@ from discord import Forbidden, NotFound
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} [leave text]'
-    short_doc = 'Allows to set message on guild user leave.'
-    additional_doc = (
+    short_doc = 'Allows to set message on guild user leave'
+    long_doc = (
         'See current leave message:\n'
         '\t{prefix}{aliases}\n\n'
         'Remove leave message:\n'
@@ -30,7 +30,7 @@ class Module(ModuleBase):
 
     name = 'leave'
     aliases = (name, )
-    call_flags = {
+    flags = {
         'channel': {
             'alias': 'c',
             'bool': False

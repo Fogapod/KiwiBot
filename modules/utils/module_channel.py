@@ -1,10 +1,10 @@
 from objects.modulebase import ModuleBase
+from objects.permissions import PermissionEmbedLinks
 
 from utils.funcs import find_channel
 
 from discord.abc import PrivateChannel
 from discord import Embed, Colour, TextChannel, VoiceChannel
-
 
 
 class Module(ModuleBase):
@@ -14,6 +14,7 @@ class Module(ModuleBase):
 
     name = 'channel'
     aliases = (name, 'channelinfo')
+    bot_perms = (PermissionEmbedLinks(), )
 
     async def on_call(self, msg, args, **flags):
         if len(args) == 1:

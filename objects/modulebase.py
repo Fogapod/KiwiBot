@@ -6,40 +6,41 @@ from utils.funcs import get_local_prefix
 class ModuleBase:
 
     usage_doc = '{prefix}{aliases}'
-    short_doc = 'Not documented.'
-    additional_doc = ''
+    short_doc = 'Not documented'
+    long_doc = ''
 
     name             = ''     # name of module, should be same as in file name
     aliases          = ()     # default check_message event would search for matches in this tuple
-    required_perms   = ()     # permissions required for bot
-    require_perms    = ()     # permissions required from user
-    required_args    = 0      # number if required arguments
-    call_flags       = {}     # flags are specified here
+    bot_perms        = ()     # needed bot permissions
+    user_perms       = ()     # needed user permissions
+    min_args         = 0      # minimum number if arguments
+    max_args         = -1     # maximum number of arguments. -1 if no limit
+    flags            = {}     # flags are specified here
     guild_only       = False  # can only be used in guild
     nsfw             = False  # can only be used in nsfw channel
     hidden           = False  # would be hidden when possible
     disabled         = False  # won't be checked or called
-    events           = {}     # name: function pairs of events module will handle
+    events           = {}     # (name: function) pairs of events module will handle
 
     def __init__(self, bot):
         self.bot = bot
 
-        if type(self.required_perms) is not tuple:
-            self.required_perms = (self.required_perms, )
+        if type(self.bot_perms) is not tuple:
+            self.required_perms = (self.bot_perms, )
 
-        if type(self.require_perms) is not tuple:
-            self.require_perms = (self.require_perms, )
+        if type(self.user_perms) is not tuple:
+            self.require_perms = (self.user_perms, )
 
         # format call_flags dict
-        self._call_flags = {}
+        self._flags = {}
 
-        for k, v in self.call_flags.items():
+        for k, v in self.flags.items():
             alias = v.get('alias', None)
             bool  = v.get('bool', False)
 
             if alias is not None:
-                self._call_flags[alias] = { 'alias': k }
-            self._call_flags[k] = { 'alias': k, 'bool': bool }
+                self._flags[alias] = { 'alias': k }
+            self._flags[k] = { 'alias': k, 'bool': bool }
 
     async def on_guild_check_failed(self, msg):
         return '{error} This command can only be used in guild'
@@ -48,6 +49,9 @@ class ModuleBase:
         return '{error} You can use this command only in channel marked as nsfw'
 
     async def on_not_enough_arguments(self, msg):
+        return await self.on_doc_request(msg)
+
+    async def on_too_many_arguments(self, msg):
         return await self.on_doc_request(msg)
 
     async def on_missing_permissions(self, msg, *missing):
@@ -86,17 +90,20 @@ class ModuleBase:
         if getattr(msg.channel, 'is_nsfw', lambda: isinstance(msg.channel, DMChannel))() < self.nsfw:
             raise NSFWPermissionDenied
 
-        args.parse_flags(known_flags=self._call_flags)
+        args.parse_flags(known_flags=self._flags)
 
-        if len(args) - 1 < self.required_args:
+        if len(args) - 1 < self.min_args:
             raise NotEnoughArgs
 
+        if self.max_args > 0 and len(args) - 1 > self.max_args:
+            raise TooManyArgs
+
         missing_permissions = []
-        for permission in self.required_perms:
+        for permission in self.bot_perms:
             if not permission.check(msg.channel, self.bot.user):
                 missing_permissions.append(permission)
 
-        for permission in self.require_perms:
+        for permission in self.user_perms:
             if not permission.check(msg.channel, msg.author):
                 missing_permissions.append(permission)
 
@@ -113,9 +120,9 @@ class ModuleBase:
 
     async def on_doc_request(self, msg):
         help_text = ''
-        help_text += f'{self.usage_doc}'          if self.usage_doc else ''
-        help_text += f'\n\n{self.short_doc}'      if self.short_doc else ''
-        help_text += f'\n\n{self.additional_doc}' if self.additional_doc else ''
+        help_text += f'{self.usage_doc}'     if self.usage_doc else ''
+        help_text += f'\n\n{self.short_doc}' if self.short_doc else ''
+        help_text += f'\n\n{self.long_doc}'  if self.long_doc else ''
 
         help_text = help_text.strip()
 
@@ -159,6 +166,10 @@ class NSFWPermissionDenied(ModuleCallError):
 
 
 class NotEnoughArgs(ModuleCallError):
+    pass
+
+
+class TooManyArgs(ModuleCallError):
     pass
 
 

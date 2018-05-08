@@ -10,8 +10,8 @@ from discord import Forbidden, NotFound
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} [welcome text]'
-    short_doc = 'Allows to set message on guild user join.'
-    additional_doc = (
+    short_doc = 'Allows to set message on guild user join'
+    long_doc = (
         'See current join message:\n'
         '\t{prefix}{aliases}\n\n'
         'Remove welcome message:\n'
@@ -30,7 +30,7 @@ class Module(ModuleBase):
 
     name = 'join'
     aliases = (name, 'welcome')
-    call_flags = {
+    flags = {
         'channel': {
             'alias': 'c',
             'bool': False

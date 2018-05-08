@@ -25,8 +25,8 @@ NSFW_IMG_TAGS = [
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} <tag|subcommand>'
-    short_doc = 'Nekos.'
-    additional_doc = (
+    short_doc = 'Nekos'
+    long_doc = (
         'Powered by https://nekos.life api\n\n'
         'Subcommands:\n'
         '\tlist: show list available image tags'
@@ -38,8 +38,8 @@ class Module(ModuleBase):
 
     name = 'nekos'
     aliases = (name, 'neko')
-    required_args = 1
-    required_perms = (
+    min_args = 1
+    bot_perms = (
         PermissionEmbedLinks(), PermissionAddReactions(),
         PermissionReadMessageHistory()
     )

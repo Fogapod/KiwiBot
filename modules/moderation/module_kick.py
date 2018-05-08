@@ -7,14 +7,14 @@ from utils.funcs import find_user, request_reaction_confirmation
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} <user> [reason]'
-    short_doc = 'Kick user from server.'
+    short_doc = 'Kick user from server'
 
     name = 'kick'
     aliases = (name, )
-    required_args = 1
+    min_args = 1
     guild_only = True
-    require_perms  = (PermissionKickMembers(), )
-    required_perms = (PermissionKickMembers(), )
+    bot_perms  = (PermissionKickMembers(), )
+    user_perms = (PermissionKickMembers(), )
 
     async def on_call(self, msg, args, **flags):
         guild_member = await find_user(args[1], msg, self.bot, strict_guild=True)

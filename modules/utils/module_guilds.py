@@ -1,5 +1,6 @@
 from objects.modulebase import ModuleBase
-from objects.permissions import PermissionEmbedLinks, PermissionAddReactions
+from objects.permissions import (
+    PermissionEmbedLinks, PermissionAddReactions, PermissionReadMessageHistory)
 from objects.paginators import Paginator
 
 from discord import Embed, Colour
@@ -7,11 +8,14 @@ from discord import Embed, Colour
 
 class Module(ModuleBase):
 
-    short_doc = 'Get list of guilds I\'m in.'
+    short_doc = 'Get list of guilds I\'m in'
 
     name = 'guilds'
     aliases = (name, 'servers')
-    required_perms = (PermissionEmbedLinks(), PermissionAddReactions())
+    bot_perms = (
+        PermissionEmbedLinks(), PermissionAddReactions(),
+        PermissionReadMessageHistory()
+    )
 
     async def on_call(self, msg, args, **flags):
         guilds = sorted(
@@ -19,12 +23,11 @@ class Module(ModuleBase):
             key=lambda g: (g.member_count, g.name)
         )
         lines = [f'{str(i + 1) + ")":<3}{g.name:<25} {g.id}' for i, g in enumerate(guilds)]
-        lines_per_chunk = 20
+        lines_per_chunk = 30
         chunks = ['```\n' + '\n'.join(lines[i:i + lines_per_chunk]) + '```' for i in range(0, len(lines), lines_per_chunk)]
 
         if len(chunks) == 1:
-            await self.send(msg, content=chunks[0])
-            return
+            return await self.send(msg, content=chunks[0])
 
         p = Paginator(self.bot)
         for i, chunk in enumerate(chunks):

@@ -10,11 +10,11 @@ DISCORD_AUTH_URL = 'https://discordapp.com/oauth2/authorize?client_id={id}&scope
 
 class Module(ModuleBase):
     
-    short_doc = 'Get bot invite link.'
+    short_doc = 'Get bot invite link'
 
     name = 'invite'
     aliases = (name, )
-    required_perms = (PermissionEmbedLinks(), )
+    bot_perms = (PermissionEmbedLinks(), )
 
     async def on_call(self, msg, args, **flags):
         e = Embed(

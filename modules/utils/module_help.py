@@ -11,15 +11,15 @@ from discord import Embed, Colour
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} [alias]'
-    short_doc = 'Get information about bot or module (if given).'
+    short_doc = 'Get information about bot or module (if given)'
 
     name = 'help'
     aliases = (name, 'commands')
-    required_perms = (
+    bot_perms = (
         PermissionEmbedLinks(), PermissionAddReactions(),
         PermissionReadMessageHistory()
     )
-    call_flags = {
+    flags = {
         'show-disabled': {
             'alias': 'd',
             'bool': True
@@ -53,7 +53,7 @@ class Module(ModuleBase):
                 return '{error} No commands found'
 
             lines = sorted([f'{m.name:<20}{m.short_doc}' for n, m in module_list])
-            lines_per_chunk = 20
+            lines_per_chunk = 30
             chunks = [lines[i:i + lines_per_chunk] for i in range(0, len(lines), lines_per_chunk)]
 
             local_prefix = await get_local_prefix(msg, self.bot)
@@ -67,11 +67,8 @@ class Module(ModuleBase):
                 return e
 
             if len(chunks) == 1:
-                await self.send(
-                    msg, content=f'{len(lines)} commands',
-                    embed=make_embed(chunks[0])
-                )
-                return
+                return await self.send(
+                    msg, f'{len(lines)} commands', embed=make_embed(chunks[0]))
 
             p = Paginator(self.bot)
             for i, chunk in enumerate(chunks):
@@ -81,8 +78,7 @@ class Module(ModuleBase):
                 )
 
             m = await self.send(msg, **p.current_page)
-            await p.run(m, target_user=msg.author)
-            return
+            return await p.run(m, target_user=msg.author)
 
         if len(args) > 2:
             return '{warning} help for subcommands is not supported yet'

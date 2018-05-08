@@ -8,12 +8,12 @@ from utils.funcs import create_subprocess_shell, execute_process
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} <code>'
-    short_doc = 'Execute terminal command in a shell.'
+    short_doc = 'Execute terminal command in a shell'
 
     name = 'exec2'
     aliases = (name, )
-    required_args = 1
-    require_perms = (PermissionBotOwner(), )
+    min_args = 1
+    user_perms = (PermissionBotOwner(), )
     hidden = True
 
     async def on_call(self, msg, args, **flags):
@@ -21,7 +21,7 @@ class Module(ModuleBase):
         process, pid = await create_subprocess_shell(command)
         
         start_message = await self.send(
-            msg, content='Started task with pid `' + str(pid) + '`'
+            msg, f'Started task with pid `{pid}`'
         )
 
         stdout, stderr = await execute_process(process, command)
@@ -36,4 +36,4 @@ class Module(ModuleBase):
             response = await format_response(result, msg, self.bot)
 
         await self.bot.edit_message(
-            start_message, content='```\n' + response + '```')
+            start_message, f'```\n{response}```')

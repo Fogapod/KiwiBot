@@ -10,8 +10,8 @@ MAX_LIMIT = 500
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} [target] [limit]'
-    short_doc = 'Delete messages in channel.'
-    additional_doc = (
+    short_doc = 'Delete messages in channel'
+    long_doc = (
         f'Target of prune can be: user mention/id/name, bots, users.\n'
         f'Default number of messages to check (limit) is {DEF_LIMIT}.\n'
         f'Maximum value is {MAX_LIMIT}.'
@@ -19,8 +19,8 @@ class Module(ModuleBase):
 
     name = 'purge'
     aliases = (name, 'clear')
-    require_perms  = (PermissionManageMessages(), )
-    required_perms = (PermissionManageMessages(), )
+    bot_perms  = (PermissionManageMessages(), )
+    user_perms = (PermissionManageMessages(), )
     guild_only = True
 
     async def on_call(self, msg, args, **flags):
