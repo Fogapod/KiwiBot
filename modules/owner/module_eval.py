@@ -61,7 +61,7 @@ class Module(ModuleBase):
 
             if result is None:
                 if output:
-                    return f'```py\n{output}s\n```'
+                    return f'```py\n{output}\n```'
             else:
                 self._last_result = result
 
