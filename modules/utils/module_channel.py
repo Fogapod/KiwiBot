@@ -10,10 +10,11 @@ from discord import Embed, Colour, TextChannel, VoiceChannel
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} [channel]'
-    short_doc = 'Get information about given channel.'
+    short_doc = 'Get information about given channel'
 
     name = 'channel'
     aliases = (name, 'channelinfo')
+    category = 'Discord'
     bot_perms = (PermissionEmbedLinks(), )
 
     async def on_call(self, msg, args, **flags):

@@ -12,6 +12,7 @@ class Module(ModuleBase):
 
     name = 'rate'
     aliases = (name, )
+    category = 'Actions'
     min_args = 1
 
     async def on_call(self, msg, args, **flags):

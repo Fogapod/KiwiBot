@@ -12,6 +12,7 @@ class Module(ModuleBase):
 
     name = 'guilds'
     aliases = (name, 'servers')
+    category = 'Bot'
     bot_perms = (
         PermissionEmbedLinks(), PermissionAddReactions(),
         PermissionReadMessageHistory()

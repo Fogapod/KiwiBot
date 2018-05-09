@@ -12,6 +12,7 @@ class Module(ModuleBase):
 
     name = 'commandstats'
     aliases = (name, 'cmdstats')
+    category = 'Bot'
     bot_perms = (
         PermissionEmbedLinks(), PermissionAddReactions(),
         PermissionReadMessageHistory()

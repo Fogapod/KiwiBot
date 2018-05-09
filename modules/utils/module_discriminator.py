@@ -13,6 +13,7 @@ class Module(ModuleBase):
 
     name = 'discriminator'
     aliases = (name, 'discrim')
+    category = 'Discord'
     bot_perms = (
         PermissionEmbedLinks(), PermissionAddReactions(),
         PermissionReadMessageHistory()

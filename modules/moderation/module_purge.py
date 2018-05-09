@@ -19,6 +19,7 @@ class Module(ModuleBase):
 
     name = 'purge'
     aliases = (name, 'clear')
+    category = 'Moderation'
     bot_perms  = (PermissionManageMessages(), )
     user_perms = (PermissionManageMessages(), )
     guild_only = True

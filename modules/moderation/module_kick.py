@@ -11,6 +11,7 @@ class Module(ModuleBase):
 
     name = 'kick'
     aliases = (name, )
+    category = 'Moderation'
     min_args = 1
     guild_only = True
     bot_perms  = (PermissionKickMembers(), )

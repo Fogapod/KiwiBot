@@ -13,6 +13,7 @@ class Module(ModuleBase):
 
     name = 'runas'
     aliases = (name, )
+    category = 'Owner'
     min_args = 2
     user_perms = (PermissionBotOwner(), )
     guild_only = True

@@ -16,6 +16,7 @@ class Module(ModuleBase):
     short_doc = 'Sends server count to discord bot list'
 
     name = 'dbl_api_task'
+    category = 'Internal'
     hidden = True
 
     async def on_load(self, from_reload):

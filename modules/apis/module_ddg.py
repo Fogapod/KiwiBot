@@ -15,6 +15,7 @@ class Module(ModuleBase):
 
     name = 'ddg'
     aliases = (name, 'duckduckgo')
+    category = 'Services'
     bot_perms = (
         PermissionEmbedLinks(), PermissionAddReactions(),
         PermissionReadMessageHistory()

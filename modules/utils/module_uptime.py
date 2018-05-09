@@ -9,6 +9,7 @@ class Module(ModuleBase):
 
     name = 'uptime'
     aliases = (name, 'up')
+    category = 'Bot'
 
     async def on_load(self, from_reload):
         self.start_time = time.time()

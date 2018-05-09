@@ -21,12 +21,14 @@ class Module(ModuleBase):
         '\tlist - show all activities\n'
         '\tremove - remove activity from list\n\n'
         'Flags:\n'
-        '\t[--status|-s] <name> - select status (online, dnd, etc)\n'
-        '\t[--interval|-i] <time> - change activity change interval'
+        '\t[--status|-s] <name>:    select status (online, dnd, etc)\n'
+        '\t[--interval|-i] <time>:  change activity change interval'
     )
 
     name = 'status'
     aliases = (name, 'presence', 'activity')
+    category = 'Owner'
+    
     bot_perms = (PermissionAddReactions(), PermissionReadMessageHistory())
     user_perms = (PermissionBotOwner(), )
     flags = {

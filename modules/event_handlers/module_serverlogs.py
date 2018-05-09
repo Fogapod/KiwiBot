@@ -13,6 +13,7 @@ class Module(ModuleBase):
 
     name = 'serverlogs'
     aliases = (name, 'slogs')
+    category = 'Moderation'
     user_perms = (PermissionManageGuild(), )
     guild_only = True
 

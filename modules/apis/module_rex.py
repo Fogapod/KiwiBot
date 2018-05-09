@@ -91,6 +91,7 @@ class Module(ModuleBase):
 
     name = 'rex'
     aliases = (name, )
+    category = 'Services'
     min_args = 1
 
     async def on_call(self, msg, args, **options):

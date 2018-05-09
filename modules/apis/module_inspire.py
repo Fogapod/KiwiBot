@@ -15,6 +15,7 @@ class Module(ModuleBase):
 
     name = 'inspire'
     aliases = (name, 'inspirebot')
+    category = 'Services'
     bot_perms = (
         PermissionEmbedLinks(), PermissionAddReactions(),
         PermissionReadMessageHistory()

@@ -13,6 +13,7 @@ import asyncio
 
 from datetime import timezone
 
+
 REACTION_FOR = '✅'
 REACTION_AGAINST = '❎'
 
@@ -31,6 +32,7 @@ class Module(ModuleBase):
 
     name = 'vote'
     aliases = (name, )
+    category = 'Actions'
     bot_perms = (
         PermissionEmbedLinks(), PermissionAddReactions(),
         PermissionReadMessageHistory()

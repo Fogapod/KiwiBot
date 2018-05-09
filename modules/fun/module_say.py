@@ -10,7 +10,7 @@ class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} <text>'
     short_doc = 'Let me say something for you, lazy human'
-    additional_doc = (
+    long_doc = (
         'Command flags:\n'
         '\t[--delete|-d]:            Delete command message if added\n'
         '\t[--channel|-c] <channel>: Channel where to send message\n'
@@ -20,6 +20,7 @@ class Module(ModuleBase):
 
     name = 'say'
     aliases = (name, )
+    category = 'Actions'
     min_args = 1
     flags = {
         'delete': {

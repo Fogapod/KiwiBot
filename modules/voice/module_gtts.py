@@ -26,6 +26,7 @@ class Module(ModuleBase):
 
     name = 'gtts'
     aliases = (name, )
+    category = 'Actions'
     min_args = 1
     flags = {
         'language': {

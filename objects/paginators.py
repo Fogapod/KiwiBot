@@ -4,6 +4,7 @@ from concurrent.futures import FIRST_COMPLETED
 
 import time
 
+from discord import TextChannel, DMChannel
 from discord.errors import Forbidden, NotFound
 
 
@@ -59,12 +60,12 @@ class PaginatorABC:
 
         return self.current_page
 
-    async def init_reactions(self, msg, force=False):
+    async def init_reactions(self, force=False):
         if len(self._pages) <= 1 and not force:
             return
 
         for emoji in self.events.keys():
-            await msg.add_reaction(emoji)
+            await self.target_message.add_reaction(emoji)
 
     async def _reaction_add_callback(self, reaction, user):
         manage_messages_permission = \
@@ -81,12 +82,12 @@ class PaginatorABC:
     async def _reaction_remove_callback(self, reaction, user):
         await self.events[str(reaction)](reaction, user)
 
-    async def run(self, target_message, **kwargs):
+    async def run(self, target, **kwargs):
         """
         Runs paginator session
         parameters:
-            :target_message:
-                message attach paginator to
+            :target:
+                message attach paginator to or channel to send 1st page
             :target_user: (default: None)
                 user wait actions from. Can be User or Member object
             :target_users: (default: [])
@@ -99,7 +100,13 @@ class PaginatorABC:
                 callbacks are coroutines recieving event result(s)
         """
 
-        self.target_message = target_message
+        if isinstance(target, TextChannel) or isinstance(target, DMChannel):
+            self.target_message = await self.bot.send_message(
+                target, **self.current_page)
+            if self.target_message is None:
+                return await self.cleanup()
+        else:
+            self.target_message = target
 
         target_user = kwargs.pop('target_user', None)
         target_users = kwargs.pop('target_users', [])
@@ -114,12 +121,12 @@ class PaginatorABC:
             target_users.append(target_user)
 
         self.target_users = target_users
-        await self.init_reactions(target_message, force=force_run)
+        await self.init_reactions(force=force_run)
 
         def check(reaction, user):
             return all((
                 any(user == u for u in target_users),
-                reaction.message.id == target_message.id,
+                reaction.message.id == self.target_message.id,
                 str(reaction.emoji) in self.events
              ))
 
@@ -127,7 +134,7 @@ class PaginatorABC:
         time_left = self.timeout
 
         manage_messages_permission = \
-            target_message.guild and target_message.channel.permissions_for(target_message.guild.me).manage_messages
+            self.target_message.guild and self.target_message.channel.permissions_for(self.target_message.guild.me).manage_messages
 
         while time_left >= 0 and not self.closed:
             reaction_add_event = self.bot.wait_for('reaction_add', check=check)
@@ -163,14 +170,18 @@ class PaginatorABC:
                 self.start_time += self.additional_time
                 time_left = self.timeout - (time.time() - self.start_time)
 
-        await self.cleanup(target_message)
+        await self.cleanup()
 
-    async def cleanup(self, msg):
+    async def cleanup(self):
         try:
-            await msg.clear_reactions()
-        except (Forbidden, NotFound):
+            await self.target_message.clear_reactions()
+        except Exception:
             pass
+
         self.closed = True
+
+    def __len__(self):
+        return len(self._pages)
 
 
 class Paginator(PaginatorABC):

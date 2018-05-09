@@ -30,6 +30,7 @@ class Module(ModuleBase):
 
     name = 'leave'
     aliases = (name, )
+    category = 'Moderation'
     flags = {
         'channel': {
             'alias': 'c',

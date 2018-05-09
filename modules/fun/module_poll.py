@@ -24,13 +24,14 @@ class Module(ModuleBase):
         'Subcommands:\n'
         '\t{prefix}{aliases} cancel - cancels poll\n\n'
         'Command flags:\n'
-        '\t--timeout or -t <time> - set custom timeout, default is 60\n\n'
+        '\t[--timeout|-t] <time>: set custom timeout, default is 60\n\n'
         'Time formatting examples:\n'
-        '\t1hour or 1h or 60m or 3600 will result in 1 hour'
+        '\t1hour or 1h or 60m or 3600s or 3600 will result in 1 hour'
     )
 
     name = 'poll'
     aliases = (name, )
+    category = 'Actions'
     bot_perms = (
         PermissionEmbedLinks(), PermissionAddReactions(),
         PermissionReadMessageHistory()

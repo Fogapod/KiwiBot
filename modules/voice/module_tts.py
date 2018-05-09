@@ -95,6 +95,7 @@ class Module(ModuleBase):
 
     name = 'tts'
     aliases = (name, )
+    category = 'Actions'
     min_args = 1
     flags = {
         'language': {

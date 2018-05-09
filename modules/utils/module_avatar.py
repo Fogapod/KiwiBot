@@ -13,6 +13,7 @@ class Module(ModuleBase):
 
     name = 'avatar'
     aliases = (name, 'pfp')
+    category = 'Discord'
     bot_perms = (PermissionEmbedLinks(), )
 
     async def on_call(self, msg, args, **flags):

@@ -15,6 +15,7 @@ class Module(ModuleBase):
 
     name = 'seenon'
     aliases = (name, )
+    category = 'Discord'
     bot_perms = (
         PermissionEmbedLinks(), PermissionAddReactions(),
         PermissionReadMessageHistory()

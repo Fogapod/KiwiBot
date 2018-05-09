@@ -19,6 +19,7 @@ class Module(ModuleBase):
 
     name = 'reload'
     aliases = (name, )
+    category = 'Owner'
     min_args = 1
     user_perms = (PermissionBotOwner(), )
     hidden = True

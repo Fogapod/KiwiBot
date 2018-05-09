@@ -13,6 +13,7 @@ class Module(ModuleBase):
 
     name = 'ban'
     aliases = (name, 'hackban')
+    category = 'Moderation'
     min_args = 1
     guild_only = True
     bot_perms  = (PermissionBanMembers(), )

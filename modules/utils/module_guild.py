@@ -16,6 +16,7 @@ class Module(ModuleBase):
 
     name = 'guild'
     aliases = (name, 'guildinfo', 'server', 'serverinfo')
+    category = 'Discord'
     bot_perms = (PermissionEmbedLinks(), )
 
     async def on_call(self, msg, args, **flags):

@@ -11,6 +11,7 @@ class ModuleBase:
 
     name             = ''     # name of module, should be same as in file name
     aliases          = ()     # default check_message event would search for matches in this tuple
+    category         = ''     # name of category include module in. Should not conflict with aliases
     bot_perms        = ()     # needed bot permissions
     user_perms       = ()     # needed user permissions
     min_args         = 0      # minimum number if arguments

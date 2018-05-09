@@ -15,6 +15,7 @@ class Module(ModuleBase):
 
     name = 'role'
     aliases = (name, 'roleinfo')
+    category = 'Discord'
     bot_perms = (PermissionEmbedLinks(), )
     min_args = 1
     guild_only = True

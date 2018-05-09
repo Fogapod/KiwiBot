@@ -30,6 +30,7 @@ class Module(ModuleBase):
 
     name = 'join'
     aliases = (name, 'welcome')
+    category = 'Moderation'
     flags = {
         'channel': {
             'alias': 'c',

@@ -12,6 +12,7 @@ class Module(ModuleBase):
 
     name = 'report'
     aliases = (name, )
+    category = 'Actions'
     min_args = 1
 
     async def on_load(self, from_reload):

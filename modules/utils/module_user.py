@@ -23,6 +23,7 @@ class Module(ModuleBase):
 
     name = 'user'
     aliases = (name, 'userinfo')
+    category = 'Discord'
     bot_perms = (PermissionEmbedLinks(), )
 
     async def on_call(self, msg, args, **flags):

@@ -14,15 +14,16 @@ class Module(ModuleBase):
     short_doc = 'Show list of member or role permissions'
     long_doc = (
         'Available flags:\n'
-        '\tc or channel: channel to check permissions in\n'
-        '\tt: show permissions set to true only\n'
-        '\tf: show permissions set to false only\n'
-        '\tg or global: show guild permissions\n'
-        '\tv or value: use custom permission value'
+        '\t[--channel|-c]: channel to check permissions in\n'
+        '\t-t:             show permissions set to true only\n'
+        '\t-f:             show permissions set to false only\n'
+        '\t[--global|-g]:  show guild permissions\n'
+        '\t[--value|-v]:   use custom permission value'
     )
 
     name = 'permissions'
     aliases = (name, 'perms')
+    category = 'Discord'
     flags = {
         'value': {
             'alias': 'v',

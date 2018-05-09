@@ -17,6 +17,7 @@ class Module(ModuleBase):
 
     name = 'info'
     aliases = (name, 'information', 'stats')
+    category = 'Bot'
     bot_perms = (PermissionEmbedLinks(), )
 
     async def on_call(self, msg, args, **flags):

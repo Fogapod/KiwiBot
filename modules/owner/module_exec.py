@@ -12,6 +12,7 @@ class Module(ModuleBase):
 
     name = 'exec'
     aliases = (name, )
+    category = 'Owner'
     min_args = 1
     user_perms = (PermissionBotOwner(), )
     hidden = True

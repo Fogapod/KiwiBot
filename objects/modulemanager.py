@@ -143,8 +143,15 @@ class ModuleManager:
                     logger.debug(f'Exception occured calling {name} on_error')
                     logger.debug(traceback.format_exc())
 
+    def get_all_modules(self):
+        return [m for m in self.modules.values() if not m.disabled]
+
+    def get_modules_by_category(self, category):
+        return [m for m in self.modules.values() if not m.disabled and m.category.lower() == (category.lower() or 'uncategorized')]
+
     def get_module(self, alias):
-        for name, module in self.bot.mm.modules.items():
-            if alias in module.aliases or alias == module.name:
+        alias = alias.lower()
+        for name, module in self.modules.items():
+            if not module.disabled and alias in module.aliases or alias == module.name:
                 return module
         return None

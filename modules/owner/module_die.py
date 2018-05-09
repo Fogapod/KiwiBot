@@ -11,6 +11,7 @@ class Module(ModuleBase):
 
     name = 'stop'
     aliases = (name, 'die', '!')
+    category = 'Owner'
     user_perms = (PermissionBotOwner(), )
     hidden = True
 

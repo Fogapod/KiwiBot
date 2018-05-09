@@ -15,6 +15,7 @@ class Module(ModuleBase):
 
     name = 'users'
     aliases = (name, 'userlist')
+    category = 'Discord'
     min_args = 1
     bot_perms = (
         PermissionEmbedLinks(), PermissionAddReactions(),

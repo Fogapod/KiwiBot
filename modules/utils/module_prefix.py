@@ -12,6 +12,7 @@ class Module(ModuleBase):
     )
 
     name = 'prefix'
+    category = 'Moderation'
     aliases = (name, )
     guild_only = True
 

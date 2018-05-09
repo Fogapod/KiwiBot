@@ -12,6 +12,7 @@ class Module(ModuleBase):
 
     name = 'ping'
     aliases = (name, )
+    category = 'Bot'
 
     async def on_call(self, msg, args, **flags):
         ping_msg = await self.send(msg, 'Pinging ...')

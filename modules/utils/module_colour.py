@@ -15,6 +15,7 @@ class Module(ModuleBase):
 
     name = 'colourinfo'
     aliases = (name, 'colorinfo')
+    category = 'Utils'
     bot_perms = (PermissionEmbedLinks(), )
     min_args = 1
 

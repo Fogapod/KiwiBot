@@ -23,6 +23,7 @@ class Module(ModuleBase):
 
     name = 'autorole'
     aliases = (name, 'autoroles')
+    category = 'Moderation'
     bot_perms = (PermissionManageRoles(), )
     user_perms = (PermissionManageRoles(), )
     flags = {

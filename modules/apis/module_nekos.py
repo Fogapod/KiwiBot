@@ -38,6 +38,7 @@ class Module(ModuleBase):
 
     name = 'nekos'
     aliases = (name, 'neko')
+    category = 'Services'
     min_args = 1
     bot_perms = (
         PermissionEmbedLinks(), PermissionAddReactions(),
