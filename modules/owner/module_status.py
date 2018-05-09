@@ -43,7 +43,7 @@ class Module(ModuleBase):
     }
     hidden = True
 
-    async def on_missing_user_permissions(self, msg, missing_permissions):
+    async def on_missing_permissions(self, msg, *missing):
         return 'not dogsong or notsosuper'
 
     async def on_load(self, from_reload):
