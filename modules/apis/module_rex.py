@@ -53,6 +53,8 @@ LANG_CODES = {
     'tcl':         32,
     'mysql':       33,
     'postgresql':  34,
+    'postgres':    34,
+    'pg':          34,
     'oracle':      35,
     'swift':       37,
     'bash':        38,
