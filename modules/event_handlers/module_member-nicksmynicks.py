@@ -31,5 +31,5 @@ class Module(ModuleBase):
             n = member.display_name[:15]
             try:
                 await member.edit(nick=f'{n}My{n}', reason='ReasonMyReason')
-            except Exceotion:
+            except Exception:
                 pass
