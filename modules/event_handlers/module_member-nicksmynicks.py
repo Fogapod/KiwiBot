@@ -2,8 +2,6 @@ from objects.modulebase import ModuleBase
 
 from constants import DEV_GUILD_ID
 
-from discord import Forbidden
-
 
 class Module(ModuleBase):
 
@@ -33,5 +31,5 @@ class Module(ModuleBase):
             n = member.display_name[:15]
             try:
                 await member.edit(nick=f'{n}My{n}', reason='ReasonMyReason')
-            except Forbidden:
+            except Exceotion:
                 pass
