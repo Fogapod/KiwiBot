@@ -26,10 +26,17 @@ class Module(ModuleBase):
             await self.set_nick(after)
 
     async def set_nick(self, member):
-        left, _, right = member.display_name.partition('My')
-        if left != right:
-            n = member.display_name[:15]
-            try:
-                await member.edit(nick=f'{n}My{n}', reason='ReasonMyReason')
-            except Exception:
-                pass
+        name = member.display_name
+        if len(name) >= 2:
+            left = name[:len(name) // 2 - 1]
+            right = name[len(name) // 2 + 1:]
+            middle = name[len(left):-len(right)]
+
+            if middle == 'My':
+                return
+
+        n = member.display_name[:15]
+        try:
+            await member.edit(nick=f'{n}My{n}', reason='ReasonMyReason')
+        except Exception:
+            pass
