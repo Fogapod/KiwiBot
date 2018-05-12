@@ -5,7 +5,7 @@ from objects.logger import Logger
 import asyncio
 
 
-logger = Logger()
+logger = Logger.get_logger()
 
 API_URL = 'https://discordbots.org/api/bots/{bot_id}/stats'
 
