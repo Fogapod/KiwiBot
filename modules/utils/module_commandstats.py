@@ -7,6 +7,7 @@ from discord import Embed, Colour
 
 class Module(ModuleBase):
 
+    usage_doc = '{prefix}{aliases} [command...]'
     short_doc = 'Show command usage stats'
 
     name = 'commandstats'
@@ -29,23 +30,28 @@ class Module(ModuleBase):
     }
 
     async def on_call(self, ctx, args, **flags):
-        keys = await self.bot.redis.keys('command_usage:*')
-        usage = await self.bot.redis.mget(*keys)
+        if len(args) > 1:
+            keys = [m.name for m in [self.bot.mm.get_module(n) for n in set(args.args[1:])] if m is not None]
+            usage = await self.bot.redis.mget(*[f'command_usage:{k}' for k in keys])
+            commands = tuple(zip(keys, [int(u) for u in usage]))
+        else:
+            keys = await self.bot.redis.keys('command_usage:*')
+            usage = await self.bot.redis.mget(*keys)
 
-        commands = []
-        for k, u in zip(keys, usage):
-            name = k[14:]
-            module = self.bot.mm.get_module(name)
-            if module:
-                if module.disabled:
-                    if not (flags.get('show-disabled', False)):
+            commands = []
+            for k, u in zip(keys, usage):
+                name = k[14:]
+                module = self.bot.mm.get_module(name)
+                if module:
+                    if module.disabled:
+                        if not (flags.get('show-disabled', False)):
+                            continue
+                    if module.hidden:
+                        if not (flags.get('show-hidden', False)):
+                            continue
+                    if not (module.disabled or module.hidden) and flags.get('hide-normal', False):
                         continue
-                if module.hidden:
-                    if not (flags.get('show-hidden', False)):
-                        continue
-                if not (module.disabled or module.hidden) and flags.get('hide-normal', False):
-                    continue
-                commands.append((name, int(u)))
+                    commands.append((name, int(u)))
 
         if not commands:
             return '{error} No commands found'
@@ -67,7 +73,7 @@ class Module(ModuleBase):
             return e
 
         if len(chunks) == 1:
-            return await ctx.send(mbed=make_embed(chunks[0]))
+            return await ctx.send(embed=make_embed(chunks[0]))
 
         p = Paginator(self.bot)
         for i, chunk in enumerate(chunks):
