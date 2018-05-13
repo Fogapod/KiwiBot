@@ -30,15 +30,16 @@ class Module(ModuleBase):
     }
 
     async def on_call(self, ctx, args, **flags):
+        commands = []
         if len(args) > 1:
             keys = [m.name for m in [self.bot.mm.get_module(n) for n in set(args.args[1:])] if m is not None]
-            usage = await self.bot.redis.mget(*[f'command_usage:{k}' for k in keys])
-            commands = tuple(zip(keys, [int(u) for u in usage]))
+            if keys:
+                usage = await self.bot.redis.mget(*[f'command_usage:{k}' for k in keys])
+                commands = tuple(zip(keys, [int(u) for u in usage]))
         else:
             keys = await self.bot.redis.keys('command_usage:*')
             usage = await self.bot.redis.mget(*keys)
 
-            commands = []
             for k, u in zip(keys, usage):
                 name = k[14:]
                 module = self.bot.mm.get_module(name)
