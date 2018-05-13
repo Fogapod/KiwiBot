@@ -94,25 +94,25 @@ class ModuleManager:
     async def unload_module(self, name):
         pass
 
-    async def check_modules(self, msg, clean_content):
+    async def check_modules(self, ctx, clean_content):
         args = ArgParser.parse(clean_content)
 
         for name, module in self.modules.items():
             if module.disabled:
                 continue
             try:
-                if not await module.check_message(msg, args):
+                if not await module.check_message(ctx, args):
                     continue
             except GuildOnly:
-                return await module.on_guild_check_failed(msg)
+                return await module.on_guild_check_failed(ctx)
             except NSFWPermissionDenied:
-                return await module.on_nsfw_permission_denied(msg)
+                return await module.on_nsfw_permission_denied(ctx)
             except NotEnoughArgs:
-                return await module.on_not_enough_arguments(msg)
+                return await module.on_not_enough_arguments(ctx)
             except TooManyArgs:
-                return await module.on_too_many_arguments(msg)
+                return await module.on_too_many_arguments(ctx)
             except MissingPermissions as e:
-                return await module.on_missing_permissions(msg, *e.missing)
+                return await module.on_missing_permissions(ctx, *e.missing)
             except Exception:
                 logger.info(f'Failed to check command, stopped on module {name}')
                 logger.info(traceback.format_exc())
@@ -120,25 +120,25 @@ class ModuleManager:
                 self.bot.restart()
             try:
                 logger.trace(
-                    f'{msg.author}-{msg.author.id} -> {module.name} in ' +
-                    ('direct messages' if msg.guild is None else f'{msg.guild}-{msg.guild.id}')
+                    f'{ctx.author}-{ctx.author.id} -> {module.name} in ' +
+                    ('direct messages' if ctx.guild is None else f'{ctx.guild}-{ctx.guild.id}')
                 )
                 await self.bot.redis.incr(f'command_usage:{module.name}')
                 try:
-                    self.bot.dispatch('command_use', module, msg, args)
+                    self.bot.dispatch('command_use', module, ctx, args)
                 except Exception:
                     logger.debug(f'Exception dispatching command_use event')
                     logger.debug(traceback.format_exc())
-                return await module.call_command(msg, args, **args.flags)
+                return await module.call_command(ctx, args, **args.flags)
             except Permission as p:
-                return await module.on_missing_permissions(msg, p)
+                return await module.on_missing_permissions(ctx, p)
             except Exception as e:
                 module_tb = traceback.format_exc()
                 logger.info(f'Exception occured calling {name}')
                 logger.info(module_tb)
                 logger.trace(f'Calling {name} on_error')
                 try:
-                    return await module.on_error(e, module_tb, msg)
+                    return await module.on_error(e, module_tb, ctx)
                 except Exception:
                     logger.debug(f'Exception occured calling {name} on_error')
                     logger.debug(traceback.format_exc())

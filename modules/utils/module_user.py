@@ -1,5 +1,5 @@
 from objects.modulebase import ModuleBase
-from objects.permissions import PermissionExternalEmojis, PermissionEmbedLinks
+from objects.permissions import PermissionEmbedLinks, PermissionExternalEmojis
 
 from utils.funcs import find_user, _get_last_user_message_timestamp
 
@@ -26,11 +26,11 @@ class Module(ModuleBase):
     category = 'Discord'
     bot_perms = (PermissionEmbedLinks(), )
 
-    async def on_call(self, msg, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         if len(args) == 1:
-            user = msg.author
+            user = ctx.author
         else:
-            user = await find_user(args[1:], msg, self.bot)
+            user = await find_user(args[1:], ctx.message, self.bot)
 
         if user is None:
             return '{warning} User not found'
@@ -43,13 +43,13 @@ class Module(ModuleBase):
         )
         if isinstance(user, Member):
             # function can return members from different guild
-            if user.guild == msg.guild:
+            if user.guild == ctx.guild:
                 e.title += ' (member)'
                 e.add_field(
                     name='member since', inline=False,
                     value=f'`{user.joined_at.replace(microsecond=0)}` ({(datetime.now() - user.joined_at).days} days)'
                 )
-                last_msg_ts = _get_last_user_message_timestamp(user.id, msg.channel.id, self.bot)
+                last_msg_ts = _get_last_user_message_timestamp(user.id, ctx.channel.id, self.bot)
                 if last_msg_ts != datetime.fromtimestamp(0):
                     last_msg_ts = last_msg_ts.replace(microsecond=0)
                     e.add_field(
@@ -62,7 +62,7 @@ class Module(ModuleBase):
                 if user.nick is not None:
                     e.add_field(name='nick', value=user.nick, inline=False)
 
-            external_emoji_perm = PermissionExternalEmojis().check(msg.channel, self.bot.user)
+            external_emoji_perm = PermissionExternalEmojis().check(ctx.channel, self.bot.user)
 
             if user.activity is None:
                 e.add_field(
@@ -78,4 +78,4 @@ class Module(ModuleBase):
         e.add_field(name='robot', value='yes' if user.bot else 'no')
         e.set_footer(text=user.id)
 
-        await self.send(msg, embed=e)
+        await ctx.send(embed=e)

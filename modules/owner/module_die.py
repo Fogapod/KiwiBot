@@ -15,7 +15,11 @@ class Module(ModuleBase):
     user_perms = (PermissionBotOwner(), )
     hidden = True
 
-    async def on_call(self, message, args, **options):
-        await message.add_reaction('✅')
+    async def on_call(self, message, ctx, **options):
+        try:
+            await message.add_reaction('✅')
+        except Exception:
+            pass
+
         exit_code = args[1] if len(args) == 2 else STOP_EXIT_CODE
         self.bot.stop(exit_code)

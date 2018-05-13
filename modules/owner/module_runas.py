@@ -1,9 +1,7 @@
 from objects.modulebase import ModuleBase
 from objects.permissions import PermissionBotOwner
 
-from utils.funcs import find_user, get_local_prefix
-
-from copy import copy
+from utils.funcs import find_user
 
 
 class Module(ModuleBase):
@@ -19,18 +17,14 @@ class Module(ModuleBase):
     guild_only = True
     hidden = True
 
-    async def on_call(self, msg, args, **flags):
-        user = await find_user(args[1], msg, self.bot, strict_guild=True)
+    async def on_call(self, ctx, args, **flags):
+        user = await find_user(args[1], ctx.message, self.bot, strict_guild=True)
 
         if user is None:
             return '{warning} User not found'
 
-        prefix = await get_local_prefix(msg, self.bot)
-        new_content = args[2:]
+        ctx.author = user
 
-        new_msg = copy(msg)
-        new_msg.author = user
-        new_msg.content = prefix + new_content
-        await self.bot.on_message(new_msg)
+        await self.bot.process_command(ctx, args[2:])
 
         return f'Message processed as `{user}`'

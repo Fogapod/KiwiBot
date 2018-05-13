@@ -1,7 +1,6 @@
 from objects.modulebase import ModuleBase
 from objects.paginators import UpdatingPaginator
-from objects.permissions import (
-    PermissionEmbedLinks, PermissionAddReactions, PermissionReadMessageHistory)
+from objects.permissions import PermissionEmbedLinks, PermissionReadMessageHistory
 
 from itertools import zip_longest
 
@@ -40,12 +39,9 @@ class Module(ModuleBase):
     aliases = (name, 'neko')
     category = 'Services'
     min_args = 1
-    bot_perms = (
-        PermissionEmbedLinks(), PermissionAddReactions(),
-        PermissionReadMessageHistory()
-    )
+    bot_perms = (PermissionEmbedLinks(), PermissionReadMessageHistory())
 
-    async def on_call(self, msg, args, **options):
+    async def on_call(self, ctx, args, **options):
         result = ''
         subcommand = args[1].lower()
 
@@ -90,12 +86,12 @@ class Module(ModuleBase):
                 e = Embed(
                     colour=Colour.gold(), title=title.get('cat', None) or 'OwO')
                 e.add_field(
-                    name=f'{msg.author.display_name} just said...',
+                    name=f'{ctx.author.display_name} just said...',
                     value=owo
                 )
-                e.set_footer(text=msg.author, icon_url=msg.author.avatar_url)
+                e.set_footer(text=ctx.author, icon_url=ctx.author.avatar_url)
 
-                return await self.send(msg, embed=e)
+                return await ctx.send(embed=e)
         elif subcommand == 'why':
             question = args[2:]
             if question.endswith('?'):
@@ -110,14 +106,14 @@ class Module(ModuleBase):
             response = await self.do_request(url)
             if response is not None:
                 e.description = response['why']
-                e.set_footer(text=msg.author, icon_url=msg.author.avatar_url)
+                e.set_footer(text=ctx.author, icon_url=ctx.author.avatar_url)
 
-                return await self.send(msg, embed=e)
+                return await ctx.send(embed=e)
         else:
-            return await self.on_doc_request(msg)
+            return await self.on_doc_request(ctx)
 
-        if getattr(msg.channel, 'is_nsfw', lambda: isinstance(msg.channel, DMChannel))() < nsfw:
-            return await self.on_nsfw_permission_denied(msg)
+        if getattr(ctx.channel, 'is_nsfw', lambda: isinstance(ctx.channel, DMChannel))() < nsfw:
+            return await self.on_nsfw_permission_denied(ctx)
 
         if image_tag:
             if image_tag == 'random_hentai_gif':
@@ -126,9 +122,7 @@ class Module(ModuleBase):
 
             p = UpdatingPaginator(self.bot)
             return await p.run(
-                msg.channel, self.paginator_update_func, ((url, image_tag), {}),
-                target_user=msg.author
-            )
+                ctx, self.paginator_update_func, update_args=(url, image_tag))
 
         return '{error} Problem with api response. Please, try again later'
 

@@ -19,40 +19,39 @@ class Module(ModuleBase):
     bot_perms  = (PermissionBanMembers(), )
     user_perms = (PermissionBanMembers(), )
 
-    async def on_call(self, msg, args, **flags):
-        user = await find_user(args[1], msg, self.bot)
+    async def on_call(self, ctx, args, **flags):
+        user = await find_user(args[1], ctx.message, self.bot)
 
         if not user:
             return '{warning} User not found'
         reason = args[2:] or ''
 
         if isinstance(user, Member):
-            if user == msg.guild.owner:
+            if user == ctx.guild.owner:
                 return '{warning} Can\'t ban guild owner'
-            if msg.guild.me.top_role <= user.top_role:
+            if ctx.me.top_role <= user.top_role:
                 return '{warning} My top role is lower or equal to member\'s top role, can\'t ban'
-            if msg.author.top_role <= user.top_role and msg.author != msg.guild.owner:
+            if ctx.author.top_role <= user.top_role and ctx.author != ctx.guild.owner:
                 return '{warning} Your top role is lower or equal to member\'s top role, can\'t ban'
 
-        ban_msg = await self.send(
-            msg,
-            content=(
+        ban_msg = await ctx.send(
+            (
                 f'Are you sure you want to ban **{user}** ?' +
                 (f'\nReason:```\n{reason}```' if reason else '\n') +
                 f'React with ✅ to continue'
             )
         )
 
-        if await request_reaction_confirmation(ban_msg, msg.author, self.bot):
+        if await request_reaction_confirmation(ban_msg, ctx.author, self.bot):
             ban_notification = await self.bot.send_message(
                 user,
-                f'You were banned on **{msg.guild.name}**\n' +
+                f'You were banned on **{ctx.guild.name}**\n' +
                 (f'Reason:```\n{reason}```' if reason else 'No reason given')
             )
             try:
-                await msg.guild.ban(
+                await ctx.guild.ban(
                     user, delete_message_days=0,
-                    reason=reason + f' banned by {msg.author}'
+                    reason=reason + f' banned by {ctx.author}'
                 )
             except Exception:
                 await self.bot.delete_message(ban_notification)

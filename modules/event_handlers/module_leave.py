@@ -25,7 +25,7 @@ class Module(ModuleBase):
         '\t{guild} - guild name\n'
         '\t{id} - user id\n\n'
         'Command flags:\n'
-        '\t--channel or -c <channel> - use matched channel'
+        '\t[--channel|-c] <channel>: use matched channel'
     )
 
     name = 'leave'
@@ -63,9 +63,9 @@ class Module(ModuleBase):
             except Forbidden:
                 pass
 
-    async def on_call(self, msg, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         if len(args) == 1:
-            record = await self.bot.redis.get(f'leave_message:{msg.guild.id}')
+            record = await self.bot.redis.get(f'leave_message:{ctx.guild.id}')
             if record:
                 channel, _, leave_message = record.partition(':')
                 return f'Current leave message: {leave_message}\nChannel: **{channel}**'
@@ -73,32 +73,30 @@ class Module(ModuleBase):
                 return '{warning} Leave message not set'
 
         manage_guild_perm = PermissionManageGuild()
-        if not manage_guild_perm.check(msg.channel, msg.author):
+        if not manage_guild_perm.check(ctx.channel, ctx.author):
             raise manage_guild_perm
 
         if args[1:].lower() in ('delete', 'remove'):
-            await self.bot.redis.delete(f'leave_message:{msg.guild.id}')
+            await self.bot.redis.delete(f'leave_message:{ctx.guild.id}')
             return 'Leave message removed'
 
         channel_flag = flags.get('channel')
         if channel_flag:
             channel = await find_channel(
-                channel_flag, msg.guild, self.bot,
+                channel_flag, ctx.guild, self.bot,
                 include_voice=False, include_category=False
             )
             if channel is None:
                 return '{error} Channel not found'
         else:
-            channel = msg.channel
+            channel = ctx.channel
 
         text = args[1:]
-        if not msg.channel.permissions_for(msg.author).mention_everyone:
+        if not ctx.channel.permissions_for(ctx.author).mention_everyone:
             text = text.replace('@everyone', '@\u200beveryone')
             text = text.replace('@here', '@\u200bhere')
 
-        await self.bot.redis.set(f'leave_message:{msg.guild.id}', f'{channel.id}:{text}')
-        await self.bot.delete_message(msg)
-        await self.send(
-            msg, delete_after=7,
-            content=f'Set leave message in {channel.mention}'
-        )
+        await self.bot.redis.set(f'leave_message:{ctx.guild.id}', f'{channel.id}:{text}')
+        await self.bot.delete_message(ctx.message)
+        await ctx.send(
+            f'Set leave message in {channel.mention}', delete_after=7)

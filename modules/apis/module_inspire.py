@@ -1,7 +1,6 @@
 from objects.modulebase import ModuleBase
 from objects.paginators import UpdatingPaginator
-from objects.permissions import (
-    PermissionEmbedLinks, PermissionAddReactions, PermissionReadMessageHistory)
+from objects.permissions import PermissionEmbedLinks
 
 
 from discord import Embed, Colour
@@ -16,23 +15,17 @@ class Module(ModuleBase):
     name = 'inspire'
     aliases = (name, 'inspirebot')
     category = 'Services'
-    bot_perms = (
-        PermissionEmbedLinks(), PermissionAddReactions(),
-        PermissionReadMessageHistory()
-    )
+    bot_perms = (PermissionEmbedLinks(), )
 
-    async def on_call(self, msg, args, **options):
+    async def on_call(self, ctx, args, **options):
         p = UpdatingPaginator(self.bot)
-        await p.run(
-            msg.channel, self.paginator_update_func, ((), {}),
-            target_user=msg.author
-        )
+        await p.run(ctx, self.paginator_update_func)
 
     async def paginator_update_func(self):
         async with self.bot.sess.get(API_URL) as r:
             if r.status == 200:
-                url = await r.text()
                 e = Embed(colour=Colour.gold())
-                e.set_image(url=url)
+                e.set_image(url=await r.text())
                 e.set_footer(text='Powered by https://inspirobot.me')
+
                 return { 'embed': e }

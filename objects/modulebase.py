@@ -43,19 +43,19 @@ class ModuleBase:
                 self._flags[alias] = { 'alias': k }
             self._flags[k] = { 'alias': k, 'bool': bool }
 
-    async def on_guild_check_failed(self, msg):
+    async def on_guild_check_failed(self, ctx):
         return '{error} This command can only be used in guild'
 
-    async def on_nsfw_permission_denied(self, msg):
+    async def on_nsfw_permission_denied(self, ctx):
         return '{error} You can use this command only in channel marked as nsfw'
 
-    async def on_not_enough_arguments(self, msg):
-        return await self.on_doc_request(msg)
+    async def on_not_enough_arguments(self, ctx):
+        return await self.on_doc_request(ctx)
 
-    async def on_too_many_arguments(self, msg):
-        return await self.on_doc_request(msg)
+    async def on_too_many_arguments(self, ctx):
+        return await self.on_doc_request(ctx)
 
-    async def on_missing_permissions(self, msg, *missing):
+    async def on_missing_permissions(self, ctx, *missing):
         user_missing, bot_missing = [], []
 
         for p in missing:
@@ -79,16 +79,16 @@ class ModuleBase:
     async def on_load(self, from_reload):
         pass
 
-    async def check_message(self, msg, args):
+    async def check_message(self, ctx, args):
         if not (args and args[0].lower() in self.aliases):
             return False
-        return await self.on_check_message(msg, args)
+        return await self.on_check_message(ctx, args)
 
-    async def on_check_message(self, msg, args):
-        if (msg.guild is not None) < self.guild_only:
+    async def on_check_message(self, ctx, args):
+        if (ctx.guild is not None) < self.guild_only:
             raise GuildOnly
 
-        if getattr(msg.channel, 'is_nsfw', lambda: isinstance(msg.channel, DMChannel))() < self.nsfw:
+        if getattr(ctx.channel, 'is_nsfw', lambda: isinstance(ctx.channel, DMChannel))() < self.nsfw:
             raise NSFWPermissionDenied
 
         args.parse_flags(known_flags=self._flags)
@@ -101,11 +101,11 @@ class ModuleBase:
 
         missing_permissions = []
         for permission in self.bot_perms:
-            if not permission.check(msg.channel, self.bot.user):
+            if not permission.check(ctx.channel, self.bot.user):
                 missing_permissions.append(permission)
 
         for permission in self.user_perms:
-            if not permission.check(msg.channel, msg.author):
+            if not permission.check(ctx.channel, ctx.author):
                 missing_permissions.append(permission)
 
         if missing_permissions:
@@ -113,13 +113,13 @@ class ModuleBase:
 
         return True
 
-    async def call_command(self, msg, args, **flags):
-        return await self.on_call(msg, args, **flags)
+    async def call_command(self, ctx, args, **flags):
+        return await self.on_call(ctx, args, **flags)
 
-    async def on_call(self, msg, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         pass
 
-    async def on_doc_request(self, msg):
+    async def on_doc_request(self, ctx):
         help_text = ''
         help_text += f'{self.usage_doc}'     if self.usage_doc else ''
         help_text += f'\n\n{self.short_doc}' if self.short_doc else ''
@@ -127,10 +127,10 @@ class ModuleBase:
 
         help_text = help_text.strip()
 
-        return await self._format_help(help_text, msg)
+        return await self._format_help(help_text, ctx)
 
-    async def _format_help(self, help_text, msg):
-        help_text = help_text.replace('{prefix}', await get_local_prefix(msg, self.bot))
+    async def _format_help(self, help_text, ctx):
+        help_text = help_text.replace('{prefix}', await get_local_prefix(ctx, self.bot))
 
         if len(self.aliases) == 1:
             help_text = help_text.replace('{aliases}', self.aliases[0])
@@ -139,7 +139,7 @@ class ModuleBase:
 
         return f'```\n{help_text}\n```'
 
-    async def on_error(self, e, tb_text, msg):
+    async def on_error(self, e, tb_text, ctx):
         return (
             '{error} Error appeared during execution **'
             + self.name + '**: **' + e.__class__.__name__ + '**\n'
@@ -149,9 +149,6 @@ class ModuleBase:
 
     async def on_unload(self):
         pass
-
-    async def send(self, msg, content=None, *, channel=None, **kwargs):
-        return await self.bot.send_message(channel or msg, content, response_to=msg, **kwargs)
 
 
 class ModuleCallError(Exception):

@@ -96,7 +96,7 @@ class Module(ModuleBase):
     category = 'Services'
     min_args = 1
 
-    async def on_call(self, msg, args, **options):
+    async def on_call(self, ctx, args, **options):
         result = ''
 
         if args[1].lower() == 'list':

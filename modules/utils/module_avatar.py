@@ -16,11 +16,11 @@ class Module(ModuleBase):
     category = 'Discord'
     bot_perms = (PermissionEmbedLinks(), )
 
-    async def on_call(self, msg, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         if len(args) == 1:
-            user = msg.author
+            user = ctx.author
         else:
-            user = await find_user(args[1:], msg, self.bot)
+            user = await find_user(args[1:], ctx.message, self.bot)
 
         if user is None:
             return '{warning} User not found'
@@ -36,4 +36,4 @@ class Module(ModuleBase):
         e.set_image(url=user.avatar_url_as(static_format='png'))
         e.set_footer(text=user)
 
-        await self.send(msg, embed=e)
+        await ctx.send(embed=e)

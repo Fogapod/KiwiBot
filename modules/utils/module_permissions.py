@@ -46,7 +46,7 @@ class Module(ModuleBase):
     }
     guild_only = True
 
-    async def on_call(self, msg, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         value = flags.pop('value', None)
 
         if value:
@@ -62,9 +62,9 @@ class Module(ModuleBase):
 
         channel_flag = flags.pop('channel', None)
         if channel_flag is None:
-            channel = msg.channel
+            channel = ctx.channel
         else:
-            channel = await find_channel(channel_flag, msg.guild, self.bot)
+            channel = await find_channel(channel_flag, ctx.guild, self.bot)
             if channel is None:
                 return '{warning} Channel not found'
 
@@ -79,12 +79,12 @@ class Module(ModuleBase):
             target = value
         elif len(args) == 1:
             if use_global:
-                permissions = msg.author.guild_permissions
+                permissions = ctx.author.guild_permissions
             else:
-                permissions = channel.permissions_for(msg.author)
-            target = str(msg.author)
+                permissions = channel.permissions_for(ctx.author)
+            target = str(ctx.author)
         else:
-            role = await find_role(args[1:], msg.guild, self.bot)
+            role = await find_role(args[1:], ctx.guild, self.bot)
             if role is not None:
                 permissions = role.permissions
                 target = str(role)
@@ -110,7 +110,7 @@ class Module(ModuleBase):
                         if v is not None:
                             setattr(permissions, k, v)
             else:
-                member = await find_user(args[1:], msg, self.bot, strict_guild=True)
+                member = await find_user(args[1:], ctx.message, self.bot, strict_guild=True)
                 if member is None:
                     return '{warning} Role or member not found'
 

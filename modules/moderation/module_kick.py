@@ -17,39 +17,38 @@ class Module(ModuleBase):
     bot_perms  = (PermissionKickMembers(), )
     user_perms = (PermissionKickMembers(), )
 
-    async def on_call(self, msg, args, **flags):
-        guild_member = await find_user(args[1], msg, self.bot, strict_guild=True)
+    async def on_call(self, ctx, args, **flags):
+        guild_member = await find_user(args[1], ctx.message, self.bot, strict_guild=True)
 
         if not guild_member:
             return '{warning} User not found'
 
         reason = args[2:] or ''
 
-        if guild_member == msg.guild.owner:
+        if guild_member == ctx.guild.owner:
             return '{warning} Can\'t kick guild owner'
-        if msg.guild.me.top_role <= guild_member.top_role:
+        if ctx.me.top_role <= guild_member.top_role:
             return '{warning} My top role is lower or equal to member\'s top role, can\'t kick'
-        if msg.author.top_role <= guild_member.top_role and msg.guild.owner != msg.author:
+        if ctx.author.top_role <= guild_member.top_role and ctx.guild.owner != ctx.author:
             return '{warning} Your top role is lower or equal to member\'s top role, can\'t kick'
 
-        kick_msg = await self.send(
-            msg,
-            content=(
+        kick_msg = await ctx.send(
+            (
                 f'Are you sure you want to kick **{guild_member}** ?' +
                 (f'\nReason:```\n{reason}```' if reason else '\n') +
                 f'React with ✅ to continue'
             )
         )
 
-        if await request_reaction_confirmation(kick_msg, msg.author, self.bot):
+        if await request_reaction_confirmation(kick_msg, ctx.author, self.bot):
             kick_notification = await self.bot.send_message(
                 guild_member,
-                f'You were kicked from **{msg.guild.name}**\n' +
+                f'You were kicked from **{ctx.guild.name}**\n' +
                 (f'Reason:```\n{reason}```' if reason else 'No reason given')
             )
             try:
-                await msg.guild.kick(
-                    guild_member, reason=reason + f' kicked by {msg.author}')
+                await ctx.guild.kick(
+                    guild_member, reason=reason + f' kicked by {ctx.author}')
             except Exception:
                 await self.bot.delete_message(kick_notification)
                 raise

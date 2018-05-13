@@ -18,16 +18,17 @@ class Module(ModuleBase):
     async def on_load(self, from_reload):
         self.report_channel = self.bot.get_channel(REPORT_CHANNEL_ID)
 
-    async def on_call(self, msg, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         e = Embed(
             colour=Colour.gold(), description=args[1:],
-            title=f'Report from {"guild " + msg.guild.name if msg.guild else "direct messages"}'
+            title=f'Report from {"guild " + ctx.guild.name if ctx.guild else "direct messages"}'
         )
-        if msg.guild:
-            e.add_field(name='Guild id', value=msg.guild.id)
-            e.add_field(name='Channel', value=f'{msg.channel} {msg.channel.id}')
-        e.set_author(name=msg.author, icon_url=msg.author.avatar_url)
-        e.set_footer(text=f'Author id: {msg.author.id}')
+        if ctx.guild:
+            e.add_field(name='Guild id', value=ctx.guild.id)
+            e.add_field(name='Channel', value=f'{ctx.channel} {ctx.channel.id}')
+        e.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
+        e.set_footer(text=f'Author id: {ctx.author.id}')
 
-        await self.bot.send_message(self.report_channel, embed=e)
+        await ctx.send(channel=self.report_channel, embed=e, register=False)
+
         return f'Sent report to {self.report_channel.guild.name}'

@@ -18,7 +18,7 @@ class Module(ModuleBase):
         'Remove autorole:\n'
         '\t{prefix}{aliases} [remove|delete] <role>\n\n'
         'Command flags:\n'
-        '\t--bots or -b - assign role only to bots if set, otherwise only humans'
+        '\t[--bots|-b]: assign role only to bots if set, otherwise only humans'
     )
 
     name = 'autorole'
@@ -59,10 +59,10 @@ class Module(ModuleBase):
             except Forbidden:
                 pass
 
-    async def on_call(self, msg, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         if len(args) == 1:
-            human_roles = await self.bot.redis.smembers(f'autorole:{msg.guild.id}')
-            bot_roles = await self.bot.redis.smembers(f'autorole_bots:{msg.guild.id}')
+            human_roles = await self.bot.redis.smembers(f'autorole:{ctx.guild.id}')
+            bot_roles = await self.bot.redis.smembers(f'autorole_bots:{ctx.guild.id}')
             
             if not (human_roles or bot_roles):
                 return '{warning} No autoroles set'
@@ -73,43 +73,43 @@ class Module(ModuleBase):
             if bot_roles:
                 e.add_field(name='Robots', value=', '.join(f'<@&{r}>' for r in bot_roles))
 
-            return await self.send(msg, embed=e)
+            return await ctx.send(embed=e)
 
         if len(args) < 3:
-            return await self.on_not_enough_arguments(msg)
+            return await self.on_not_enough_arguments(ctx)
 
         bot_flag = flags.get('bots')
 
         if args[1].lower() in ('set', 'add'):
-            role = await find_role(args[2:], msg.guild, self.bot)
+            role = await find_role(args[2:], ctx.guild, self.bot)
             if role is None:
                 return '{error} Role not found'
 
-            if role.position >= msg.author.top_role.position:
-                if not msg.author == msg.guild.owner:
+            if role.position >= ctx.author.top_role.position:
+                if not ctx.author == ctx.guild.owner:
                     return '{error} Role is higher or equal to your top role'
-            if role.permissions > msg.author.guild_permissions:
+            if role.permissions > ctx.author.guild_permissions:
                 return '{error} Role has higher permissions than you in guild'
-            if role.position >= msg.guild.me.top_role.position:
+            if role.position >= ctx.guild.me.top_role.position:
                 return '{error} Role is higher or equal to my top role, I won\'t be able to assign it'
 
             if bot_flag:
-                await self.bot.redis.sadd(f'autorole_bots:{msg.guild.id}', str(role.id))
+                await self.bot.redis.sadd(f'autorole_bots:{ctx.guild.id}', str(role.id))
             else:
-                await self.bot.redis.sadd(f'autorole:{msg.guild.id}', str(role.id))
+                await self.bot.redis.sadd(f'autorole:{ctx.guild.id}', str(role.id))
             
             return f'Set {role.mention} as autorole' + (' for bots' if bot_flag else '')
 
         if args[1].lower() in ('delete', 'remove'):
-            role = await find_role(args[2:], msg.guild, self.bot)
+            role = await find_role(args[2:], ctx.guild, self.bot)
             if role is None:
                 return '{error} Role not found'
 
             if bot_flag:
-                await self.bot.redis.srem(f'autorole_bots:{msg.guild.id}', str(role.id))
+                await self.bot.redis.srem(f'autorole_bots:{ctx.guild.id}', str(role.id))
             else:
-                await self.bot.redis.srem(f'autorole:{msg.guild.id}', str(role.id))
+                await self.bot.redis.srem(f'autorole:{ctx.guild.id}', str(role.id))
 
             return f'Removed {role.mention} autorole' + (' for bots' if bot_flag else '')
 
-        return await self.on_not_enough_arguments(msg)
+        return await self.on_not_enough_arguments(ctx)

@@ -72,34 +72,34 @@ class Module(ModuleBase):
         for task in self.votes.values():
             task.cancel()
 
-    async def on_call(self, msg, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         if args[1].lower() == 'cancel':
-            task = self.votes.get(msg.channel.id)
+            task = self.votes.get(ctx.channel.id)
             if not task:
                 return '{warning} No active vote in channel found'
 
-            value = await self.bot.redis.get(f'vote:{msg.channel.id}')
+            value = await self.bot.redis.get(f'vote:{ctx.channel.id}')
             author_id, vote_id = [int(i) for i in value.split(':')[:2]]
 
-            if msg.author.id != author_id:
+            if ctx.author.id != author_id:
                 manage_messages_perm = PermissionManageMessages()
-                if not manage_messages_perm.check(msg.channel, msg.author):
+                if not manage_messages_perm.check(ctx.channel, ctx.author):
                     raise manage_messages_perm
 
             task.cancel()
-            await self.bot.redis.delete(f'vote:{msg.channel.id}')
-            del self.votes[msg.channel.id]
+            await self.bot.redis.delete(f'vote:{ctx.channel.id}')
+            del self.votes[ctx.channel.id]
 
             try:
-                vote = await msg.channel.get_message(vote_id)
+                vote = await ctx.channel.get_message(vote_id)
             except NotFound:
                 pass
             else:
                 await self.bot.edit_message(vote, content='[CANCELLED]')
 
-            return await self.send(msg, content=f'**{msg.author}** cancelled vote.')
+            return await ctx.send(f'**{ctx.author}** cancelled vote.')
 
-        if msg.channel.id in self.votes:
+        if ctx.channel.id in self.votes:
             return '{warning} Channel already have active vote'
 
         try:
@@ -115,26 +115,26 @@ class Module(ModuleBase):
         subject = args[1:]
 
         e = Embed(colour=Colour.gold(), title='Vote', description=subject)
-        e.set_author(name=msg.author.name, icon_url=msg.author.avatar_url)
+        e.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
         e.set_footer(
             text=f'React with {REACTION_FOR} or {REACTION_AGAINST} to vote')
         e.timestamp = wait_until
 
         try:
-            vote = await self.bot.send_message(msg.channel, embed=e)
+            vote = await ctx.send(embed=e, register=False)
             for e in (REACTION_FOR, REACTION_AGAINST):
                 await vote.add_reaction(e)
         except NotFound:
             return
 
-        await self.bot.delete_message(msg)
+        await self.bot.delete_message(ctx.message)
 
         await self.bot.redis.set(
             f'vote:{vote.channel.id}',
-            f'{msg.author.id}:{vote.id}:{int(expires_at)}:{subject}'
+            f'{ctx.author.id}:{vote.id}:{int(expires_at)}:{subject}'
         )
         self.votes[vote.channel.id] = self.bot.loop.create_task(
-            self.end_vote(expires_at, msg.author, vote))
+            self.end_vote(expires_at, ctx.author, vote))
 
     async def end_vote(self, expires_at, author, vote):
         await asyncio.sleep(expires_at - time.time())

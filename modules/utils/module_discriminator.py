@@ -1,6 +1,5 @@
 from objects.modulebase import ModuleBase
-from objects.permissions import (
-    PermissionEmbedLinks, PermissionAddReactions, PermissionReadMessageHistory)
+from objects.permissions import PermissionEmbedLinks
 from objects.paginators import Paginator
 
 from discord import Embed, Colour
@@ -14,14 +13,11 @@ class Module(ModuleBase):
     name = 'discriminator'
     aliases = (name, 'discrim')
     category = 'Discord'
-    bot_perms = (
-        PermissionEmbedLinks(), PermissionAddReactions(),
-        PermissionReadMessageHistory()
-    )
+    bot_perms = (PermissionEmbedLinks(), )
 
-    async def on_call(self, msg, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         if len(args) == 1:
-            discrim = msg.author.discriminator
+            discrim = ctx.author.discriminator
         else:
             if args[1].isdigit() and len(args[1]) == 4:
                 discrim = args[1]
@@ -30,7 +26,7 @@ class Module(ModuleBase):
 
         matched = []
         for user in self.bot.users:
-            if user.discriminator == discrim and not user.bot and user != msg.author:
+            if user.discriminator == discrim and not user.bot and user != ctx.author:
                 matched.append(user)
 
         if not matched:
@@ -41,7 +37,7 @@ class Module(ModuleBase):
         chunks = [lines[i:i + users_per_chunk] for i in range(0, len(lines), users_per_chunk)]
 
         if len(chunks) == 1:
-            return await self.send(msg, '```\n' + '\n'.join(chunks[0]) + '```')
+            return await ctx.send('```\n' + '\n'.join(chunks[0]) + '```')
 
         p = Paginator(self.bot)
         for i, chunk in enumerate(chunks):
@@ -49,5 +45,4 @@ class Module(ModuleBase):
             e.set_footer(text=f'Page {i + 1}/{len(chunks)} ({len(lines)}) results')
             p.add_page(embed=e)
 
-        m = await self.send(msg, **p.current_page)
-        await p.run(m, target_user=msg.author)
+        await p.run(ctx)

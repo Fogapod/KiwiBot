@@ -14,6 +14,7 @@ import discord
 from objects.modulemanager import ModuleManager
 from objects.config import Config
 from objects.redisdb import RedisDB
+from objects.context import Context
 
 from constants import *
 
@@ -150,7 +151,6 @@ class KiwiBot(discord.AutoShardedClient):
             await self.track_message(msg)
 
         lower_content = msg.content.lower()
-        clean_content = None
 
         prefixes = self.prefixes
 
@@ -162,26 +162,30 @@ class KiwiBot(discord.AutoShardedClient):
         else:
             prefixes = prefixes + ['']
 
+        prefix = None
         for p in prefixes:
             if lower_content.startswith(p):
-                clean_content = msg.content[len(p):].lstrip()
+                prefix = p
                 break
 
-        if clean_content is None:
+        if prefix is None:
             return
 
-        module_response = await self.mm.check_modules(msg, clean_content)
+        await self.process_command(
+            Context(self, msg, prefix), msg.content[len(p):].lstrip())
+
+    async def process_command(self, ctx, clean_content):
+        module_response = await self.mm.check_modules(ctx, clean_content)
 
         if module_response:
-            if isinstance(module_response, discord.Message):
+            if not isinstance(module_response, str):
                 return
 
             module_response = await formatters.format_response(
-                module_response, msg, self)
+                module_response, ctx.message, self)
 
         if module_response:
-            await self.send_message(
-                msg.channel, content=module_response, response_to=msg)
+            await ctx.send(module_response)
 
     def register_last_user_message(self, msg):
         if msg.channel.id not in self._last_messages:
@@ -246,6 +250,8 @@ class KiwiBot(discord.AutoShardedClient):
             else:
                 channel = target.dm_channel
         elif isinstance(target, discord.Message):
+            channel = target.channel
+        elif isinstance(target, Context):
             channel = target.channel
         elif isinstance(target, discord.DMChannel) or isinstance(target, discord.TextChannel):
             channel = target

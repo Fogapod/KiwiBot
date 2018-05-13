@@ -35,7 +35,7 @@ class Module(ModuleBase):
         }
     }
 
-    async def on_call(self, msg, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         if len(args) == 1:
             module_list = []
             for module in self.bot.mm.get_all_modules():
@@ -65,7 +65,7 @@ class Module(ModuleBase):
                 chunks = [lines[i:i + lines_per_chunk] for i in range(0, len(lines), lines_per_chunk)]
                 chunks_by_category[category] = chunks
 
-            local_prefix = await get_local_prefix(msg, self.bot)
+            local_prefix = await get_local_prefix(ctx, self.bot)
             total_pages = sum(len(chunks) for chunks in chunks_by_category.values()) + 1
 
             def make_page(title, chunk, page):
@@ -92,8 +92,7 @@ class Module(ModuleBase):
                     page += 1
             p._pages[0]['embed'].description += '```'
 
-            m = await self.send(msg, **p.current_page)
-            return await p.run(m, target_user=msg.author)
+            return await p.run(ctx)
 
         if len(args) > 2:
             return '{warning} help for subcommands is not supported yet'
@@ -129,11 +128,11 @@ class Module(ModuleBase):
                     ),
                     content=f'Page **{i + 1}/{len(chunks)}** ({len(modules)}) commands'
                 )
-            await p.run(msg.channel, target_user=msg.author)
+            await p.run(ctx)
         else:
             module = self.bot.mm.get_module(args[1])
 
             if not module:
                 return '{warning} Unknown command or category'
 
-            return await module.on_doc_request(msg)
+            return await module.on_doc_request(ctx)

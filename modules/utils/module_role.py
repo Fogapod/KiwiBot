@@ -20,8 +20,8 @@ class Module(ModuleBase):
     min_args = 1
     guild_only = True
 
-    async def on_call(self, msg, args, **flags):
-        role = await find_role(args[1:], msg.guild, self.bot)
+    async def on_call(self, ctx, args, **flags):
+        role = await find_role(args[1:], ctx.guild, self.bot)
 
         if role is None:
             return '{warning} Role not found'
@@ -30,11 +30,11 @@ class Module(ModuleBase):
         e.add_field(
             name='Created', value=f'`{role.created_at.replace(microsecond=0)}`')
         e.add_field(
-            name='Position', value=f'{len(msg.guild.roles) - role.position}/{len(msg.guild.roles)}')
+            name='Position', value=f'{len(ctx.guild.roles) - role.position}/{len(ctx.guild.roles)}')
         e.add_field(name='Members', value=len(role.members))
         e.add_field(name='Permission bitfield', value=role.permissions.value)
         e.add_field(name='Colour', value=f'#{role.colour.value:06x}')
         e.add_field(name='Mentionable', value=role.mentionable)
         e.set_footer(text=role.id)
 
-        await self.send(msg, embed=e)
+        await ctx.send(embed=e)

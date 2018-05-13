@@ -24,7 +24,7 @@ class Module(ModuleBase):
     user_perms = (PermissionManageMessages(), )
     guild_only = True
 
-    async def on_call(self, msg, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         limit = None
         user_string = None
 
@@ -47,19 +47,19 @@ class Module(ModuleBase):
         elif user_string.lower() == 'users':
             check = lambda m: not m.author.bot
         else:
-            user = await find_user(user_string, msg, self.bot)
+            user = await find_user(user_string, ctx.message, self.bot)
             if user is None:
                 return '{error} User **' + user_string + '** not found!'
             check = lambda m: m.author.id == user.id
 
-        deleted = await msg.channel.purge(
+        deleted = await ctx.channel.purge(
             limit=limit, check=check,
-            before=msg.created_at
+            before=ctx.message.created_at
         )
 
-        await msg.channel.send(
+        await ctx.send(
             f'Deleted {len(deleted)} messages from {", ".join(set("**" + str(m.author) + "**" for m in deleted))}' if deleted else 'No matched messages found',
-            delete_after=7
+            delete_after=7, register=False
         )
 
-        await self.bot.delete_message(msg)
+        await self.bot.delete_message(ctx.message)

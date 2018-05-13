@@ -72,37 +72,37 @@ class Module(ModuleBase):
         for task in self.polls.values():
             task.cancel()
 
-    async def on_call(self, msg, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         if args[1].lower() == 'cancel':
-            task = self.polls.get(msg.channel.id)
+            task = self.polls.get(ctx.channel.id)
             if not task:
                 return '{warning} No active poll in channel found'
 
-            value = await self.bot.redis.get(f'poll:{msg.channel.id}')
+            value = await self.bot.redis.get(f'poll:{ctx.channel.id}')
             author_id, poll_id = [int(i) for i in value.split(':')[:2]]
 
-            if msg.author.id != author_id:
+            if ctx.author.id != author_id:
                 manage_messages_perm = PermissionManageMessages()
-                if not manage_messages_perm.check(msg.channel, msg.author):
+                if not manage_messages_perm.check(ctx.channel, ctx.author):
                     raise manage_messages_perm
 
             task.cancel()
-            await self.bot.redis.delete(f'poll_choices:{msg.channel.id}')
-            await self.bot.redis.delete(f'poll:{msg.channel.id}')
-            del self.polls[msg.channel.id]
+            await self.bot.redis.delete(f'poll_choices:{ctx.channel.id}')
+            await self.bot.redis.delete(f'poll:{ctx.channel.id}')
+            del self.polls[ctx.channel.id]
 
             try:
-                poll = await msg.channel.get_message(poll_id)
+                poll = await ctx.channel.get_message(poll_id)
             except NotFound:
                 pass
             else:
                 await self.bot.edit_message(poll, content='[CANCELLED]')
 
-            return await self.send(msg, content=f'**{msg.author}** cancelled poll.')
+            return await ctx.send(f'**{ctx.author}** cancelled poll.')
         elif len(args) < 4:
-            return await self.on_not_enough_arguments(msg)
+            return await self.on_not_enough_arguments(ctx)
 
-        if msg.channel.id in self.polls:
+        if ctx.channel.id in self.polls:
             return '{warning} Channel already has active poll'
 
         try:
@@ -127,27 +127,27 @@ class Module(ModuleBase):
 
         e = Embed(colour=Colour.gold(), title=subject)
         e.description = '\n'.join(f'{emojis[i]}: {c}' for i, c in enumerate(choices))
-        e.set_author(name=msg.author.name, icon_url=msg.author.avatar_url)
+        e.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
         e.set_footer(
             text=f'React with {emojis[0]} - {emojis[-1]} to vote')
         e.timestamp = wait_until
 
         try:
-            poll = await self.bot.send_message(msg.channel, embed=e)
+            poll = await ctx.send(embed=e, register=False)
             for e in emojis:
                 await poll.add_reaction(e)
         except NotFound:
             return
 
-        await self.bot.delete_message(msg)
+        await self.bot.delete_message(ctx.message)
 
         await self.bot.redis.set(
             f'poll:{poll.channel.id}',
-            f'{msg.author.id}:{poll.id}:{int(expires_at)}:{subject}'
+            f'{ctx.author.id}:{poll.id}:{int(expires_at)}:{subject}'
         )
         await self.bot.redis.rpush(f'poll_choices:{poll.channel.id}', *choices)
         self.polls[poll.channel.id] = self.bot.loop.create_task(
-            self.end_poll(expires_at, msg.author, poll))
+            self.end_poll(expires_at, ctx.author, poll))
 
     async def end_poll(self, expires_at, author, poll):
         await asyncio.sleep(expires_at - time.time())

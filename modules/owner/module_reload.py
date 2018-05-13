@@ -38,12 +38,10 @@ class Module(ModuleBase):
         except Exception:
             pass
 
-    async def on_call(self, msg, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         target = args[1].lower()
 
-        reload_message = await self.send(
-            msg, content='Reloading `' + target + '` ...'
-        )
+        reload_message = await ctx.send(f'Reloading `{target}` ...')
 
         if target == 'bot':
             await self.bot.redis.set(
@@ -55,7 +53,7 @@ class Module(ModuleBase):
                 await self.bot.mm.reload_modules()
             except Exception:
                 response = '{error} Failed to reload modules. Exception:```py\n' + traceback.format_exc() + '```'
-                response = await format_response(response, msg, self.bot)
+                response = await format_response(response, ctx, self.bot)
                 return await self.bot.edit_message(
                     reload_message,
                     content=response
@@ -79,7 +77,7 @@ class Module(ModuleBase):
                 await self.bot.mm.reload_module(target)
             except Exception:
                 response = '{error} ' + f'Failed to reload module `{target}`. Exception:```py\n{traceback.format_exc()}```'
-                response = await format_response(response, msg, self.bot)
+                response = await format_response(response, ctx, self.bot)
                 return await self.bot.edit_message(
                     reload_message,
                     content=response

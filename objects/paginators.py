@@ -7,6 +7,8 @@ import time
 from discord import TextChannel, DMChannel
 from discord.errors import Forbidden, NotFound
 
+from objects.context import Context
+
 
 class PaginatorABC:
 
@@ -64,8 +66,11 @@ class PaginatorABC:
         if len(self._pages) <= 1 and not force:
             return
 
-        for emoji in self.events.keys():
-            await self.target_message.add_reaction(emoji)
+        try:
+            for emoji in self.events.keys():
+                await self.target_message.add_reaction(emoji)
+        except Exception:
+            pass
 
     async def _reaction_add_callback(self, reaction, user):
         manage_messages_permission = \
@@ -87,12 +92,12 @@ class PaginatorABC:
         Runs paginator session
         parameters:
             :target:
-                message attach paginator to or channel to send 1st page
-            :target_user: (default: None)
+                Message or Context object attach paginator to
+            :target_user: (default: None or ctx author if ctx passed as target)
                 user wait actions from. Can be User or Member object
             :target_users: (default: [])
                 list of users wait actions from. Can be User or Member object list
-            :force_run: (default: False(
+            :force_run: (default: False)
                 force run paginator even if missing pages
             :events: (default: {})
                 dict of events to wait as keys and their callbacks as values
@@ -100,15 +105,15 @@ class PaginatorABC:
                 callbacks are coroutines recieving event result(s)
         """
 
-        if isinstance(target, TextChannel) or isinstance(target, DMChannel):
-            self.target_message = await self.bot.send_message(
-                target, **self.current_page)
+        if isinstance(target, Context):
+            self.target_message = await target.send(**self.current_page)
             if self.target_message is None:
                 return await self.cleanup()
+            target_user = kwargs.pop('target_user', target.author)
         else:
             self.target_message = target
+            target_user = kwargs.pop('target_user', None)
 
-        target_user = kwargs.pop('target_user', None)
         target_users = kwargs.pop('target_users', [])
         force_run = kwargs.pop('force_run', False)
         events = kwargs.pop('events', {})
@@ -121,7 +126,6 @@ class PaginatorABC:
             target_users.append(target_user)
 
         self.target_users = target_users
-        await self.init_reactions(force=force_run)
 
         def check(reaction, user):
             return all((
@@ -136,9 +140,11 @@ class PaginatorABC:
         manage_messages_permission = \
             self.target_message.guild and self.target_message.channel.permissions_for(self.target_message.guild.me).manage_messages
 
+        await self.init_reactions(force=force_run)
+
         while time_left >= 0 and not self.closed:
             reaction_add_event = self.bot.wait_for('reaction_add', check=check)
-            _events = {l(): c for l, c in events.items()}
+            _events = { l(): c for l, c in events.items() }
             _events[reaction_add_event] = self._reaction_add_callback
 
             if not manage_messages_permission:
@@ -263,20 +269,20 @@ class SelectionPaginator(Paginator):
         self.choice = int(msg.content)
         await self.bot.delete_message(msg)
 
-    async def run(self, target_message, num_elements, **kwargs):
+    async def run(self, target, num_elements, **kwargs):
         self.num_elements = num_elements
 
         def check(msg):
             return all((
-                any(msg.author == u for u in self.target_users),
-                msg.channel == target_message.channel
+                msg.author in (self.target_users),
+                msg.channel == target.channel
             ))
 
         message_event_lambda = lambda: self.bot.wait_for('message', check=check)
 
         await super().run(
-            target_message,
-            events={message_event_lambda: self._check_choice}, **kwargs
+            target,
+            events={ message_event_lambda: self._check_choice }, **kwargs
         )
 
         return self.choice
@@ -290,31 +296,24 @@ class UpdatingPaginator(PaginatorABC):
 
         self.events[emoji_update] = self.on_update
 
-    async def run(self, channel, update_func, update_func_parameters, **kwargs):
+    async def run(self, target, update_func, **kwargs):
         self.update_func = update_func
-        self.update_func_parameters = update_func_parameters
+        self.update_args = kwargs.pop('update_args', ())
+        self.update_kwargs = kwargs.pop('update_kwargs', {})
 
-        try:
-            fields = await update_func(
-                *update_func_parameters[0], **update_func_parameters[1])
-            if not fields:
-                return
-        except Exception:
-            return
+        self.add_page(**await self.get_fields())
 
-        m = await self.bot.send_message(channel, **fields)
-
-        await super().run(m, force_run=True, **kwargs)
+        await super().run(target, force_run=True, **kwargs)
 
     async def on_update(self, reaction, user):
+        await self.bot.edit_message(
+            self.target_message, **await self.get_fields())
+
+    async def get_fields(self):
         try:
             fields = await self.update_func(
-                *self.update_func_parameters[0],
-                **self.update_func_parameters[1]
-            )
-            if not fields:
-                return
-        except Exception as e:
-            return print(e)
-
-        await self.bot.edit_message(self.target_message, **fields)
+                *self.update_args, **self.update_kwargs)
+        except Exception:
+            return {}
+        else:
+            return fields

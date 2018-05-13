@@ -1,6 +1,5 @@
 from objects.modulebase import ModuleBase
-from objects.permissions import (
-    PermissionEmbedLinks, PermissionAddReactions, PermissionReadMessageHistory)
+from objects.permissions import PermissionEmbedLinks
 from objects.paginators import Paginator
 
 from utils.funcs import find_user
@@ -16,16 +15,13 @@ class Module(ModuleBase):
     name = 'seenon'
     aliases = (name, )
     category = 'Discord'
-    bot_perms = (
-        PermissionEmbedLinks(), PermissionAddReactions(),
-        PermissionReadMessageHistory()
-    )
+    bot_perms = (PermissionEmbedLinks(), )
 
-    async def on_call(self, msg, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         if len(args) == 1:
-            user = msg.author
+            user = ctx.author
         else:
-            user = await find_user(args[1:], msg, self.bot)
+            user = await find_user(args[1:], ctx.message, self.bot)
 
         if not user:
             return '{warning} User not found'
@@ -55,11 +51,10 @@ class Module(ModuleBase):
             return e
 
         if len(chunks) == 1:
-            return await self.send(msg, embed=make_embed(chunks[0]))
+            return await ctx.send(embed=make_embed(chunks[0]))
 
         p = Paginator(self.bot)
         for i, chunk in enumerate(chunks):
             p.add_page(embed=make_embed(chunk, page=i))
 
-        m = await self.send(msg, **p.current_page)
-        await p.run(m, target_user=msg.author)
+        await p.run(ctx)

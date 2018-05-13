@@ -41,7 +41,7 @@ class Module(ModuleBase):
         }
     }
 
-    async def on_call(self, msg, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         channel = flags.get('channel', None)
         user = flags.get('user', None)
         tts = flags.get('tts', False)
@@ -51,14 +51,14 @@ class Module(ModuleBase):
 
         if channel:
             channel = await find_channel(
-                channel, msg.guild, self.bot, global_id_search=True,
+                channel, ctx.guild, self.bot, global_id_search=True,
                 include_voice=False, include_category=False
             )
             if channel is None:
                 return '{warning} Channel not found'
 
         elif user:
-            user = await find_user(user, msg, self.bot)
+            user = await find_user(user, ctx.message, self.bot)
             if user is None:
                 return '{warning} User not found'
 
@@ -70,32 +70,33 @@ class Module(ModuleBase):
                 channel = await user.create_dm()
 
         if channel is None:
-            channel = msg.channel
+            channel = ctx.channel
 
         if tts:
             check_permission(
-                PermissionSendTtsMessages(), msg.channel, self.bot.user)
+                PermissionSendTtsMessages(), ctx.channel, self.bot.user)
             check_permission(
-                PermissionSendTtsMessages(), msg.channel, msg.author)
+                PermissionSendTtsMessages(), ctx.channel, ctx.author)
 
-        is_same_place = getattr(channel, 'guild', None) == getattr(msg, 'guild', None)
+        is_same_place = getattr(channel, 'guild', None) == ctx.guild
         if not is_same_place:
-            if not PermissionBotOwner().check(msg.channel, msg.author):
+            if not PermissionBotOwner().check(ctx.channel, ctx.author):
                 return '{warning} Only bot owner can send messages to other guilds or users'
-        elif not channel.permissions_for(msg.author).send_messages:
+        elif not channel.permissions_for(ctx.author).send_messages:
             return '{warning} You don\'t have permission to send messages to this channel'
 
-        if flags.get('delete', False):
-            await self.bot.delete_message(msg)
+        delete_message = flags.get('delete', False)
+        if delete_message:
+            await self.bot.delete_message(ctx.message)
 
-        m = await self.send(msg, channel=channel, content=args[1:], tts=tts)
+        m = await ctx.send(
+            args[1:], channel=channel, tts=tts, register=not delete_message)
         if m is None:
             return '{error} Failed to deliver message. (blocked by user/no common servers/no permission to send messages to this channel)'
-        else:
-            await self.bot.register_response(msg, m)
-            if not is_same_place:
-                if isinstance(m.channel, DMChannel):
-                    destination = m.channel.recipient
-                else:
-                    destination = f'{channel.mention}** on **{m.guild}'
-                return f'Sent message to **{destination}**'
+
+        if not is_same_place:
+            if isinstance(m.channel, DMChannel):
+                destination = m.channel.recipient
+            else:
+                destination = f'{channel.mention}** on **{m.guild}'
+            return f'Sent message to **{destination}**'

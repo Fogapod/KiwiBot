@@ -14,7 +14,7 @@ class Module(ModuleBase):
     user_perms = (PermissionBotOwner(), )
     hidden = True
 
-    async def on_call(self, msg, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         value = await self.bot.redis.execute(*args.args[1:])
 
         return f'Return value: {self.to_string(value)}'

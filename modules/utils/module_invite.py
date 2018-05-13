@@ -17,7 +17,7 @@ class Module(ModuleBase):
     category = 'Bot'
     bot_perms = (PermissionEmbedLinks(), )
 
-    async def on_call(self, msg, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         e = Embed(
             title='My invite links', colour=Colour.gold(),
             description='   |   '.join((
@@ -40,4 +40,4 @@ class Module(ModuleBase):
             )
         )
 
-        await self.send(msg, embed=e)
+        await ctx.send(embed=e)

@@ -10,7 +10,7 @@ import asyncio
 
 class Module(ModuleBase):
 
-    usage_doc = '{prefix}{aliases} [subcommand] [args...]'
+    usage_doc = '{prefix}{aliases} <subcommand> [args...]'
     short_doc = 'Bot presence utils'
     long_doc = (
         'Suncommands:\n'
@@ -31,6 +31,7 @@ class Module(ModuleBase):
     
     bot_perms = (PermissionAddReactions(), PermissionReadMessageHistory())
     user_perms = (PermissionBotOwner(), )
+    min_args = 1
     flags = {
         'status': {
             'alias': 's',
@@ -43,7 +44,7 @@ class Module(ModuleBase):
     }
     hidden = True
 
-    async def on_missing_permissions(self, msg, *missing):
+    async def on_missing_permissions(self, ctx, *missing):
         return 'not dogsong or notsosuper'
 
     async def on_load(self, from_reload):
@@ -55,7 +56,7 @@ class Module(ModuleBase):
     async def on_unload(self):
         self._task.cancel()
 
-    async def on_call(self, msg, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         interval = flags.get('interval', None)
         if interval is not None:
             if not interval.isdigit():
@@ -88,8 +89,7 @@ class Module(ModuleBase):
             for i, chunk in enumerate(chunks):
                 p.add_page(content='List of activities:```\n' + '\n'.join(chunk) + '```')
 
-            m = await self.send(msg, **p.current_page)
-            return await p.run(m, target_user=msg.author)
+            return await p.run(ctx)
 
         elif subcommand == 'remove':
             items = await self.bot.redis.smembers('activity')
@@ -108,8 +108,7 @@ class Module(ModuleBase):
             for i, chunk in enumerate(chunks):
                 p.add_page(content='Please, type index to remove```\n' + '\n'.join(chunk) + '```')
 
-            m = await self.send(msg, **p.current_page)
-            await p.run(m, len(lines), target_user=msg.author)
+            await p.run(ctx, len(lines))
             if p.choice is not None:
                 await self.bot.redis.srem('activity', items[p.choice - 1])
                 return f'Deleted activity `{items[p.choice - 1]}`'
@@ -127,7 +126,7 @@ class Module(ModuleBase):
             a_type = 3
             a_name = args[2:]
         else:
-            return await self.on_doc_request(msg)
+            return await self.on_doc_request(ctx)
 
         if a_name:
             await self.bot.redis.sadd('activity', f'{a_type}:{status}:{a_name}')

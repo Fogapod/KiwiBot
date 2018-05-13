@@ -25,16 +25,16 @@ class Module(ModuleBase):
     async def on_load(self, from_reload):
         self._last_result = None
 
-    async def on_call(self, msg, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         program = args[1:]
 
         glob = {
             'self': self,
             'bot': self.bot,
-            'msg': msg,
-            'message': msg,
-            'guild': msg.guild,
-            'channel': msg.channel,
+            'ctx': ctx,
+            'msg': ctx.message,
+            'guild': ctx.guild,
+            'channel': ctx.channel,
             '_': self._last_result
         }
 

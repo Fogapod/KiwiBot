@@ -19,9 +19,9 @@ class Module(ModuleBase):
     category = 'Discord'
     bot_perms = (PermissionEmbedLinks(), )
 
-    async def on_call(self, msg, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         if len(args) == 1:
-            guild = msg.guild
+            guild = ctx.guild
         else:
             guild = await find_guild(args[1:], self.bot)
 
@@ -30,12 +30,12 @@ class Module(ModuleBase):
 
         invite = ''
 
-        if guild == msg.guild:
+        if guild == ctx.guild:
             top_role = guild.role_hierarchy[0].mention
         else:
             try:
                 invite = await guild.channels[0].create_invite(
-                    reason=f'requested by {msg.author}-{msg.author.id}' + (f' in guild {msg.guild}-{msg.guild.id}' if msg.guild else ''),
+                    reason=f'requested by {ctx.author}-{ctx.author.id}' + (f' in guild {ctx.guild}-{ctx.guild.id}' if ctx.guild else ''),
                     max_age=3600 * 12  # 12 hours
                 )
             except HTTPException:
@@ -93,7 +93,7 @@ class Module(ModuleBase):
                 name='avatar',
                 value=' | '.join(f'[{f}]({guild.icon_url_as(format=f)})' for f in formats)
             )
-        if guild == msg.guild or PermissionExternalEmojis().check(msg.channel, self.bot.user):
+        if guild == ctx.guild or PermissionExternalEmojis().check(ctx.channel, self.bot.user):
             e.add_field(
                 name='static emotes', inline=False,
                 value=(
@@ -121,4 +121,4 @@ class Module(ModuleBase):
                 name='emojis', value='I have no permission to show external emojis', inline=False)
         e.set_footer(text=guild.id)
 
-        await self.send(msg, embed=e)
+        await ctx.send(embed=e)

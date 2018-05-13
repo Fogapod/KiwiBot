@@ -20,7 +20,7 @@ class Module(ModuleBase):
     category = 'Bot'
     bot_perms = (PermissionEmbedLinks(), )
 
-    async def on_call(self, msg, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         git_url = None
         git_commit = None
 
@@ -92,6 +92,6 @@ class Module(ModuleBase):
         )
         e.add_field(name='git status', value=git_commit, inline=False)
         e.set_thumbnail(url=self.bot.user.avatar_url)
-        e.set_footer(text='Local prefix: ' + await get_local_prefix(msg, self.bot))
+        e.set_footer(text='Local prefix: ' + await get_local_prefix(ctx.message, self.bot))
 
-        await self.send(msg, embed=e)
+        await ctx.send(embed=e)

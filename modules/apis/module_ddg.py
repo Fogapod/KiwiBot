@@ -1,6 +1,5 @@
 from objects.modulebase import ModuleBase
-from objects.permissions import (
-    PermissionEmbedLinks, PermissionAddReactions, PermissionReadMessageHistory)
+from objects.permissions import PermissionEmbedLinks
 from objects.paginators import Paginator
 
 from discord import Embed, Colour
@@ -16,13 +15,10 @@ class Module(ModuleBase):
     name = 'ddg'
     aliases = (name, 'duckduckgo')
     category = 'Services'
-    bot_perms = (
-        PermissionEmbedLinks(), PermissionAddReactions(),
-        PermissionReadMessageHistory()
-    )
+    bot_perms = (PermissionEmbedLinks(), )
     min_args = 1
 
-    async def on_call(self, msg, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         params = {
             'q': args[1:],
             'o': 'json',
@@ -73,5 +69,4 @@ class Module(ModuleBase):
                 e.add_field(name=topic['Text'][:255], value=topic['FirstURL'])
             p.add_page(embed=e)
 
-        m = await self.send(msg, **p.current_page)
-        await p.run(m, target_user=msg.author)
+        await p.run(ctx)

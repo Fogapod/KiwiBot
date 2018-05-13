@@ -19,7 +19,7 @@ class Module(ModuleBase):
     bot_perms = (PermissionEmbedLinks(), )
     min_args = 1
 
-    async def on_call(self, msg, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         try:
             rgb = ImageColor.getrgb(args[1:])
             colour = Colour.from_rgb(*rgb)
@@ -36,4 +36,4 @@ class Module(ModuleBase):
         e.add_field(name='Decimal value', value=colour.value)
         e.set_image(url='attachment://img.jpg')
 
-        await self.send(msg, embed=e, file=file)
+        await ctx.send(embed=e, file=file)

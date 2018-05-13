@@ -1,6 +1,5 @@
 from objects.modulebase import ModuleBase
-from objects.permissions import (
-    PermissionEmbedLinks, PermissionAddReactions, PermissionReadMessageHistory)
+from objects.permissions import PermissionEmbedLinks
 from objects.paginators import Paginator
 
 from discord import Embed, Colour
@@ -13,10 +12,7 @@ class Module(ModuleBase):
     name = 'commandstats'
     aliases = (name, 'cmdstats')
     category = 'Bot'
-    bot_perms = (
-        PermissionEmbedLinks(), PermissionAddReactions(),
-        PermissionReadMessageHistory()
-    )
+    bot_perms = (PermissionEmbedLinks(), )
     flags = {
         'show-disabled': {
             'alias': 'd',
@@ -32,7 +28,7 @@ class Module(ModuleBase):
         }
     }
 
-    async def on_call(self, msg, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         keys = await self.bot.redis.keys('command_usage:*')
         usage = await self.bot.redis.mget(*keys)
 
@@ -71,7 +67,7 @@ class Module(ModuleBase):
             return e
 
         if len(chunks) == 1:
-            return await self.send(msg, embed=make_embed(chunks[0]))
+            return await ctx.send(mbed=make_embed(chunks[0]))
 
         p = Paginator(self.bot)
         for i, chunk in enumerate(chunks):
@@ -80,5 +76,4 @@ class Module(ModuleBase):
                 content=f'Page **{i + 1}/{len(chunks)}**'
             )
 
-        m = await self.send(msg, **p.current_page)
-        await p.run(m, target_user=msg.author)
+        await p.run(ctx)

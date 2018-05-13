@@ -19,12 +19,12 @@ class Module(ModuleBase):
 
     async def on_load(self, from_reload):
         self.events = {
-            'command_use': self.on_command_use,
-            'member_join': self.on_member_join,
-            'member_remove': self.on_member_leave,
+            'command_use':    self.on_command_use,
+            'member_join':    self.on_member_join,
+            'member_remove':  self.on_member_leave,
             'message_delete': self.on_message_delete,
-            'message_edit': self.on_message_edit,
-            'member_update': self.on_member_update
+            'message_edit':   self.on_message_edit,
+            'member_update':  self.on_member_update
         }
 
     async def get_logging_channel(self, guild):
@@ -37,22 +37,22 @@ class Module(ModuleBase):
         if channel_id:
             channel = guild.get_channel(int(channel_id))
             if channel is None:  # channel deleted
-                print(await self.bot.redis.delete(f'serverlogs:{guild.id}'))
+                await self.bot.redis.delete(f'serverlogs:{guild.id}')
 
         return channel
 
     async def log(self, channel, text, **kwargs):
         text = trim_text(replace_mass_mentions(text))
-        await self.bot.send_message(channel, content=text, **kwargs)
+        await self.bot.send_message(channel, text, **kwargs)
 
-    async def on_command_use(self, module, msg, args):
-        channel = await self.get_logging_channel(msg.guild)
+    async def on_command_use(self, module, ctx, args):
+        channel = await self.get_logging_channel(ctx.guild)
         if not channel:
             return
 
         await self.log(
             channel,
-            f'**{msg.author}**-`{msg.author.id}` used command **{module.name}** in {msg.channel.mention}'
+            f'**{ctx.author}**-`{ctx.author.id}` used command **{module.name}** in {ctx.channel.mention}'
         )
 
     async def on_member_join(self, member):
@@ -84,6 +84,7 @@ class Module(ModuleBase):
             channel, content, embed=msg.embeds[0] if msg.embeds else None,
             files=[File(await (await self.bot.sess.get(a.url)).read(), filename=a.filename) for a in msg.attachments]
         )
+
     async def on_message_edit(self, before, after):
         if after.author.id == self.bot.user.id:
             return
@@ -109,22 +110,22 @@ class Module(ModuleBase):
         if str(before) != str(after):  # name or discriminator updated
             await self.log(channel, f'🔎 Member updated: **{before}** -> **{after}**')
 
-    async def on_call(self, msg, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         if len(args) == 1:
-            channel = msg.channel
+            channel = ctx.channel
         else:
             channel = await find_channel(
-                args[1:], msg.guild, self.bot,
+                args[1:], ctx.guild, self.bot,
                 include_voice=False, include_category=False
             )
             if channel is None:
                 return '{warning} Channel not found'
 
-        log_channel_id = await self.bot.redis.get(f'serverlogs:{msg.guild.id}')
+        log_channel_id = await self.bot.redis.get(f'serverlogs:{ctx.guild.id}')
 
-        if log_channel_id and msg.guild.get_channel(int(log_channel_id)) == msg.channel:
-            await self.bot.redis.delete(f'serverlogs:{msg.guild.id}')
+        if log_channel_id and ctx.guild.get_channel(int(log_channel_id)) == ctx.channel:
+            await self.bot.redis.delete(f'serverlogs:{ctx.guild.id}')
             return f'Disabled logs in {channel.mention}'
         else:
-            await self.bot.redis.set(f'serverlogs:{msg.guild.id}', str(channel.id))
+            await self.bot.redis.set(f'serverlogs:{ctx.guild.id}', str(channel.id))
             return f'Enabled logs in {channel.mention}'

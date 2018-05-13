@@ -15,9 +15,9 @@ class Module(ModuleBase):
     category = 'Actions'
     min_args = 1
 
-    async def on_call(self, msg, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         subject = args[1:]
-        user = await find_user(subject, msg, self.bot)
+        user = await find_user(subject, ctx.message, self.bot)
 
         if user is not None:
             target = str(user.id)

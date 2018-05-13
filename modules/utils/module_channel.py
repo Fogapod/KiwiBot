@@ -17,12 +17,12 @@ class Module(ModuleBase):
     category = 'Discord'
     bot_perms = (PermissionEmbedLinks(), )
 
-    async def on_call(self, msg, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         if len(args) == 1:
-            channel = msg.channel
+            channel = ctx.channel
         else:
             channel = await find_channel(
-                args[1:], msg.guild, self.bot, global_id_search=True)
+                args[1:], ctx.guild, self.bot, global_id_search=True)
 
         if channel is None:
             return '{warning} Channel not found'
@@ -85,7 +85,7 @@ class Module(ModuleBase):
             ]
         else:
             c_type = 'Category'
-            member_count = msg.guild.member_count
+            member_count = ctx.guild.member_count
             additional_fields = [
                 {
                     'name': 'Channels',
@@ -105,4 +105,4 @@ class Module(ModuleBase):
 
         e.set_footer(text=channel.id)
 
-        await self.send(msg, embed=e)
+        await ctx.send(embed=e)

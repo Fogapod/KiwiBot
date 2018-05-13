@@ -14,8 +14,8 @@ class Module(ModuleBase):
     aliases = (name, )
     category = 'Bot'
 
-    async def on_call(self, msg, args, **flags):
-        ping_msg = await self.send(msg, 'Pinging ...')
+    async def on_call(self, ctx, args, **flags):
+        ping_msg = await ctx.send('Pinging ...')
 
         if len(args) == 2:
             domain = args[1]
@@ -36,7 +36,7 @@ class Module(ModuleBase):
                     return await self.bot.edit_message(
                         ping_msg, f'```\n{stdout.decode() or stderr.decode()}```')
 
-        msg_timestamp = msg.edited_at or msg.created_at
+        msg_timestamp = ctx.message.edited_at or ctx.message.created_at
         delta = round((ping_msg.created_at.timestamp() - msg_timestamp.timestamp()) * 1000)
 
         result = f'Pong, it took `{int(delta)}ms`'

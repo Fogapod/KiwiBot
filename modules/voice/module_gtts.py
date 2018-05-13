@@ -54,7 +54,7 @@ class Module(ModuleBase):
     async def on_load(self, from_reload):
         self.langs = tts_langs()
 
-    async def on_call(self, msg, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         if args[1:].lower() == 'list':
             return '\n'.join(f'`{k}`: {v}' for k, v in self.langs.items())
 
@@ -63,9 +63,9 @@ class Module(ModuleBase):
             return '{warning} Text is too long (> 1000 characters)'
 
         voice_flag = not flags.get(
-            'no-voice', isinstance(msg.channel, DMChannel))
+            'no-voice', isinstance(ctx.channel, DMChannel))
 
-        if voice_flag and not msg.author.voice:
+        if voice_flag and not ctx.author.voice:
             return '{warning} Please, join voice channel first'
 
         try:
@@ -94,13 +94,13 @@ class Module(ModuleBase):
             audio = PCMVolumeTransformer(FFmpegPCMAudio(tmp, pipe=True), volume)
 
             if flags.get('file', not voice_flag):
-                await self.send(msg, file=File(stdout, filename='tts.mp3'))
+                await ctx.send(file=File(stdout, filename='tts.mp3'))
 
         if voice_flag:
-            if msg.guild.voice_client is None:
-                vc = await msg.author.voice.channel.connect()
+            if ctx.guild.voice_client is None:
+                vc = await ctx.author.voice.channel.connect()
             else:
-                vc = msg.guild.voice_client
+                vc = ctx.guild.voice_client
 
             if vc.is_playing():
                 vc.stop()
