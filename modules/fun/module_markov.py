@@ -70,10 +70,11 @@ class Module(ModuleBase):
             if word in word_dict:
                 next_word = random.choice(word_dict[word])
             else:
-                next_word = random.choice(random.choice(word_dict.values()))
+                next_word = random.choice(random.choice(tuple(word_dict.values())))
             chain.append(next_word)
 
         e = Embed(colour=Colour.gold(), title='Markov Chain')
+        e.add_field(name='Channel', value=channel.mention)
         e.description = trim_text(' '.join(chain), max_len=2048)
         e.set_footer(text=ctx.author, icon_url=ctx.author.avatar_url)
 
