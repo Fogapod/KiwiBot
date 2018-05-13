@@ -15,7 +15,7 @@ class Module(ModuleBase):
     user_perms = (PermissionBotOwner(), )
     hidden = True
 
-    async def on_call(self, message, ctx, **options):
+    async def on_call(self, ctx, args, **options):
         try:
             await message.add_reaction('✅')
         except Exception:
