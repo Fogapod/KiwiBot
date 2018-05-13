@@ -44,7 +44,7 @@ class Module(ModuleBase):
 
         words = [i for s in [m.content.split() for m in messages] for i in s]
 
-        num_words = random.randint(20, 200)
+        num_words = random.randint(5, 150)
         if len(words) < num_words:
             return await self.bot.edit_message(
                 m, 'Not enough words to generate text')
@@ -66,7 +66,12 @@ class Module(ModuleBase):
         chain = [random.choice(words)]
 
         for i in range(num_words):
-            chain.append(random.choice(word_dict[chain[-1]]))
+            word = chain[-1]
+            if word in word_dict:
+                next_word = random.choice(word_dict[word])
+            else:
+                next_word = random.choice(random.choice(word_dict.values()))
+            chain.append(next_word)
 
         e = Embed(colour=Colour.gold(), title='Markov Chain')
         e.description = trim_text(' '.join(chain), max_len=2048)
