@@ -37,7 +37,7 @@ class Module(ModuleBase):
         PermissionEmbedLinks(), PermissionAddReactions(),
         PermissionReadMessageHistory()
     )
-    required_args = 1
+    min_args = 1
     flags = {
         'timeout': {
             'alias': 't',
