@@ -41,13 +41,13 @@ class Module(ModuleBase):
 
         try:
             messages = await channel.history(
-                limit=200, reverse=True,
+                limit=300, reverse=True,
                 before=ctx.message.edited_at or ctx.message.created_at
             ).flatten()
         except Exception:
             return await self.bot.edit_message(m, 'Failed to read message history')
 
-        words = [i for s in [m.content.split(' ') for m in messages] for i in s]
+        words = [i for s in [m.content.split(' ') for m in messages if m.content] for i in s]
 
         num_words = random.randint(5, 150)
         if len(words) < num_words:
@@ -78,8 +78,15 @@ class Module(ModuleBase):
                 next_word = random.choice(random.choice(tuple(word_dict.values())))
             chain.append(next_word)
 
+        most_frequent_word = max(word_dict, key=lambda x: len(word_dict[x] if x else []))
+
         e = Embed(colour=Colour.gold(), title='Markov Chain')
         e.add_field(name='Channel', value=channel.mention)
+        e.add_field(name='Words analized', value=len(words))
+        e.add_field(
+            name='Most frequent word',
+            value=f'**{most_frequent_word}**: used **{len(word_dict[most_frequent_word])}** times ({round(len(word_dict[most_frequent_word]) / len(words), 4)}%)'
+        )
         e.description = trim_text(' '.join(chain), max_len=2048)
         e.set_footer(text=ctx.author, icon_url=ctx.author.avatar_url)
 
