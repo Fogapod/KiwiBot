@@ -38,7 +38,8 @@ class Module(ModuleBase):
 
         try:
             messages = await channel.history(
-                limit=200, before=ctx.message.edited_at or ctx.message.created_at
+                limit=200, reverse=True,
+                before=ctx.message.edited_at or ctx.message.created_at
             ).flatten()
         except Exception:
             return await self.bot.edit_message(m, 'Failed to read message history')
@@ -52,7 +53,7 @@ class Module(ModuleBase):
 
         def make_pairs(words):
             for i in range(len(words) - 1):
-                yield (words[i], words[i + 1])
+                yield (words[i].lower(), words[i + 1])
         
         pairs = make_pairs(words)
 
