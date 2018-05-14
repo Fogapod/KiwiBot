@@ -85,7 +85,7 @@ class Module(ModuleBase):
         e.add_field(name='Words analyzed', value=len(words))
         e.add_field(
             name='Most frequent word',
-            value=f'**{most_frequent_word}**: used **{len(word_dict[most_frequent_word])}** times ({round(len(word_dict[most_frequent_word]) / len(words), 4)}%)'
+            value=f'**{most_frequent_word[:256]}**: used **{len(word_dict[most_frequent_word])}** times ({round(len(word_dict[most_frequent_word]) / len(words), 4)}%)'
         )
         e.description = trim_text(' '.join(chain), max_len=2048)
         e.set_footer(text=ctx.author, icon_url=ctx.author.avatar_url)
