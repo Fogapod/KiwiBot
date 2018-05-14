@@ -41,7 +41,7 @@ class Module(ModuleBase):
 
         try:
             messages = await channel.history(
-                limit=300, reverse=True,
+                limit=1000, reverse=True,
                 before=ctx.message.edited_at or ctx.message.created_at
             ).flatten()
         except Exception:
@@ -82,7 +82,7 @@ class Module(ModuleBase):
 
         e = Embed(colour=Colour.gold(), title='Markov Chain')
         e.add_field(name='Channel', value=channel.mention)
-        e.add_field(name='Words analized', value=len(words))
+        e.add_field(name='Words analyzed', value=len(words))
         e.add_field(
             name='Most frequent word',
             value=f'**{most_frequent_word}**: used **{len(word_dict[most_frequent_word])}** times ({round(len(word_dict[most_frequent_word]) / len(words), 4)}%)'
