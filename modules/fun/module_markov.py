@@ -29,9 +29,10 @@ class Module(ModuleBase):
             )
             if channel is None:
                 return '{warning} Channel not found'
-
             if not channel.permissions_for(ctx.author).read_messages:
                 return '{error} You don\'t have permission to read messages in that channel'
+            if channel.is_nsfw() > ctx.channel.is_nsfw():
+                return '{warning} Trying to access nsfw channel from sfw channel'
 
         m = await ctx.send('Generating...')
 
