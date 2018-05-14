@@ -47,7 +47,7 @@ class Module(ModuleBase):
         except Exception:
             return await self.bot.edit_message(m, 'Failed to read message history')
 
-        words = [i for s in [m.content.split() for m in messages] for i in s]
+        words = [i for s in [m.content.split(' ') for m in messages] for i in s]
 
         num_words = random.randint(5, 150)
         if len(words) < num_words:
