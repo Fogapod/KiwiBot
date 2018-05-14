@@ -197,8 +197,8 @@ find_server = find_guild
 
 
 async def find_channel(
-    pattern, guild, bot, max_count=1, global_id_search=False,
-    global_search=False, include_text=True, include_voice=True, include_category=True
+    pattern, guild, bot, max_count=1, global_id_search=False, global_search=False,
+    include_direct=False, include_text=True, include_voice=True, include_category=True
     ):
     found = []
     id_match = ID_REGEX.fullmatch(pattern)
@@ -209,6 +209,8 @@ async def find_channel(
 
         if global_id_search:
             channel = bot.get_channel(channel_id)
+            if isinstance(channel, discord.DMChannel):
+                channel = None
         elif guild is not None:
             channel = guild.get_channel(channel_id)
         if channel is not None:

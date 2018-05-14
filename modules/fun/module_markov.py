@@ -18,18 +18,21 @@ class Module(ModuleBase):
     aliases = (name, 'markovchain')
     category = 'Actions'
     bot_perms = (PermissionEmbedLinks(), )
+    guild_only = True
 
     async def on_call(self, ctx, args, **flags):
         if len(args) == 1:
             channel = ctx.channel
         else:
             channel = await find_channel(
-                args[1:], ctx.guild, self.bot,
+                args[1:], ctx.guild, self.bot, global_id_search=True,
                 include_voice=False, include_category=False
             )
             if channel is None:
                 return '{warning} Channel not found'
-            if not channel.permissions_for(ctx.author).read_messages:
+
+            author = channel.guild.get_member(ctx.author.id)
+            if not author or not channel.permissions_for(author).read_messages:
                 return '{error} You don\'t have permission to read messages in that channel'
             if channel.is_nsfw() > ctx.channel.is_nsfw():
                 return '{warning} Trying to access nsfw channel from sfw channel'
