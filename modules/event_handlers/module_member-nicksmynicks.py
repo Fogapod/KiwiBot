@@ -26,6 +26,9 @@ class Module(ModuleBase):
             await self.set_nick(after)
 
     async def set_nick(self, member):
+        if member.id == self.bot.user.id:
+            return
+
         name = member.display_name
         if len(name) >= 2:
             left = name[:len(name) // 2 - 1]
