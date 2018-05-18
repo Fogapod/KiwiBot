@@ -12,12 +12,18 @@ from objects.logger import Logger
 logger = Logger.get_logger()
 
 ID_EXPR = '\d{17,19}'
+USER_MENTION_EXPR = f'<@!?({ID_EXPR})>'
+ROLE_MENTION_EXPR = f'<@&({ID_EXPR})>'
+CHANNEL_MENTION_EXPR = f'<#({ID_EXPR})>'
 
 ID_REGEX = re.compile(ID_EXPR)
-USER_MENTION_REGEX = re.compile(f'<@!?({ID_EXPR})>')
-ROLE_MENTION_REGEX = re.compile(f'<@&({ID_EXPR})>')
-MENTION_OR_ID_REGEX = re.compile(f'(?:<@!?({ID_EXPR})>)|{ID_EXPR}')
-ROLE_OR_ID_REGEX = re.compile(f'(?:<@&({ID_EXPR})>)|{ID_EXPR}')
+USER_MENTION_REGEX = re.compile(USER_MENTION_EXPR)
+ROLE_MENTION_REGEX = re.compile(ROLE_MENTION_EXPR)
+CHANNEL_MENTION_REGEX = re.compile(CHANNEL_MENTION_EXPR)
+
+USER_MENTION_OR_ID_REGEX = re.compile(f'(?:{USER_MENTION_EXPR})|{ID_EXPR}')
+ROLE_OR_ID_REGEX = re.compile(f'(?:{ROLE_MENTION_EXPR})|{ID_EXPR}')
+CHANNEL_OR_ID_REGEX = re.compile(f'(?:{CHANNEL_MENTION_EXPR})|{ID_EXPR}')
 
 COLOUR_REGEX = re.compile('#?([a-f0-9]{6})', re.I)
 
@@ -63,7 +69,7 @@ async def execute_process(process, code):
 
 async def find_user(pattern, msg, bot, strict_guild=False, max_count=1, global_search=False):
     user = None
-    id_match = MENTION_OR_ID_REGEX.fullmatch(pattern)
+    id_match = USER_MENTION_OR_ID_REGEX.fullmatch(pattern)
 
     if id_match is not None:
         user_id = int(id_match.group(1) or id_match.group(0))
@@ -201,10 +207,10 @@ async def find_channel(
     include_direct=False, include_text=True, include_voice=True, include_category=True
     ):
     found = []
-    id_match = ID_REGEX.fullmatch(pattern)
+    id_match = CHANNEL_OR_ID_REGEX.fullmatch(pattern)
 
     if id_match is not None:
-        channel_id = int(id_match.group(0))
+        channel_id = int(id_match.group(1) or id_match.group(0))
         channel = None
 
         if global_id_search:

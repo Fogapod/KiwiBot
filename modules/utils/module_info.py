@@ -7,6 +7,8 @@ from constants import BOT_OWNER_ID, DEV_GUILD_INVITE, ASCII_ART
 from discord import Colour, Embed
 import discord
 
+import psutil
+
 import os
 import sys
 
@@ -58,6 +60,9 @@ class Module(ModuleBase):
         else:
             author = str(user)
 
+        process = psutil.Process()
+        net_counters = psutil.net_io_counters()
+
         e = Embed(
             colour=Colour.gold(), title='Information',
             url=git_url,
@@ -86,11 +91,15 @@ class Module(ModuleBase):
         )
         e.add_field(
             name='Environment status', value=(
+                f'CPU load: **{process.cpu_percent()}%**\n'
+                f'Memory used: **{round(process.memory_info().rss / 1000000, 1)} MB**\n'
+                f'Data sent: **{round(net_counters.bytes_sent / 1000000, 1)} MB**\n'
+                f'Data recieved: **{round(net_counters.bytes_recv / 1000000, 1)} MB**\n\n'
                 f'Python version: **{sys.version[:5]}**\n'
                 f'discord.py version: **{discord.__version__}**'
             ), inline=False
         )
-        e.add_field(name='git status', value=git_commit, inline=False)
+        e.add_field(name='git status', value=git_commit[:1024], inline=False)
         e.set_thumbnail(url=self.bot.user.avatar_url)
         e.set_footer(text='Local prefix: ' + await get_local_prefix(ctx.message, self.bot))
 
