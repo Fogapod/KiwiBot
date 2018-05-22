@@ -49,8 +49,8 @@ class Module(ModuleBase):
 
         words = [i for s in [m.content.split(' ') for m in messages if m.content] for i in s]
 
-        num_words = random.randint(5, 150)
-        if len(words) < num_words:
+        num_words = min((random.randint(5, 150), len(words)))
+        if num_words < 2:
             return await self.bot.edit_message(
                 m, 'Not enough words to generate text')
 
