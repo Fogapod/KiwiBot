@@ -1,5 +1,6 @@
 from discord import DMChannel
 
+from constants import DEV_GUILD_ID, DEV_GUILD_INVITE
 from utils.funcs import get_local_prefix
 
 
@@ -143,7 +144,8 @@ class ModuleBase:
         return (
             '{error} Error appeared during execution **'
             + self.name + '**: **' + e.__class__.__name__ + '**\n'
-            + 'Please report this to bot owner\n'
+            + 'Please, report this to bot owner directly'
+            + (f' or join support guild: {DEV_GUILD_INVITE}' if not ctx.guild or ctx.guild.id != DEV_GUILD_INVITE else '')
             + '```\n' + '\n'.join(tb_text.split('\n')[-4:]) + '\n```'
         )
 

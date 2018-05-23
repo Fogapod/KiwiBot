@@ -116,8 +116,7 @@ class ModuleManager:
             except Exception:
                 logger.info(f'Failed to check command, stopped on module {name}')
                 logger.info(traceback.format_exc())
-                logger.info('Critical problem, attempting to restart')
-                self.bot.restart()
+                return
             try:
                 logger.trace(
                     f'{ctx.author}-{ctx.author.id} -> {module.name} in ' +
@@ -127,20 +126,20 @@ class ModuleManager:
                 try:
                     self.bot.dispatch('command_use', module, ctx, args)
                 except Exception:
-                    logger.debug(f'Exception dispatching command_use event')
+                    logger.debug(f'Error dispatching command_use event')
                     logger.debug(traceback.format_exc())
                 return await module.call_command(ctx, args, **args.flags)
             except Permission as p:
                 return await module.on_missing_permissions(ctx, p)
             except Exception as e:
                 module_tb = traceback.format_exc()
-                logger.info(f'Exception occured calling {name}')
+                logger.info(f'Error occured calling {name}')
                 logger.info(module_tb)
                 logger.trace(f'Calling {name} on_error')
                 try:
                     return await module.on_error(e, module_tb, ctx)
                 except Exception:
-                    logger.debug(f'Exception occured calling {name} on_error')
+                    logger.debug(f'Error occured calling {name} on_error')
                     logger.debug(traceback.format_exc())
 
     def get_all_modules(self):

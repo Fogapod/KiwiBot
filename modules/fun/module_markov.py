@@ -53,12 +53,8 @@ class Module(ModuleBase):
         if num_words < 2:
             return await self.bot.edit_message(
                 m, 'Not enough words to generate text')
-
-        def make_pairs(words):
-            for i in range(len(words) - 1):
-                yield (words[i].lower(), words[i + 1])
         
-        pairs = make_pairs(words)
+        pairs = [(words[i].lower(), words[i + 1]) for i in range(len(words) - 1)]
 
         word_dict = {}
 
