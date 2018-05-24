@@ -145,7 +145,7 @@ class ModuleBase:
             '{error} Error appeared during execution **'
             + self.name + '**: **' + e.__class__.__name__ + '**\n'
             + 'Please, report this to bot owner directly'
-            + (f' or join support guild: {DEV_GUILD_INVITE}' if not ctx.guild or ctx.guild.id != DEV_GUILD_INVITE else '')
+            + (f' or join support guild: {DEV_GUILD_INVITE}' if not ctx.guild or ctx.guild.id != DEV_GUILD_ID else '')
             + '\n```\n' + '\n'.join(tb_text.split('\n')[-4:]) + '\n```'
         )
 

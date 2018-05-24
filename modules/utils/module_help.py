@@ -84,9 +84,9 @@ class Module(ModuleBase):
             p.add_page(**make_page('Categories', [], 1))
 
             page = 2
-            p._pages[0]['embed'].description = '```\n'
+            p._pages[0]['embed'].description = f'```\n{"Category":<19} Pages\n'
             for category, chunks in chunks_by_category.items():
-                p._pages[0]['embed'].description += f'{category:.<19} {page} - {page + len(chunks) - 1}\n'
+                p._pages[0]['embed'].description += f'{category:.<19} {page:<2}- {page + len(chunks) - 1}\n'
                 for chunk in chunks:
                     p.add_page(**make_page(category, chunk, page))
                     page += 1

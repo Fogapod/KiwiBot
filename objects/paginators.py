@@ -198,15 +198,14 @@ class Paginator(PaginatorABC):
 
     def __init__(self, *args,
         emoji_go_left='◀', emoji_go_right='▶',
-        emoji_use_index='🔢', emoji_quit='⏹', **kwargs
+        emoji_use_index='🔢', **kwargs
         ):
 
         super().__init__(*args, **kwargs)
 
         self.events[emoji_go_left]   = self.on_go_left
-        self.events[emoji_go_right]  = self.on_go_right
         self.events[emoji_use_index] = self.on_use_index
-        self.events[emoji_quit]      = self.on_quit
+        self.events[emoji_go_right]  = self.on_go_right
 
     async def on_go_left(self, reaction, user):
         await self.bot.edit_message(self.target_message, **self.switch_to_prev_page())
@@ -240,9 +239,6 @@ class Paginator(PaginatorABC):
                     await index_response_message.delete()
                 except Exception:
                     pass
-
-    async def on_quit(self, reaction, user):
-        self.closed = True
 
 
 class SelectionPaginator(Paginator):
