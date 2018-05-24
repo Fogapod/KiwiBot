@@ -49,7 +49,7 @@ class Module(ModuleBase):
 
         for role in roles:
             try:
-                await self.bot.http.add_role(member.guild.id, member.id, role)
+                await self.bot.http.add_role(member.guild.id, member.id, int(role))
             except NotFound as e:
                 if 'role' in str(e).lower():  # make sure that role isn't found, not user
                     if bots:
