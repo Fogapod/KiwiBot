@@ -34,7 +34,6 @@ async def neko_api_image_request(tag, **params):
     return await neko_api_request(f'img/{tag}', **params)
 
 async def neko_api_request(endpoint, **params):
-    print('/'.join((API_URL, endpoint)))
     async with bot.sess.get('/'.join((API_URL, endpoint)), params=params) as r:
         if r.status == 200:
             result_json = await r.json()
