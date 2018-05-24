@@ -101,6 +101,6 @@ class Module(ModuleBase):
         )
         e.add_field(name='git status', value=git_commit[:1024], inline=False)
         e.set_thumbnail(url=self.bot.user.avatar_url)
-        e.set_footer(text='Local prefix: ' + await get_local_prefix(ctx.message, self.bot))
+        e.set_footer(text='Local prefix: ' + await get_local_prefix(ctx.message))
 
         await ctx.send(embed=e)

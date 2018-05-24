@@ -23,7 +23,7 @@ class Module(ModuleBase):
         if len(args) == 1:
             guild = ctx.guild
         else:
-            guild = await find_guild(args[1:], self.bot)
+            guild = await find_guild(args[1:])
 
         if guild is None:
             return '{warning} Guild not found'

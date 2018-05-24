@@ -21,7 +21,7 @@ class Module(ModuleBase):
         p = UpdatingPaginator(self.bot)
         await p.run(ctx, self.paginator_update_func)
 
-    async def paginator_update_func(self):
+    async def paginator_update_func(self, p):
         async with self.bot.sess.get(API_URL) as r:
             if r.status == 200:
                 e = Embed(colour=Colour.gold())

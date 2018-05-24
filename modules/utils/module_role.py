@@ -21,7 +21,7 @@ class Module(ModuleBase):
     guild_only = True
 
     async def on_call(self, ctx, args, **flags):
-        role = await find_role(args[1:], ctx.guild, self.bot)
+        role = await find_role(args[1:], ctx.guild)
 
         if role is None:
             return '{warning} Role not found'

@@ -23,7 +23,11 @@ from utils import formatters
 
 class KiwiBot(discord.AutoShardedClient):
 
+    _bot = None
+
     def __init__(self, **kwargs):
+        KiwiBot._bot = self
+
         super().__init__(**kwargs)
 
         # will be used as process exit code after stopping if not None
@@ -59,6 +63,10 @@ class KiwiBot(discord.AutoShardedClient):
 
         self._last_messages = {}
         self._leave_voice_channel_tasks = {}
+
+    @staticmethod
+    def get_bot():
+        return KiwiBot._bot
 
     @property
     def uptime(self):

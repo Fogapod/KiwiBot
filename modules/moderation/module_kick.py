@@ -18,7 +18,7 @@ class Module(ModuleBase):
     user_perms = (PermissionKickMembers(), )
 
     async def on_call(self, ctx, args, **flags):
-        guild_member = await find_user(args[1], ctx.message, self.bot, strict_guild=True)
+        guild_member = await find_user(args[1], ctx.message, strict_guild=True)
 
         if not guild_member:
             return '{warning} User not found'

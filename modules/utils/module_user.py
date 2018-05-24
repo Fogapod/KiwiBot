@@ -30,7 +30,7 @@ class Module(ModuleBase):
         if len(args) == 1:
             user = ctx.author
         else:
-            user = await find_user(args[1:], ctx.message, self.bot)
+            user = await find_user(args[1:], ctx.message)
 
         if user is None:
             return '{warning} User not found'
@@ -49,7 +49,7 @@ class Module(ModuleBase):
                     name='member since', inline=False,
                     value=f'`{user.joined_at.replace(microsecond=0)}` ({(datetime.now() - user.joined_at).days} days)'
                 )
-                last_msg_ts = _get_last_user_message_timestamp(user.id, ctx.channel.id, self.bot)
+                last_msg_ts = _get_last_user_message_timestamp(user.id, ctx.channel.id)
                 if last_msg_ts != datetime.fromtimestamp(0):
                     last_msg_ts = last_msg_ts.replace(microsecond=0)
                     e.add_field(

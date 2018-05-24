@@ -64,7 +64,7 @@ class Module(ModuleBase):
         if channel_flag is None:
             channel = ctx.channel
         else:
-            channel = await find_channel(channel_flag, ctx.guild, self.bot)
+            channel = await find_channel(channel_flag, ctx.guild)
             if channel is None:
                 return '{warning} Channel not found'
 
@@ -84,7 +84,7 @@ class Module(ModuleBase):
                 permissions = channel.permissions_for(ctx.author)
             target = str(ctx.author)
         else:
-            role = await find_role(args[1:], ctx.guild, self.bot)
+            role = await find_role(args[1:], ctx.guild)
             if role is not None:
                 permissions = role.permissions
                 target = str(role)
@@ -110,7 +110,7 @@ class Module(ModuleBase):
                         if v is not None:
                             setattr(permissions, k, v)
             else:
-                member = await find_user(args[1:], ctx.message, self.bot, strict_guild=True)
+                member = await find_user(args[1:], ctx.message, strict_guild=True)
                 if member is None:
                     return '{warning} Role or member not found'
 

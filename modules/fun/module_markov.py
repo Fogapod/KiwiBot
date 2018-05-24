@@ -25,7 +25,7 @@ class Module(ModuleBase):
             channel = ctx.channel
         else:
             channel = await find_channel(
-                args[1:], ctx.guild, self.bot, global_id_search=True,
+                args[1:], ctx.guild, global_id_search=True,
                 include_voice=False, include_category=False
             )
             if channel is None:

@@ -308,7 +308,7 @@ class UpdatingPaginator(PaginatorABC):
     async def get_fields(self):
         try:
             fields = await self.update_func(
-                *self.update_args, **self.update_kwargs)
+                self, *self.update_args, **self.update_kwargs)
         except Exception:
             return {}
         else:

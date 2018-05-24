@@ -7,10 +7,7 @@ from importlib import reload
 from objects.logger import Logger
 from objects.argparser import ArgParser
 from objects.permissions import Permission
-from objects.modulebase import (
-    GuildOnly, MissingPermissions, NSFWPermissionDenied,
-    NotEnoughArgs, TooManyArgs
-)
+from objects.moduleexceptions import *
 
 
 logger = Logger.get_logger()

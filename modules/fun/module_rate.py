@@ -17,7 +17,7 @@ class Module(ModuleBase):
 
     async def on_call(self, ctx, args, **flags):
         subject = args[1:]
-        user = await find_user(subject, ctx.message, self.bot)
+        user = await find_user(subject, ctx.message)
 
         if user is not None:
             target = str(user.id)

@@ -22,7 +22,7 @@ class Module(ModuleBase):
             channel = ctx.channel
         else:
             channel = await find_channel(
-                args[1:], ctx.guild, self.bot, global_id_search=True)
+                args[1:], ctx.guild, global_id_search=True)
 
         if channel is None:
             return '{warning} Channel not found'

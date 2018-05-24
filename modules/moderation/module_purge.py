@@ -24,7 +24,7 @@ class Module(ModuleBase):
     user_perms = (PermissionManageMessages(), )
     guild_only = True
 
-    async def on_call(self, ctx, args, **flags):
+    async def on_call(self, ctx9, args, **flags):
         limit = None
         user_string = None
 
@@ -47,7 +47,7 @@ class Module(ModuleBase):
         elif user_string.lower() == 'users':
             check = lambda m: not m.author.bot
         else:
-            user = await find_user(user_string, ctx.message, self.bot)
+            user = await find_user(user_string, ctx.message)
             if user is None:
                 return '{error} User **' + user_string + '** not found!'
             check = lambda m: m.author.id == user.id

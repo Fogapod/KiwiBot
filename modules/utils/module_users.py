@@ -19,7 +19,7 @@ class Module(ModuleBase):
     bot_perms = (PermissionEmbedLinks(), )
 
     async def on_call(self, ctx, args, **flags):
-        users = await find_user(args[1:], ctx.message, self.bot, max_count=-1)
+        users = await find_user(args[1:], ctx.message, max_count=-1)
 
         if not users:
             return '{warning} Users not found'

@@ -51,14 +51,14 @@ class Module(ModuleBase):
 
         if channel:
             channel = await find_channel(
-                channel, ctx.guild, self.bot, global_id_search=True,
+                channel, ctx.guild, global_id_search=True,
                 include_voice=False, include_category=False
             )
             if channel is None:
                 return '{warning} Channel not found'
 
         elif user:
-            user = await find_user(user, ctx.message, self.bot)
+            user = await find_user(user, ctx.message)
             if user is None:
                 return '{warning} User not found'
 

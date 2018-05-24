@@ -6,35 +6,17 @@ from datetime import datetime
 
 import discord
 
+from objects.bot import KiwiBot
 from objects.logger import Logger
 
+from constants import (
+    ID_REGEX, USER_MENTION_OR_ID_REGEX, ROLE_OR_ID_REGEX,
+    CHANNEL_OR_ID_REGEX, COLOUR_REGEX, TIME_REGEX
+)
 
+
+bot = KiwiBot.get_bot()
 logger = Logger.get_logger()
-
-ID_EXPR = '\d{17,19}'
-USER_MENTION_EXPR = f'<@!?({ID_EXPR})>'
-ROLE_MENTION_EXPR = f'<@&({ID_EXPR})>'
-CHANNEL_MENTION_EXPR = f'<#({ID_EXPR})>'
-
-ID_REGEX = re.compile(ID_EXPR)
-USER_MENTION_REGEX = re.compile(USER_MENTION_EXPR)
-ROLE_MENTION_REGEX = re.compile(ROLE_MENTION_EXPR)
-CHANNEL_MENTION_REGEX = re.compile(CHANNEL_MENTION_EXPR)
-
-USER_MENTION_OR_ID_REGEX = re.compile(f'(?:{USER_MENTION_EXPR})|{ID_EXPR}')
-ROLE_OR_ID_REGEX = re.compile(f'(?:{ROLE_MENTION_EXPR})|{ID_EXPR}')
-CHANNEL_OR_ID_REGEX = re.compile(f'(?:{CHANNEL_MENTION_EXPR})|{ID_EXPR}')
-
-COLOUR_REGEX = re.compile('#?([a-f0-9]{6})', re.I)
-
-TIME_REGEX = re.compile('''(?:(?:([0-9]{1,2})(?:years?|y))|
-                           (?:([0-9]{1,2})(?:months?|mo))|
-                           (?:([0-9]{1,4})(?:weeks?|w))|
-                           (?:([0-9]{1,5})(?:days?|d))|
-                           (?:([0-9]{1,5})(?:hours?|h))|
-                           (?:([0-9]{1,5})(?:minutes?|m))|
-                           (?:([0-9]{1,5})(?:seconds?|s)))
-                           ''', re.VERBOSE + re.IGNORECASE)
 
 
 async def create_subprocess_exec(
@@ -67,7 +49,7 @@ async def execute_process(process, code):
     return stdout, stderr
 
 
-async def find_user(pattern, msg, bot, strict_guild=False, max_count=1, global_search=False):
+async def find_user(pattern, msg, strict_guild=False, max_count=1, global_search=False):
     user = None
     id_match = USER_MENTION_OR_ID_REGEX.fullmatch(pattern)
 
@@ -113,7 +95,7 @@ async def find_user(pattern, msg, bot, strict_guild=False, max_count=1, global_s
     found.sort(
         key=lambda x: (
             # last member message timestamp, lower delta is better
-            _get_last_user_message_timestamp(x[0].id, msg.channel.id, bot),
+            _get_last_user_message_timestamp(x[0].id, msg.channel.id),
             # index of match in string, smaller value is better
             -x[1],
             # member status, not 'offline' is better
@@ -134,7 +116,7 @@ async def find_user(pattern, msg, bot, strict_guild=False, max_count=1, global_s
     return None
 
 
-async def find_role(pattern, guild, bot, max_count=1):
+async def find_role(pattern, guild, max_count=1):
     id_match = ROLE_OR_ID_REGEX.fullmatch(pattern)
 
     if id_match is not None:
@@ -167,7 +149,7 @@ async def find_role(pattern, guild, bot, max_count=1):
     return None
 
 
-async def find_guild(pattern, bot, max_count=1):
+async def find_guild(pattern, max_count=1):
     id_match = ID_REGEX.fullmatch(pattern)
 
     if id_match is not None:
@@ -203,7 +185,7 @@ find_server = find_guild
 
 
 async def find_channel(
-    pattern, guild, bot, max_count=1, global_id_search=False, global_search=False,
+    pattern, guild, max_count=1, global_id_search=False, global_search=False,
     include_direct=False, include_text=True, include_voice=True, include_category=True
     ):
     found = []
@@ -247,14 +229,14 @@ async def find_channel(
     return None
 
 
-def _get_last_user_message_timestamp(user_id, channel_id, bot):
+def _get_last_user_message_timestamp(user_id, channel_id):
     if channel_id in bot._last_messages:
         if user_id in bot._last_messages[channel_id]:
             return bot._last_messages[channel_id][user_id].edited_at or bot._last_messages[channel_id][user_id].created_at
     return datetime.fromtimestamp(0)
 
 
-async def get_local_prefix(msg, bot):
+async def get_local_prefix(msg):
     if msg.guild is not None:
         guild_prefix = bot._guild_prefixes.get(msg.guild.id)
         if guild_prefix is not None:
@@ -262,7 +244,7 @@ async def get_local_prefix(msg, bot):
     return bot._default_prefix
 
 
-async def request_reaction_confirmation(msg, user, bot, emoji_accept='✅', emoji_cancel='❌', timeout=20):
+async def request_reaction_confirmation(msg, user, emoji_accept='✅', emoji_cancel='❌', timeout=20):
     try:
         for emoji in (emoji_accept, emoji_cancel):
             await msg.add_reaction(emoji)

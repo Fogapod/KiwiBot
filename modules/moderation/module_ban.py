@@ -20,7 +20,7 @@ class Module(ModuleBase):
     user_perms = (PermissionBanMembers(), )
 
     async def on_call(self, ctx, args, **flags):
-        user = await find_user(args[1], ctx.message, self.bot)
+        user = await find_user(args[1], ctx.message)
 
         if not user:
             return '{warning} User not found'

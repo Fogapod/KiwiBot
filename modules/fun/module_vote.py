@@ -4,7 +4,7 @@ from objects.permissions import (
     PermissionReadMessageHistory, PermissionManageMessages
 )
 
-from utils.funcs import find_channel, timedelta_from_string
+from utils.funcs import timedelta_from_string
 
 from discord import Embed, Colour, NotFound, Forbidden
 

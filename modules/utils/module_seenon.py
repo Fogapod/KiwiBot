@@ -21,7 +21,7 @@ class Module(ModuleBase):
         if len(args) == 1:
             user = ctx.author
         else:
-            user = await find_user(args[1:], ctx.message, self.bot)
+            user = await find_user(args[1:], ctx.message)
 
         if not user:
             return '{warning} User not found'

@@ -3,6 +3,8 @@ from discord import DMChannel
 from constants import DEV_GUILD_ID, DEV_GUILD_INVITE
 from utils.funcs import get_local_prefix
 
+from objects.moduleexceptions import *
+
 
 class ModuleBase:
 
@@ -131,7 +133,7 @@ class ModuleBase:
         return await self._format_help(help_text, ctx)
 
     async def _format_help(self, help_text, ctx):
-        help_text = help_text.replace('{prefix}', await get_local_prefix(ctx, self.bot))
+        help_text = help_text.replace('{prefix}', await get_local_prefix(ctx))
 
         if len(self.aliases) == 1:
             help_text = help_text.replace('{aliases}', self.aliases[0])
@@ -151,28 +153,3 @@ class ModuleBase:
 
     async def on_unload(self):
         pass
-
-
-class ModuleCallError(Exception):
-    pass
-
-
-class GuildOnly(ModuleCallError):
-    pass
-
-
-class NSFWPermissionDenied(ModuleCallError):
-    pass
-
-
-class NotEnoughArgs(ModuleCallError):
-    pass
-
-
-class TooManyArgs(ModuleCallError):
-    pass
-
-
-class MissingPermissions(ModuleCallError):
-    def __init__(self, *missing):
-        self.missing = missing

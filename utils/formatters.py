@@ -2,7 +2,7 @@ import re
 
 import discord
 
-from utils.funcs import USER_MENTION_REGEX, ROLE_MENTION_REGEX
+from constants import USER_MENTION_REGEX, ROLE_MENTION_REGEX
 
 
 async def format_response(response, message, bot):

@@ -65,7 +65,7 @@ class Module(ModuleBase):
                 chunks = [lines[i:i + lines_per_chunk] for i in range(0, len(lines), lines_per_chunk)]
                 chunks_by_category[category] = chunks
 
-            local_prefix = await get_local_prefix(ctx, self.bot)
+            local_prefix = await get_local_prefix(ctx)
             total_pages = sum(len(chunks) for chunks in chunks_by_category.values()) + 1
 
             def make_page(title, chunk, page):
