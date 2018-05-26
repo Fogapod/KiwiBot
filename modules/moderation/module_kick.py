@@ -40,7 +40,7 @@ class Module(ModuleBase):
             )
         )
 
-        if await request_reaction_confirmation(kick_msg, ctx.author, self.bot):
+        if await request_reaction_confirmation(kick_msg, ctx.author):
             kick_notification = await self.bot.send_message(
                 guild_member,
                 f'You were kicked from **{ctx.guild.name}**\n' +

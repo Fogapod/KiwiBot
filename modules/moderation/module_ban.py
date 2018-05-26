@@ -42,7 +42,7 @@ class Module(ModuleBase):
             )
         )
 
-        if await request_reaction_confirmation(ban_msg, ctx.author, self.bot):
+        if await request_reaction_confirmation(ban_msg, ctx.author):
             ban_notification = await self.bot.send_message(
                 user,
                 f'You were banned on **{ctx.guild.name}**\n' +
