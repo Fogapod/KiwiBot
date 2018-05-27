@@ -221,11 +221,28 @@ class KiwiBot(discord.AutoShardedClient):
 
     async def clear_responses_to_message(self, msg):
         for value in await self.redis.lrange(f'tracked_message:{msg.id}', 1, -1):
-            channel_id, _, message_id = value.partition(':')
-            try:
-                await self.http.delete_message(int(channel_id), int(message_id))
-            except Exception:
-                pass
+            response_type, _, rest = value.partition(':')
+
+            if response_type == 'message':
+                channel_id, message_id = rest.split(':')
+                try:
+                    await self.http.delete_message(int(channel_id), int(message_id))
+                except Exception:
+                    pass
+            elif response_type == 'reaction':
+                channel_id, message_id, reaction = rest.split(':', 2)
+                if reaction.isdigit():
+                    e = self.get_emoji(int(reaction))
+                    emoji = f'{"a:" if e.animated else ""}{e.name}:{e.id}'
+                    if emoji is None:
+                        return
+                else:
+                    emoji = reaction
+                try:
+                    await self.http.remove_own_reaction(
+                        int(message_id), int(channel_id), emoji)
+                except Exception as e:
+                    pass
 
     async def on_voice_state_update(self, member, before, after):
         if before.channel and after.channel != before.channel:  # user left or moved
@@ -257,9 +274,7 @@ class KiwiBot(discord.AutoShardedClient):
                 channel = await target.create_dm()
             else:
                 channel = target.dm_channel
-        elif isinstance(target, discord.Message):
-            channel = target.channel
-        elif isinstance(target, Context):
+        elif isinstance(target, (discord.Message, Context)):
             channel = target.channel
         elif isinstance(target, discord.DMChannel) or isinstance(target, discord.TextChannel):
             channel = target
@@ -298,12 +313,12 @@ class KiwiBot(discord.AutoShardedClient):
             exception = '\n'.join(exception.split('\n')[-4:])
             exception = f'❗ Message delivery failed\n```\n{exception}```'
             message = await channel.send(exception)
-        finally:
+        else:
             if response_to is not None:
                 if message is not None:
                     await self.register_response(response_to, message)
 
-            return message or dm_message
+        return message or dm_message
 
     async def edit_message(self, msg, content=None, *, replace_mass_mentions=True, replace_mentions=True, **fields):
         content = str(content) if content is not None else ''
@@ -333,12 +348,42 @@ class KiwiBot(discord.AutoShardedClient):
 
         try:
             return await message.delete()
-        except discord.errors.NotFound:
-            logger.debug('delete_message: message not found')
-            return
         except Exception:
             if raise_on_errors:
                 raise
+
+    async def add_reaction(self, target, reaction, response_to=None, raise_on_errors=False):
+        if isinstance(target, Context):
+            message = target.message
+        elif isinstance(target, discord.Message):
+            message = target
+        else:
+            raise ValueError(f'Unknown target type is passed: {type(target)}. Expected {Context} or {discord.Message}')
+
+        reaction_type = type(reaction)
+        if reaction_type is str:  # unicode
+            emoji = reaction
+        elif reaction_type is int:  # id
+            emoji = self.get_emoji(reaction)
+            if emoji is None:
+                if raise_on_errors:
+                    raise ValueError(f'Emoji with if {emoji} not found in cache')
+                else:
+                    return
+        elif reaction_type is discord.Emoji:
+            emoji = reaction
+        else:
+            raise ValueError(f'Unknown emoji type is passed: {type(reaction)}. Expected one of {discord.Emoji}, {str}, {int}')
+
+        try:
+            await message.add_reaction(emoji)
+        except Exception as e:
+            if raise_on_errors:
+                raise e
+        else:
+            if response_to is not None:
+                await self.register_reaction_response(
+                    response_to, message, emoji)
 
     async def track_message(self, message):
         if await self.redis.exists(f'tracked_message:{message.id}'):
@@ -350,9 +395,19 @@ class KiwiBot(discord.AutoShardedClient):
     async def register_response(self, request, response):
         if await self.redis.exists(f'tracked_message:{request.id}'):
             await self.redis.rpush(
-                f'tracked_message:{request.id}', f'{response.channel.id}:{response.id}')
-        else:
-            logger.debug('Request outdated, not registering')
+                f'tracked_message:{request.id}',
+                f'message:{response.channel.id}:{response.id}'
+            )
+
+    async def register_reaction_response(self, request, message, emoji):
+        if isinstance(emoji, discord.Emoji):
+            emoji = emoji.id
+
+        if await self.redis.exists(f'tracked_message:{request.id}'):
+            await self.redis.rpush(
+                f'tracked_message:{request.id}',
+                f'reaction:{message.channel.id}:{message.id}:{emoji}'
+            )
 
     def dispatch(self, event, *args, **kwargs):
         super().dispatch(event, *args, **kwargs)

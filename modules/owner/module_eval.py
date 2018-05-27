@@ -9,6 +9,8 @@ import traceback
 
 from contextlib import redirect_stdout
 
+import discord
+
 
 class Module(ModuleBase):
 
@@ -34,7 +36,9 @@ class Module(ModuleBase):
             'ctx': ctx,
             'msg': ctx.message,
             'guild': ctx.guild,
+            'author': ctx.author,
             'channel': ctx.channel,
+            'discord': discord,
             '_': self._last_result
         }
 
@@ -53,16 +57,19 @@ class Module(ModuleBase):
 
         try:
             with redirect_stdout(fake_stdout):
-                result = await func()
+                returned = await func()
         except Exception as e:
             return f'```py\n{fake_stdout.getvalue()}{traceback.format_exc()}\n```'
         else:
-            output = fake_stdout.getvalue()
+            from_stdout = fake_stdout.getvalue()
 
-            if result is None:
-                if output:
-                    return f'```py\n{output}\n```'
+            if returned is None:
+                if from_stdout:
+                    return f'```py\n{from_stdout}\n```'
+                try:
+                    await ctx.react('✅', raise_on_errors=True)
+                except discord.Forbidden:
+                    return 'Evaluated'
             else:
-                self._last_result = result
-
-            return f'```py\n{output}{result if result is not None else "Evaluated"}\n```'
+                self._last_result = returned
+                return f'```py\n{from_stdout}{returned}```'
