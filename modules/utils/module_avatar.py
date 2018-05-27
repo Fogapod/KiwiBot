@@ -33,7 +33,7 @@ class Module(ModuleBase):
             colour=Colour.gold(),
             description=' | '.join(f'[{f}]({user.avatar_url_as(format=f)})' for f in formats)
         )
+        e.set_author(name=user)
         e.set_image(url=user.avatar_url_as(static_format='png'))
-        e.set_footer(text=user)
 
         await ctx.send(embed=e)

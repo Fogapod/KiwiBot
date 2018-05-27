@@ -12,7 +12,7 @@ SFW_IMG_TAGS = [
 
 NSFW_IMG_TAGS = [
     'hentai_gif', 'anal', 'bj', 'boobs', 'classic', 'cum', 'kuni',
-    'les', 'lewd', 'nsfw_neko_gif', 'pussy', 'nsfw_avatar', 'tits',
+    'les', 'lewd', 'nsfw_gif', 'pussy', 'nsfw_avatar', 'tits',
     'smallboobs', 'femdom', 'pussy_jpg', 'keta', 'cum_jpg', 'hololewd',
     'yuri', 'lewdkemo', 'solog', 'lewdk', 'solo', 'feetg', 'erokemo',
     'hentai', 'blowjob', 'holoero', 'pwankg', 'ero', 'feet', 'eroyuri',

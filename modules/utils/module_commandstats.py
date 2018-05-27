@@ -73,9 +73,6 @@ class Module(ModuleBase):
             )
             return e
 
-        if len(chunks) == 1:
-            return await ctx.send(embed=make_embed(chunks[0]))
-
         p = Paginator(self.bot)
         for i, chunk in enumerate(chunks):
             p.add_page(

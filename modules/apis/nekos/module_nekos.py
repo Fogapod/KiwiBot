@@ -35,7 +35,7 @@ class Module(ModuleBase):
         if subcommand == 'list':
             result = 'SFW           NSFW\n'
             result += '\n'.join(
-                f'{x:<14}{y}' for x, y in zip_longest(SFW_IMG_TAGS, NSFW_IMG_TAGS, fillvalue='')
+                f'{x:<14}{y}' for x, y in zip_longest(sorted(SFW_IMG_TAGS), sorted(NSFW_IMG_TAGS), fillvalue='')
             )
             return f'```\n{result}```'
 

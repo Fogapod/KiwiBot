@@ -36,9 +36,6 @@ class Module(ModuleBase):
         users_per_chunk = 30
         chunks = [lines[i:i + users_per_chunk] for i in range(0, len(lines), users_per_chunk)]
 
-        if len(chunks) == 1:
-            return await ctx.send('```\n' + '\n'.join(chunks[0]) + '```')
-
         p = Paginator(self.bot)
         for i, chunk in enumerate(chunks):
             e = Embed(description=f'```\n' + '\n'.join(chunk) + '```', colour=Colour.gold())

@@ -45,13 +45,10 @@ class Module(ModuleBase):
             )
             e.set_author(name=user, icon_url=user.avatar_url)
 
-            if page:
+            if page is not None:
                 e.set_footer(text=f'Page {i + 1} / {len(chunks)}')
 
             return e
-
-        if len(chunks) == 1:
-            return await ctx.send(embed=make_embed(chunks[0]))
 
         p = Paginator(self.bot)
         for i, chunk in enumerate(chunks):
