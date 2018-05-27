@@ -208,10 +208,18 @@ class Paginator(PaginatorABC):
         self.events[emoji_go_right]  = self.on_go_right
 
     async def on_go_left(self, reaction, user):
-        await self.bot.edit_message(self.target_message, **self.switch_to_prev_page())
+        if not self.looped and self.index == 0:
+            return
+
+        await self.bot.edit_message(
+            self.target_message, **self.switch_to_prev_page())
 
     async def on_go_right(self, reaction, user):
-        await self.bot.edit_message(self.target_message, **self.switch_to_next_page())
+        if not self.looped and self.index == len(self._pages) - 1:
+            return
+
+        await self.bot.edit_message(
+            self.target_message, **self.switch_to_next_page())
 
     async def on_use_index(self, reaction, user):
         index_request_message = None
@@ -227,8 +235,9 @@ class Paginator(PaginatorABC):
         try:
             index_request_message = await self.target_message.channel.send('Please, send number of page you want to go')
             index_response_message = await self.bot.wait_for('message', timeout=10, check=check)
-            index = int(index_response_message.content)
-            await self.bot.edit_message(self.target_message, **self.switch_to_page(index - 1))
+            index = int(index_response_message.content) - 1
+            if index != self.index:
+                await self.bot.edit_message(self.target_message, **self.switch_to_page(index))
         except TimeoutError:
             pass
         finally:
