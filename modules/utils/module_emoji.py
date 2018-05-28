@@ -1,0 +1,71 @@
+from objects.modulebase import ModuleBase
+from objects.permissions import PermissionEmbedLinks
+
+from discord import Embed, Colour, File
+
+from constants import ID_REGEX, EMOJI_REGEX
+
+
+EMOJI_ENDPOINT = 'https://cdn.discordapp.com/emojis/{}'
+TWEMOJI_ENDPOINT = 'https://bot.mods.nyc/twemoji/{}.png'
+
+
+class Module(ModuleBase):
+
+    usage_doc = '{prefix}{aliases} <emoji>'
+    short_doc = 'Allows to get emoji image'
+
+    name = 'emoji'
+    aliases = (name, 'e')
+    category = 'Discord'
+    bot_perms = (PermissionEmbedLinks(), )
+
+    async def on_call(self, ctx, args, **flags):
+        e = Embed(colour=Colour.gold())
+        f = None
+
+        text = args[1:]
+        id_match = ID_REGEX.fullmatch(text)
+        emoji_id = None
+        emoji_name = ''
+
+        if id_match:
+            emoji_id = int(id_match.group(0))
+        else:
+            emoji_match = EMOJI_REGEX.fullmatch(text)
+            if emoji_match:
+                groups = emoji_match.groupdict()
+                emoji_id = int(groups['id'])
+                emoji_name = groups['name']
+
+        if emoji_id is None:
+            def to_string(c):
+                digit = f'{ord(c):x}'
+                return f'{digit:>04}'
+
+            code = '-'.join(map(to_string, text))
+            async with self.bot.sess.get(TWEMOJI_ENDPOINT.format(code)) as r:
+                if r.status != 200:
+                    return '{warning} Could not get emoji from input text'
+                        
+                filename = 'emoji.png'
+                f = File(await r.read(), filename=filename)
+                e.title = f'TWEmoji'
+                e.set_image(url=f'attachment://{filename}')
+        else:
+            e.set_footer(text=emoji_id)
+            emoji = self.bot.get_emoji(emoji_id)
+            if emoji is None:
+                async with self.bot.sess.get(EMOJI_ENDPOINT.format(emoji_id)) as r:
+                    if r.status != 200:
+                        return '{error} Emoji with given id not found'
+                        
+                    filename = f'emoji.{r.content_type[6:]}'
+                    f = File(await r.read(), filename=filename)
+                    e.title = f'Emoji {emoji_name or emoji_id}'
+                    e.set_image(url=f'attachment://{filename}')
+            else:
+                e.title = f'Emoji {emoji.name}'
+                e.set_image(url=emoji.url)
+
+        await ctx.send(embed=e, file=f)
