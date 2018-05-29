@@ -25,7 +25,7 @@ class Module(ModuleBase):
         e = Embed(colour=Colour.gold())
         f = None
 
-        text = args[1:j]
+        text = args[1:]
         emoji_id = None
         emoji_name = ''
 
