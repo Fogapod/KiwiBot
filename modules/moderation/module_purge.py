@@ -24,7 +24,7 @@ class Module(ModuleBase):
     user_perms = (PermissionManageMessages(), )
     guild_only = True
 
-    async def on_call(self, ctx9, args, **flags):
+    async def on_call(self, ctx, args, **flags):
         limit = None
         user_string = None
 
