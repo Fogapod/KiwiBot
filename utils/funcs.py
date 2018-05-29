@@ -230,9 +230,12 @@ async def find_channel(
 
 
 def _get_last_user_message_timestamp(user_id, channel_id):
-    if channel_id in bot._last_messages:
-        if user_id in bot._last_messages[channel_id]:
-            return bot._last_messages[channel_id][user_id].edited_at or bot._last_messages[channel_id][user_id].created_at
+    # ts = await bot.redis.get(f'last_message_timestamp:{channel_id}:{author_id}')
+    channel = bot._last_messages.get(channel_id)
+    if channel is not None:
+        if user_id in channel:
+            return channel[user_id]
+
     return datetime.fromtimestamp(0)
 
 

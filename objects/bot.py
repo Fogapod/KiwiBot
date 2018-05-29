@@ -150,7 +150,7 @@ class KiwiBot(discord.AutoShardedClient):
         logger.info('Connection closed')
 
     async def on_message(self, msg, from_edit=False):
-        self.register_last_user_message(msg)
+        self.register_last_user_message_timestamp(msg)
 
         if msg.author.bot:
             return
@@ -195,11 +195,16 @@ class KiwiBot(discord.AutoShardedClient):
         if module_response:
             await ctx.send(module_response)
 
-    def register_last_user_message(self, msg):
+    def register_last_user_message_timestamp(self, msg):
+        # await self.redis.set(
+        #     f'last_message_timestamp:{msg.channel.id}:{msg.author.id}',
+        #     msg.created_at.timestamp(), 'EX', 86400
+        # )
+
         if msg.channel.id not in self._last_messages:
-            self._last_messages[msg.channel.id] = {msg.author.id: msg}
+            self._last_messages[msg.channel.id] = { msg.author.id: msg.edited_at or msg.created_at}
         else:
-            self._last_messages[msg.channel.id][msg.author.id] = msg
+            self._last_messages[msg.channel.id][msg.author.id] = msg.edited_at or msg.created_at
 
     async def on_message_edit(self, before, after):
         if after.author.bot:

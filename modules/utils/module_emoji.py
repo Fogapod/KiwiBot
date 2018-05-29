@@ -1,5 +1,5 @@
 from objects.modulebase import ModuleBase
-from objects.permissions import PermissionEmbedLinks
+from objects.permissions import PermissionEmbedLinks, PermissionAttachFiles
 
 from discord import Embed, Colour, File
 
@@ -18,16 +18,18 @@ class Module(ModuleBase):
     name = 'emoji'
     aliases = (name, 'e')
     category = 'Discord'
-    bot_perms = (PermissionEmbedLinks(), )
+    max_args = 1
+    bot_perms = (PermissionEmbedLinks(), PermissionAttachFiles())
 
     async def on_call(self, ctx, args, **flags):
         e = Embed(colour=Colour.gold())
         f = None
 
-        text = args[1:]
-        id_match = ID_REGEX.fullmatch(text)
+        text = args[1:j]
         emoji_id = None
         emoji_name = ''
+
+        id_match = ID_REGEX.fullmatch(text)
 
         if id_match:
             emoji_id = int(id_match.group(0))
@@ -62,7 +64,7 @@ class Module(ModuleBase):
                         
                     filename = f'emoji.{r.content_type[6:]}'
                     f = File(await r.read(), filename=filename)
-                    e.title = f'Emoji {emoji_name or emoji_id}'
+                    e.title = f'Emoji {emoji_name or ""}'
                     e.set_image(url=f'attachment://{filename}')
             else:
                 e.title = f'Emoji {emoji.name}'

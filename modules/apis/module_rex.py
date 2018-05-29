@@ -138,8 +138,6 @@ class Module(ModuleBase):
             else:
                 return '{error} Problem with rex response. Please, try again later'
 
-        result = result.strip()
-
         if not result:
             result = 'Evaluated'
 
