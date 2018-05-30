@@ -47,7 +47,6 @@ class KiwiBot(discord.AutoShardedClient):
 
         logger.debug('Logger ................. connected')
 
-        self.token = self.config.get('token', None)
         self.is_dev = self.config.get('is_dev', False)
 
         self.mm = ModuleManager(self)
@@ -87,9 +86,7 @@ class KiwiBot(discord.AutoShardedClient):
 
     def run(self, token=None):
         if token is None:
-            token = self.token
-        else:
-            self.token = token
+            token = self.config.get('token', None)
 
         if token is None:
             token = input('Token not provided. Please, insert it into config file or paste here for single bot launch: ')
