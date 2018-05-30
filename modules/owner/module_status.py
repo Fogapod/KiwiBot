@@ -13,7 +13,7 @@ class Module(ModuleBase):
     usage_doc = '{prefix}{aliases} <subcommand> [args...]'
     short_doc = 'Bot presence utils'
     long_doc = (
-        'Suncommands:\n'
+        'Subcommands:\n'
         '\tplaying - set playing activity\n'
         '\tstreaming - set streaming activity\n'
         '\tlistening - set listening activity\n'

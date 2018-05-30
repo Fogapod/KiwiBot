@@ -284,7 +284,7 @@ class KiwiBot(discord.AutoShardedClient):
             raise ValueError('Unknown target passed to send message')
 
         content = str(content) if content is not None else ''
-        content = content.replace(self.token, 'TOKEN_LEAKED')
+        content = content.replace(self.http.token, 'TOKEN_LEAKED')
 
         if replace_mentions:
             content = await formatters.replace_mentions(content, channel, self)
@@ -324,7 +324,7 @@ class KiwiBot(discord.AutoShardedClient):
 
     async def edit_message(self, msg, content=None, *, replace_mass_mentions=True, replace_mentions=True, **fields):
         content = str(content) if content is not None else ''
-        content = content.replace(self.token, 'TOKEN_LEAKED')
+        content = content.replace(self.http.token, 'TOKEN_LEAKED')
 
         if replace_mentions:
             content = await formatters.replace_mentions(content, msg.channel, self)
