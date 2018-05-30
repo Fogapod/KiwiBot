@@ -86,7 +86,7 @@ class Module(ModuleBase):
             program.append('--slow')
 
         process, pid = await create_subprocess_exec(*program)
-        stdout, stderr = await execute_process(process, program)
+        stdout, stderr = await execute_process(process)
 
         with TemporaryFile() as tmp:
             tmp.write(stdout)

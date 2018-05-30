@@ -151,7 +151,7 @@ class Module(ModuleBase):
             program.extend(('-v', LANG_LIST[language_flag]))
 
         process, pid = await create_subprocess_exec(*program)
-        stdout, stderr = await execute_process(process, program)
+        stdout, stderr = await execute_process(process)
 
         with TemporaryFile() as tmp:
             tmp.write(stdout)

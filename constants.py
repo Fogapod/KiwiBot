@@ -38,11 +38,11 @@ CHANNEL_OR_ID_REGEX = re.compile(f'(?:{CHANNEL_MENTION_EXPR})|{ID_EXPR}')
 
 COLOUR_REGEX = re.compile('#?([a-f0-9]{6})', re.I)
 
-TIME_REGEX = re.compile('''(?:(?:([0-9]{1,2})(?:years?|y))|
-                           (?:([0-9]{1,2})(?:months?|mo))|
-                           (?:([0-9]{1,4})(?:weeks?|w))|
-                           (?:([0-9]{1,5})(?:days?|d))|
-                           (?:([0-9]{1,5})(?:hours?|h))|
-                           (?:([0-9]{1,5})(?:minutes?|m))|
-                           (?:([0-9]{1,5})(?:seconds?|s)))
+TIME_REGEX = re.compile('''(?:(?:([0-9]{1,2})\s*(?:years?|y))|
+                           (?:([0-9]{1,2})\s*(?:months?|mo))|
+                           (?:([0-9]{1,4})\s*(?:weeks?|w))|
+                           (?:([0-9]{1,5})\s*(?:days?|d))|
+                           (?:([0-9]{1,5})\s*(?:hours?|h))|
+                           (?:([0-9]{1,5})\s*(?:minutes?|m))|
+                           (?:([0-9]{1,5})\s*(?:seconds?|s)))
                            ''', re.VERBOSE + re.IGNORECASE)

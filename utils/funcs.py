@@ -41,10 +41,8 @@ async def create_subprocess_shell(
     return process, process.pid
 
 
-async def execute_process(process, code):
-    logger.info('beg task:', str(code), '(pid = ' + str(process.pid) + ')')
+async def execute_process(process):
     stdout, stderr = await process.communicate()
-    logger.info('fin task:', str(code), '(pid = ' + str(process.pid) + ')')
 
     return stdout, stderr
 
@@ -303,7 +301,7 @@ def timedelta_from_string(string):
 
     names = ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds']
     data = {n: v for n, v in zip(names, values)}
-    now = datetime.utcnow()
+    now = datetime.now()
 
     return now + relativedelta(**data)  # OverflowError possible
 

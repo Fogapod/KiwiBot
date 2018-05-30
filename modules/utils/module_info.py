@@ -32,7 +32,7 @@ class Module(ModuleBase):
                 'git show -s HEAD --format="latest commit made %cr by **%cn**: \`\`\`\n%s\n\`\`\`[commit %h]({repo_url}/commit/%H)"'
             ))
             process, pid = await create_subprocess_shell(program)
-            stdout, stderr = await execute_process(process, program)
+            stdout, stderr = await execute_process(process)
             git_url, _, git_commit = stdout.decode().strip().partition('\n')
 
             if git_url.endswith('.git'):
