@@ -315,7 +315,7 @@ class KiwiBot(discord.AutoShardedClient):
             exception = '\n'.join(exception.split('\n')[-4:])
             exception = f'❗ Message delivery failed\n```\n{exception}```'
             message = await channel.send(exception)
-        else:
+        finally:
             if response_to is not None:
                 if message is not None:
                     await self.register_response(response_to, message)
