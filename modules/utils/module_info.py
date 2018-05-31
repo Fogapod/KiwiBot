@@ -85,8 +85,7 @@ class Module(ModuleBase):
         e.add_field(
             name='Useful links', value=(
                 f'[Support guild invite]({DEV_GUILD_INVITE})\n'
-                f'[Github repository]({git_url})\n'
-                f'[discordbots.org profile](https://discordbots.org/bot/{self.bot.user.id})'
+                f'[Github repository]({git_url})'
             )
         )
         e.add_field(
