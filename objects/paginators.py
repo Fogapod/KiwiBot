@@ -321,4 +321,4 @@ class UpdatingPaginator(PaginatorABC):
         except Exception:
             return {}
         else:
-            return fields
+            return fields if fields is not None else {}
