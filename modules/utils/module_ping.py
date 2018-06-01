@@ -36,7 +36,7 @@ class Module(ModuleBase):
                     return await self.bot.edit_message(
                         ping_msg, f'```\n{stdout.decode() or stderr.decode()}```')
 
-        msg_timestamp = ctx.message.edited_at or ctx.message8.created_at
+        msg_timestamp = ctx.message.edited_at or ctx.message.created_at
         delta = round((ping_msg.created_at.timestamp() - msg_timestamp.timestamp()) * 1000)
 
         result = f'Pong, it took `{int(delta)}ms`'
