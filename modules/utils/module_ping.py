@@ -30,13 +30,13 @@ class Module(ModuleBase):
             else:
                 program = ['ping', '-c', '4', domain]
                 process, pid = await create_subprocess_exec(*program)
-                stdout, stderr = await execute_process(process, program)
+                stdout, stderr = await execute_process(process)
 
                 if process.returncode in (0, 1):  # (successful ping, 100% package loss)
                     return await self.bot.edit_message(
                         ping_msg, f'```\n{stdout.decode() or stderr.decode()}```')
 
-        msg_timestamp = ctx.message.edited_at or ctx.message.created_at
+        msg_timestamp = ctx.message.edited_at or ctx.message8.created_at
         delta = round((ping_msg.created_at.timestamp() - msg_timestamp.timestamp()) * 1000)
 
         result = f'Pong, it took `{int(delta)}ms`'

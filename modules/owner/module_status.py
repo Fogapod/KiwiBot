@@ -164,8 +164,6 @@ class Module(ModuleBase):
         name = name.replace('{guilds}', str(len(self.bot.guilds)))
         name = name.replace('{users}',  str(len(self.bot.users)))
         name = name.replace('{emojis}', str(len(self.bot.emojis)))
-        name = name.replace(
-            '{help_cmd}', f'@{self.bot.user.name} ' +
-            self.bot.mm.get_module('help').aliases[0]
-        )
+        name = name.replace('{help_cmd}', f'@{self.bot.user.name} help')
+
         return name
