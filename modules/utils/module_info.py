@@ -22,6 +22,10 @@ class Module(ModuleBase):
     category = 'Bot'
     bot_perms = (PermissionEmbedLinks(), )
 
+    async def on_load(self, from_reload):
+        self.process = psutil.Process()
+        self.process.cpu_percent()
+
     async def on_call(self, ctx, args, **flags):
         git_url = None
         git_commit = None
@@ -60,9 +64,6 @@ class Module(ModuleBase):
         else:
             author = str(user)
 
-        process = psutil.Process()
-        net_counters = psutil.net_io_counters()
-
         e = Embed(
             colour=Colour.gold(), title='Information',
             url=git_url,
@@ -90,10 +91,8 @@ class Module(ModuleBase):
         )
         e.add_field(
             name='Environment status', value=(
-                f'CPU load: **{process.cpu_percent()}%**\n'
-                f'Memory used: **{round(process.memory_info().rss / 1000000, 1)} MB**\n'
-                f'Data sent: **{round(net_counters.bytes_sent / 1000000, 1)} MB**\n'
-                f'Data recieved: **{round(net_counters.bytes_recv / 1000000, 1)} MB**\n\n'
+                f'CPU load: **{self.process.cpu_percent()}%**\n'
+                f'Memory used: **{round(self.process.memory_info().rss / 1000000, 1)} MB** (**{round(self.process.memory_percent(), 1)}%**)\n'
                 f'Python version: **{sys.version[:5]}**\n'
                 f'discord.py version: **{discord.__version__}**'
             ), inline=False
