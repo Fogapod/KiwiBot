@@ -7,7 +7,7 @@ API_URL = 'https://nekos.life/api/v2'
 
 SFW_IMG_TAGS = [
     'fox_girl', 'lizard', 'meow', 'neko', 'avatar', 'holo', 'wallpaper',
-    'gasm', 'ngif','kemonomimi', 'eron'
+    'gasm', 'ngif','kemonomimi', 'eron', 'waifu'
 ]
 
 NSFW_IMG_TAGS = [
