@@ -1,6 +1,8 @@
 from objects.modulebase import ModuleBase
 from objects.permissions import PermissionBotOwner
 
+from copy import copy
+
 from utils.funcs import find_user
 
 
@@ -23,8 +25,13 @@ class Module(ModuleBase):
         if user is None:
             return '{warning} User not found'
 
-        ctx.author = user
+        fake_msg = copy(ctx.message)
+        fake_ctx = copy(ctx)
 
-        await self.bot.process_command(ctx, args[2:])
+        fake_msg.author = user
+        fake_ctx.author = user
+        fake_ctx.msg = fake_msg
+
+        await self.bot.process_command(fake_ctx, args[2:])
 
         return f'Message processed as `{user}`'
