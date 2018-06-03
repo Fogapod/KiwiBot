@@ -64,6 +64,7 @@ class PaginatorABC:
 
     async def init_reactions(self, force=False):
         if len(self._pages) <= 1 and not force:
+            self.closed = True
             return
 
         try:
@@ -295,11 +296,17 @@ class SelectionPaginator(Paginator):
 
 class UpdatingPaginator(PaginatorABC):
 
-    def __init__(self, *args, emoji_update='🆕', timeout=60, additional_time=10, **kwargs):
+    def __init__(self, *args, emoji_update='🆕', emoji_go_back='🔙', timeout=60, additional_time=10, **kwargs):
         super().__init__(
             *args, timeout=timeout, additional_time=additional_time, **kwargs)
 
         self.events[emoji_update] = self.on_update
+
+        self.emoji_go_back = emoji_go_back
+        self.backup_pages = []
+
+        self.first_page_switch = True
+        self.last_time_popped = False
 
     async def run(self, target, update_func, **kwargs):
         self.update_func = update_func
@@ -311,14 +318,40 @@ class UpdatingPaginator(PaginatorABC):
         await super().run(target, force_run=True, **kwargs)
 
     async def on_update(self, reaction, user):
-        await self.bot.edit_message(
-            self.target_message, **await self.get_fields())
+        fields = await self.get_fields()
+        if not fields:
+            return
+
+        await self.bot.edit_message(self.target_message, **fields)
+
+        if self.first_page_switch:
+            self.first_page_switch = False
+
+            self.events[self.emoji_go_back] = self.on_go_back
+            await self.init_reactions(force=True)
+
+        self.last_time_popped = False
+
+    async def on_go_back(self, reaction, user):
+        if not self.last_time_popped:
+            self.backup_pages.pop()
+
+        if len(self.backup_pages) > 1:
+            fields = self.backup_pages.pop()
+            await self.bot.edit_message(self.target_message, **fields)
+        else:
+            await self.bot.edit_message(
+                self.target_message, **self.backup_pages[0])
+
+        self.last_time_popped = True
 
     async def get_fields(self):
         try:
             fields = await self.update_func(
                 self, *self.update_args, **self.update_kwargs)
+            fields = {} if fields is None else fields
         except Exception:
-            return {}
-        else:
-            return fields if fields is not None else {}
+            fields = {}
+
+        self.backup_pages.append(fields)
+        return fields

@@ -73,4 +73,5 @@ class Module(ModuleBase):
         if response is not None:
             e = Embed(colour=Colour.gold(), title=f'Tag: {tag}', url=response['url'])
             e.set_image(url=response['url'])
+            e.set_footer(text='Click on 🆕 reaction to get new image')
             return { 'embed': e }
