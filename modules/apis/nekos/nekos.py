@@ -12,8 +12,8 @@ SFW_IMG_TAGS = [
 
 NSFW_IMG_TAGS = [
     'hentaig', 'anal', 'bj', 'boobs', 'classic', 'cumg', 'kuni',
-    'les', 'lewd', 'nsfwg', 'pussy', 'nsfw_avatar', 'tits',
-    'smallboobs', 'femdom', 'pussy', 'keta', 'cum', 'hololewd',
+    'les', 'lewd', 'nsfwg', 'pussy', 'pussyg', 'nsfw_avatar',
+    'tits', 'smallboobs', 'femdom', 'keta', 'cum', 'hololewd',
     'yuri', 'lewdkemo', 'solog', 'lewdk', 'solo', 'feetg', 'erokemo',
     'hentai', 'blowjob', 'holoero', 'pwankg', 'ero', 'feet', 'eroyuri',
     'erofeet', 'erok'
@@ -26,6 +26,7 @@ TAG_NAME_REPLACEMENTS = {
     'nsfwg':   'nsfw_gif',
     'pussy':   'pussy_jpg',
     'nsfwg':   'nsfw_neko_gif',
+    'pussyg':  'pussy',
     'hentaig': 'Random_hentai_gif'
 }
 

@@ -17,9 +17,9 @@ class Module(ModuleBase):
     long_doc = (
         'Powered by https://nekos.life api\n\n'
         'Subcommands:\n'
-        '\tlist:   shows list of available tags'
-        '\n\tsfw:  sends random  sfw tag'
-        '\n\tnsfw: sends random nsfw tag'
+        '\tlist: shows list of available tags\n'
+        '\tsfw:  sends random  sfw tag\n'
+        '\tnsfw: sends random nsfw tag\n'
     )
 
     name = 'nekos'
