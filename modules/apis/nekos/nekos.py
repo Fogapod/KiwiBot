@@ -6,22 +6,27 @@ import random
 API_URL = 'https://nekos.life/api/v2'
 
 SFW_IMG_TAGS = [
-    'fox_girl', 'lizard', 'meow', 'neko', 'avatar', 'holo', 'wallpaper',
+    'fox', 'lizard', 'meow', 'neko', 'avatar', 'holo', 'wallpaper',
     'gasm', 'ngif','kemonomimi', 'eron', 'waifu'
 ]
 
 NSFW_IMG_TAGS = [
-    'hentai_gif', 'anal', 'bj', 'boobs', 'classic', 'cum', 'kuni',
-    'les', 'lewd', 'nsfw_gif', 'pussy', 'nsfw_avatar', 'tits',
-    'smallboobs', 'femdom', 'pussy_jpg', 'keta', 'cum_jpg', 'hololewd',
+    'hentaig', 'anal', 'bj', 'boobs', 'classic', 'cumg', 'kuni',
+    'les', 'lewd', 'nsfwg', 'pussy', 'nsfw_avatar', 'tits',
+    'smallboobs', 'femdom', 'pussy', 'keta', 'cum', 'hololewd',
     'yuri', 'lewdkemo', 'solog', 'lewdk', 'solo', 'feetg', 'erokemo',
     'hentai', 'blowjob', 'holoero', 'pwankg', 'ero', 'feet', 'eroyuri',
     'erofeet', 'erok'
 ]
 
 TAG_NAME_REPLACEMENTS = {
-    'nsfw_gif':   'nsfw_neko_gif',
-    'hentai_gif': 'Random_hentai_gif'
+    'fox':     'fox_girl',
+    'cum':     'cum_jpg',
+    'cumg':    'cum',
+    'nsfwg':   'nsfw_gif',
+    'pussy':   'pussy_jpg',
+    'nsfwg':   'nsfw_neko_gif',
+    'hentaig': 'Random_hentai_gif'
 }
 
 # actions

@@ -12,14 +12,14 @@ from discord import Embed, Colour, DMChannel
 
 class Module(ModuleBase):
 
-    usage_doc = '{prefix}{aliases} <tag|subcommand>'
+    usage_doc = '{prefix}{aliases} <tag>'
     short_doc = 'Nekos'
     long_doc = (
         'Powered by https://nekos.life api\n\n'
         'Subcommands:\n'
-        '\tlist: show list available image tags'
-        '\n\tsfw: random sfw image tag'
-        '\n\tnsfw: random nsfw image tag'
+        '\tlist:   shows list of available tags'
+        '\n\tsfw:  sends random  sfw tag'
+        '\n\tnsfw: sends random nsfw tag'
     )
 
     name = 'nekos'
@@ -33,9 +33,9 @@ class Module(ModuleBase):
         subcommand = args[1].lower()
 
         if subcommand == 'list':
-            result = 'SFW           NSFW\n'
+            result = f'{"SFW": >11} | NSFW\n{"-" * 25}\n'
             result += '\n'.join(
-                f'{x:<14}{y}' for x, y in zip_longest(sorted(SFW_IMG_TAGS), sorted(NSFW_IMG_TAGS), fillvalue='')
+                f'{x: >11} | {y}' for x, y in zip_longest(sorted(SFW_IMG_TAGS), sorted(NSFW_IMG_TAGS), fillvalue='')
             )
             return f'```\n{result}```'
 
