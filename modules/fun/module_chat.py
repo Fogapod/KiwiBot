@@ -13,11 +13,15 @@ class Module(ModuleBase):
     short_doc = 'Anonymous chat'
     long_doc = (
         'Subcommands:\n'
-        '\t[say|send]: send message to current room\n'
+        '\t[say|send] <text>: send message to current room\n'
         '\t[new|create]: enter queue for the new room\n'
         '\t[leave|close] <room id>: exit room\n'
         '\t[connect|set] <room id>: switch to different room\n'
-        '\tlist: show list of chats you\'re in'
+        '\tlist: show list of chats you\'re in\n\n'
+        'To use chat, create room first usinng {prefix}{aliases} new\n'
+        'After 2nd user connects, you can communicate using {prefix}{aliases} say <text>\n\n'
+        'If you want to move conversation to different channel, use {prefix}{aliases} connect <room id> in that channel\n\n'
+        'To quit room, use {prefix}{aliases} close <room id>'
     )
 
     name = 'chat'
@@ -98,7 +102,7 @@ class Module(ModuleBase):
             waiting_user = await self.bot.redis.get('waiting_chat_user')
             if waiting_user is None:
                 await self.bot.redis.set('waiting_chat_user', f'{ctx.channel.id}:{ctx.author.id}')
-                return await ctx.send('Please, wait for 2nd user to connect. This might be long')
+                return await ctx.send('Please, wait for 2nd user to connect. This might take a while')
 
             channel_id, user_id = waiting_user.split(':')
             if int(user_id) == ctx.author.id:
@@ -140,8 +144,11 @@ class Module(ModuleBase):
                 else:
                     failed_to_notify = True
 
+            e.description  = 'Now you can send messages with `chat say`'
+
             if failed_to_notify:
-                e.description = 'Warning: failed to notify 2nd user about chat creation'
+                e.description += 'Warning: failed to notify 2nd user about chat creation'
+
             e.set_footer(text=ctx.author, icon_url=ctx.author.avatar_url)
 
             return await ctx.send(embed=e)
@@ -184,10 +191,15 @@ class Module(ModuleBase):
         elif subcommand == 'list':
             keys = await self.bot.redis.keys('chat_room:*')
 
-            if not keys:
+            lines = []
+            for k in keys:
+                u1_target_channel, u2_target_channel = await self.bot.redis.smembers(k)
+                if u1_target_channel.endswith(str(ctx.author.id)) or u2_target_channel.endswith(str(ctx.author.id)):
+                    lines.append(f'#{k[10:]}' )
+
+            if not lines:
                 return 'No active chats found'
 
-            lines = [f'#{k[10:]}' for k in keys]
             lines_per_chunk = 30
             chunks = ['```\n' + '\n'.join(lines[i:i + lines_per_chunk]) + '```' for i in range(0, len(lines), lines_per_chunk)]
 
