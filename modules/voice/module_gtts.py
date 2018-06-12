@@ -98,11 +98,21 @@ class Module(ModuleBase):
 
         if voice_flag:
             if ctx.guild.voice_client is None:
-                vc = await ctx.author.voice.channel.connect()
+                if not ctx.author.voice.channel.permissions_for(ctx.guild.me).connect:
+                    return '{error} I have no permission to connect to the voice channel'
+
+                try:
+                    vc = await ctx.author.voice.channel.connect()
+                except Exception:
+                    return '{warning} Failed to connect to voice channel'
             else:
                 vc = ctx.guild.voice_client
+
+            if not ctx.author.voice.channel.permissions_for(ctx.author).speak:
+                return '{error} You\'re muted!'
 
             if vc.is_playing():
                 vc.stop()
 
             vc.play(audio)
+            await ctx.react('✅')
