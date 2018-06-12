@@ -246,19 +246,23 @@ class KiwiBot(discord.AutoShardedClient):
                 except Exception as e:
                     pass
 
+        await self.redis.execute('LTRIM', f'tracked_message:{msg.id}', 0, 0)
+
     async def on_voice_state_update(self, member, before, after):
+        if not member.guild.me.voice:  # voice connection doesn't exist
+            return
+
         if before.channel and after.channel != before.channel:  # user left or moved
-            if member.guild.me.voice:  # voice connection exists
-                if  member.guild.me.voice.channel == before.channel and not member.bot:  # same channel and not bot
-                    if sum(1 for m in before.channel.members if not m.bot) == 0:  # no users in channel left
-                        self._leave_voice_channel_tasks[before.channel.id] = self.loop.create_task(
-                            self._voice_disconnect_task(before.channel, member.guild.voice_client))
+            if member.guild.me.voice.channel == before.channel and not member.bot:  # same channel and not bot
+                if sum(1 for m in before.channel.members if not m.bot) == 0:  # no users in channel left
+                    self._leave_voice_channel_tasks[before.channel.id] = self.loop.create_task(
+                        self._voice_disconnect_task(before.channel, member.guild.voice_client))
+
         elif after.channel and not before.channel:  # user joined
-            if member.guild.me.voice:  # voice connection exists
-                if member.guild.me.voice.channel == after.channel and not member.bot:  # same channel and not bot
-                    if after.channel.id in self._leave_voice_channel_tasks:
-                        self._leave_voice_channel_tasks[after.channel.id].cancel()
-                        del self._leave_voice_channel_tasks[after.channel.id]
+            if member.guild.me.voice.channel == after.channel and not member.bot:  # same channel and not bot
+                if after.channel.id in self._leave_voice_channel_tasks:
+                    self._leave_voice_channel_tasks[after.channel.id].cancel()
+                    del self._leave_voice_channel_tasks[after.channel.id]
 
     async def _voice_disconnect_task(self, channel, vc):
         await asyncio.sleep(60)
@@ -392,7 +396,7 @@ class KiwiBot(discord.AutoShardedClient):
             return
 
         await self.redis.rpush(f'tracked_message:{message.id}', 0)  # insert 0 to prevent key from deleting
-        await self.redis.expire(f'tracked_message:{message.id}', 300)
+        await self.redis.expire(f'tracked_message:{message.id}', 86400)  # 24 hours
 
     async def register_response(self, request, response):
         if await self.redis.exists(f'tracked_message:{request.id}'):
