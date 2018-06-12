@@ -10,7 +10,7 @@ from discord import Embed, Colour
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} <user>'
-    short_doc = 'Get matched users list'
+    short_doc = 'Get matching users list'
 
     name = 'users'
     aliases = (name, 'userlist')
@@ -24,13 +24,14 @@ class Module(ModuleBase):
         if not users:
             return '{warning} Users not found'
 
-        lines = [f'{str(i + 1) + ")":<3}{str(u):<25} {u.id}' for i, u in enumerate(users)]
+        lines = [f'{u.id:<19}| {u}' for u in users]
         lines_per_chunk = 30
-        chunks = ['Found users:\n```\n' + '\n'.join(lines[i:i + lines_per_chunk]) + '```' for i in range(0, len(lines), lines_per_chunk)]
+        chunks = [f'```{"id":<19}| name\n{"-" * 53}\n' + '\n'.join(lines[i:i + lines_per_chunk]) + '```' for i in range(0, len(lines), lines_per_chunk)]
 
         p = Paginator(self.bot)
         for i, chunk in enumerate(chunks):
             e = Embed(
+                title=f'Matching users ({len(lines)})',
                 colour=Colour.gold(),
                 description=chunk
             )

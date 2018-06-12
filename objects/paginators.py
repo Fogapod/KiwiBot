@@ -74,16 +74,13 @@ class PaginatorABC:
             pass
 
     async def _reaction_add_callback(self, reaction, user):
-        manage_messages_permission = \
-            self.target_message.guild and self.target_message.channel.permissions_for(self.target_message.guild.me).manage_messages
-
         await self.events[str(reaction)](reaction, user)
         try:
             await self.target_message.remove_reaction(reaction, user)
-        except Forbidden:
-            pass
         except NotFound:
             self.closed = True
+        except Exception:
+            pass
 
     async def _reaction_remove_callback(self, reaction, user):
         await self.events[str(reaction)](reaction, user)
@@ -296,7 +293,7 @@ class SelectionPaginator(Paginator):
 
 class UpdatingPaginator(PaginatorABC):
 
-    def __init__(self, *args, emoji_update='🆕', emoji_go_back='🔙', timeout=60, additional_time=10, **kwargs):
+    def __init__(self, *args, emoji_update='🆕', emoji_go_back='🔙', timeout=60, additional_time=30, **kwargs):
         super().__init__(
             *args, timeout=timeout, additional_time=additional_time, **kwargs)
 

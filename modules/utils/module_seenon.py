@@ -33,9 +33,9 @@ class Module(ModuleBase):
         if not guilds:
             return '{warning} No common guilds'
 
-        lines = [f'{str(i + 1) + ")":<3}{g.name:<25} {g.id}' for i, g in enumerate(guilds)]
+        lines = [f'{g.id:<19}| {g.name}' for g in guilds]
         lines_per_chunk = 30
-        chunks = ['```\n' + '\n'.join(lines[i:i + lines_per_chunk]) + '```' for i in range(0, len(lines), lines_per_chunk)]
+        chunks = [f'```{"id":<19}| name\n{"-" * 53}\n' + '\n'.join(lines[i:i + lines_per_chunk]) + '```' for i in range(0, len(lines), lines_per_chunk)]
 
         def make_embed(chunk, page=None):
             e = Embed(
