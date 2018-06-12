@@ -29,4 +29,9 @@ class Module(ModuleBase):
                     register=False, delete_after=5
                 )
 
-        return '{warning} No commands found in the last 200 messages. Try deleting them manually'
+        await self.bot.delete_message(ctx.message)
+
+        await ctx.send(
+            'No commands found in the last 200 messages. Try deleting them manually',
+            register=False, delete_after=5
+        )
