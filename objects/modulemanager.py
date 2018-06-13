@@ -139,8 +139,8 @@ class ModuleManager:
                     logger.debug(f'Error occured calling {name} on_error')
                     logger.debug(traceback.format_exc())
 
-    def get_all_modules(self):
-        return [m for m in self.modules.values() if not m.disabled]
+    def get_all_modules(self, hidden=False, disabled=False):
+        return [m for m in self.modules.values() if m.hidden <= hidden and m.disabled <= disabled]
 
     def get_modules_by_category(self, category):
         return [m for m in self.modules.values() if not m.disabled and m.category.lower() == (category.lower() or 'uncategorized')]

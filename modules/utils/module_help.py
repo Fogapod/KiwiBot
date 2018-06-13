@@ -3,9 +3,11 @@ from objects.permissions import (
     PermissionEmbedLinks, PermissionAddReactions, PermissionReadMessageHistory)
 from objects.paginators import Paginator
 
-from utils.funcs import get_local_prefix
+import random
 
 from discord import Embed, Colour
+
+from utils.funcs import get_local_prefix
 
 
 class Module(ModuleBase):
@@ -14,7 +16,8 @@ class Module(ModuleBase):
     short_doc = 'Get information about module or category'
     long_doc  = (
         'Subcommands:\n'
-        '\t{prefix}{aliases} all - show help for all commands'
+        '\t{prefix}{aliases} all:    show help for all commands\n'
+        '\t{prefix}{aliases} random: show random command help'
     )
 
     name = 'help'
@@ -36,13 +39,16 @@ class Module(ModuleBase):
     }
 
     async def on_call(self, ctx, args, **flags):
+        hidden_flag = flags.get('show-hidden', False)
+        hide_normal_flag = flags.get('hide-normal', False)
+
         if len(args) == 1:
             module_list = []
             for module in self.bot.mm.get_all_modules():
                 if module.hidden:
-                    if not (flags.get('show-hidden', False)):
+                    if not (hidden_flag):
                         continue
-                if not module.hidden and flags.get('hide-normal', False):
+                if not module.hidden and hide_normal_flag:
                     continue
 
                 module_list.append(module)
@@ -99,7 +105,11 @@ class Module(ModuleBase):
 
         if args[1].lower() == 'all':
             category = 'All commands'
-            modules = self.bot.mm.get_all_modules()
+            modules = self.bot.mm.get_all_modules(hidden=hidden_flag)
+        elif args[1].lower() == 'random':
+            return await random.choice(
+                self.bot.mm.get_all_modules(hidden=hidden_flag)
+            ).on_doc_request(ctx)
         else:
             category = args[1]
             modules = self.bot.mm.get_modules_by_category(category)
