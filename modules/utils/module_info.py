@@ -15,10 +15,10 @@ import sys
 
 class Module(ModuleBase):
 
-    short_doc = 'Get information about me'
+    short_doc = 'Bot stats/information'
 
     name = 'info'
-    aliases = (name, 'information', 'stats')
+    aliases = (name, 'information', 'stats', 'about')
     category = 'Bot'
     bot_perms = (PermissionEmbedLinks(), )
 
@@ -68,7 +68,7 @@ class Module(ModuleBase):
             colour=Colour.gold(), title='Information',
             url=git_url,
             description=(
-                f'Hello, I\'m a discord bot created by **{author}**\n'
+                f'Hello, I\'m a discord bot developed by **{author}**\n'
                 f'```\n{ASCII_ART}```'
             )
         )
@@ -76,7 +76,7 @@ class Module(ModuleBase):
             e.add_field(name='Warning', value='This is a dev instance of bot')
         e.add_field(
             name='Stats', value=(
-                f'Bot is currently in **{len(self.bot.guilds)}** guilds with **{len(self.bot.users)}** unique users\n'
+                f'Bot is currently in **{len(self.bot.guilds)}** guilds with **{len(self.bot.users)}** users\n'
                 f'**{len(tuple(self.bot.get_all_channels()))}** channels\n'
                 f'**{len(self.bot.emojis)}** custom emojis\n'
                 f'**{len(self.bot.shards)}** shards\n'
@@ -92,7 +92,7 @@ class Module(ModuleBase):
         e.add_field(
             name='Environment status', value=(
                 f'CPU load: **{self.process.cpu_percent()}%**\n'
-                f'Memory used: **{round(self.process.memory_info().rss / 1000000, 1)} MB** (**{round(self.process.memory_percent(), 1)}%**)\n'
+                f'Memory used: **{round(self.process.memory_info().rss >> 20, 1)} MB** (**{round(self.process.memory_percent(), 1)}%**)\n'
                 f'Python version: **{sys.version[:5]}**\n'
                 f'discord.py version: **{discord.__version__}**'
             ), inline=False
