@@ -59,8 +59,6 @@ class Module(ModuleBase):
             return '\n'.join(f'`{k}`: {v}' for k, v in self.langs.items())
 
         text = args[1:]
-        if len(text) > 1000:
-            return '{warning} Text is too long (> 1000 characters)'
 
         voice_flag = not flags.get(
             'no-voice', isinstance(ctx.channel, DMChannel))
@@ -94,7 +92,10 @@ class Module(ModuleBase):
             audio = PCMVolumeTransformer(FFmpegPCMAudio(tmp, pipe=True), volume)
 
             if flags.get('file', not voice_flag):
-                await ctx.send(file=File(stdout, filename='tts.mp3'))
+                try:
+                    await ctx.send(file=File(stdout, filename='tts.mp3'))
+                except Exception:
+                    await ctx.send('Failed to send file')
 
         if voice_flag:
             if ctx.guild.voice_client is None:
