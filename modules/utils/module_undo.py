@@ -20,7 +20,7 @@ class Module(ModuleBase):
                 try:
                     await self.bot.delete_message(msg, raise_on_errors=True)
                 except Exception:  # do cleanup manually
-                    await self.bot.clear_responses_to_message(msg)
+                    await self.bot.clear_responses_to_message(msg.id)
 
                 await self.bot.delete_message(ctx.message)
 

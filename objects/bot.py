@@ -210,19 +210,19 @@ class KiwiBot(discord.AutoShardedClient):
             return
 
         if await self.redis.exists(f'tracked_message:{before.id}'):
-            await self.clear_responses_to_message(before)
+            await self.clear_responses_to_message(before.id)
             ttl = await self.redis.ttl(f'tracked_message:{before.id}')
             await self.redis.expire(f'tracked_message:{before.id}', ttl + 60)
 
             await self.on_message(after, from_edit=True)
 
-    async def on_message_delete(self, msg):
-        if await self.redis.exists(f'tracked_message:{msg.id}'):
-            await self.clear_responses_to_message(msg)
-        await self.redis.delete(f'tracked_message:{msg.id}')
+    async def on_raw_message_delete(self, event):
+        if await self.redis.exists(f'tracked_message:{event.message_id}'):
+            await self.clear_responses_to_message(event.message_id)
+        await self.redis.delete(f'tracked_message:{event.message_id}')
 
-    async def clear_responses_to_message(self, msg):
-        for value in await self.redis.lrange(f'tracked_message:{msg.id}', 1, -1):
+    async def clear_responses_to_message(self, msg_id):
+        for value in await self.redis.lrange(f'tracked_message:{msg_id}', 1, -1):
             response_type, _, rest = value.partition(':')
 
             if response_type == 'message':
@@ -246,7 +246,7 @@ class KiwiBot(discord.AutoShardedClient):
                 except Exception as e:
                     pass
 
-        await self.redis.execute('LTRIM', f'tracked_message:{msg.id}', 0, 0)
+        await self.redis.execute('LTRIM', f'tracked_message:{msg_id}', 0, 0)
 
     async def on_voice_state_update(self, member, before, after):
         if not member.guild.me.voice:  # voice connection doesn't exist
