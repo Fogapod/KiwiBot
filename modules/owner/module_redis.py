@@ -4,7 +4,7 @@ from objects.permissions import PermissionBotOwner
 
 class Module(ModuleBase):
 
-    usage_doc = '{prefix}{aliases} <args*>'
+    usage_doc = '{prefix}{aliases} <args ...>'
     short_doc = 'Redis db access'
 
     name = 'redis'

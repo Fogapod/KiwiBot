@@ -10,8 +10,8 @@ class Module(ModuleBase):
     usage_doc = '{prefix}{aliases} [command...]'
     short_doc = 'Show command usage stats'
 
-    name = 'commandstats'
-    aliases = (name, 'cmdstats')
+    name = 'usagestats'
+    aliases = (name, 'usage')
     category = 'Bot'
     bot_perms = (PermissionEmbedLinks(), )
     flags = {
