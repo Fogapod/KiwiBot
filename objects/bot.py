@@ -253,7 +253,7 @@ class KiwiBot(discord.AutoShardedClient):
             return
 
         if before.channel and after.channel != before.channel:  # user left or moved
-            if member.guild.me.voice.channel == before.channel and not member.bot:  # same channel and not bot
+            if not member.bot or member == self.user:  # action by user or bot was moved
                 if sum(1 for m in before.channel.members if not m.bot) == 0:  # no users in channel left
                     self._leave_voice_channel_tasks[before.channel.id] = self.loop.create_task(
                         self._voice_disconnect_task(before.channel, member.guild.voice_client))
