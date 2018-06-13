@@ -282,7 +282,7 @@ class KiwiBot(discord.AutoShardedClient):
                 channel = target.dm_channel
         elif isinstance(target, (discord.Message, Context)):
             channel = target.channel
-        elif isinstance(target, discord.DMChannel) or isinstance(target, discord.TextChannel):
+        elif isinstance(target, (discord.DMChannel, discord.TextChannel, discord.Webhook)):
             channel = target
         else:
             raise ValueError('Unknown target passed to send message')
@@ -422,4 +422,4 @@ class KiwiBot(discord.AutoShardedClient):
             handler = module.events.get(event)
             if handler:
                 coro = self._run_event(handler, event, *args, **kwargs)
-                discord.compat.create_task(coro, loop=self.loop)
+                asyncio.ensure_future(coro, loop=self.loop)
