@@ -131,8 +131,23 @@ class Module(ModuleBase):
         voice_flag = not flags.get(
             'no-voice', isinstance(ctx.channel, DMChannel))
 
-        if voice_flag and not ctx.author.voice:
-            return '{warning} Please, join voice channel first'
+        if voice_flag:
+            if not ctx.author.voice:
+                return '{warning} Please, join voice channel first'
+
+            if not ctx.author.voice.channel.permissions_for(ctx.author).speak:
+                return '{error} You\'re muted!'
+
+            if not ctx.author.voice.channel.permissions_for(ctx.guild.me).connect:
+                return '{error} I don\'t have permission to connect to the voice channel'
+
+            if ctx.guild.voice_client is None:
+                try:
+                    vc = await ctx.author.voice.channel.connect()
+                except Exception:
+                    return '{warning} Failed to connect to voice channel'
+            else:
+                vc = ctx.guild.voice_client
 
         try:
             volume = float(flags.get('volume', 100)) / 100
@@ -163,20 +178,6 @@ class Module(ModuleBase):
                     await ctx.send('Failed to send file')
 
         if voice_flag:
-            if ctx.guild.voice_client is None:
-                if not ctx.author.voice.channel.permissions_for(ctx.guild.me).connect:
-                    return '{error} I have no permission to connect to the voice channel'
-
-                try:
-                    vc = await ctx.author.voice.channel.connect()
-                except Exception:
-                    return '{warning} Failed to connect to voice channel'
-            else:
-                vc = ctx.guild.voice_client
-
-            if not ctx.author.voice.channel.permissions_for(ctx.author).speak:
-                return '{error} You\'re muted!'
-
             if vc.is_playing():
                 vc.stop()
 

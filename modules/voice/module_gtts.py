@@ -1,12 +1,11 @@
 from objects.modulebase import ModuleBase
 
-from utils.funcs import create_subprocess_exec, execute_process
+from tempfile import TemporaryFile
+from functools import partial
 
 from discord import DMChannel, File, FFmpegPCMAudio, PCMVolumeTransformer
 
-from tempfile import TemporaryFile
-
-from gtts.lang import tts_langs
+import gtts
 
 
 class Module(ModuleBase):
@@ -52,56 +51,26 @@ class Module(ModuleBase):
     }
 
     async def on_load(self, from_reload):
-        self.langs = tts_langs()
+        self.langs = gtts.lang.tts_langs()
 
     async def on_call(self, ctx, args, **flags):
         if args[1:].lower() == 'list':
             return '\n'.join(f'`{k}`: {v}' for k, v in self.langs.items())
 
-        text = args[1:]
-
         voice_flag = not flags.get(
             'no-voice', isinstance(ctx.channel, DMChannel))
 
-        if voice_flag and not ctx.author.voice:
-            return '{warning} Please, join voice channel first'
-
-        try:
-            volume = float(flags.get('volume', 100)) / 100
-        except ValueError:
-            return '{error} Invalid volume value'
-
-        program = ['gtts-cli', text]
-
-        language_flag = flags.get('language')
-        if language_flag:
-            if language_flag not in self.langs:
-                return '{warning} language not found. Use `list` subcommand to get list of voices'
-
-            program.extend(('-l', language_flag))
-
-        if flags.get('slow', False):
-            program.append('--slow')
-
-        process, pid = await create_subprocess_exec(*program)
-        stdout, stderr = await execute_process(process)
-
-        with TemporaryFile() as tmp:
-            tmp.write(stdout)
-            tmp.seek(0)
-            audio = PCMVolumeTransformer(FFmpegPCMAudio(tmp, pipe=True), volume)
-
-            if flags.get('file', not voice_flag):
-                try:
-                    await ctx.send(file=File(stdout, filename='tts.mp3'))
-                except Exception:
-                    await ctx.send('Failed to send file')
-
         if voice_flag:
-            if ctx.guild.voice_client is None:
-                if not ctx.author.voice.channel.permissions_for(ctx.guild.me).connect:
-                    return '{error} I have no permission to connect to the voice channel'
+            if not ctx.author.voice:
+                return '{warning} Please, join voice channel first'
 
+            if not ctx.author.voice.channel.permissions_for(ctx.author).speak:
+                return '{error} You\'re muted!'
+
+            if not ctx.author.voice.channel.permissions_for(ctx.guild.me).connect:
+                return '{error} I don\'t have permission to connect to the voice channel'
+
+            if ctx.guild.voice_client is None:
                 try:
                     vc = await ctx.author.voice.channel.connect()
                 except Exception:
@@ -109,11 +78,44 @@ class Module(ModuleBase):
             else:
                 vc = ctx.guild.voice_client
 
-            if not ctx.author.voice.channel.permissions_for(ctx.author).speak:
-                return '{error} You\'re muted!'
+        try:
+            volume = float(flags.get('volume', 100)) / 100
+        except ValueError:
+            return '{error} Invalid volume value'
 
-            if vc.is_playing():
-                vc.stop()
+        language_flag = flags.get('language')
+        if language_flag:
+            if language_flag not in self.langs:
+                return '{warning} language not found. Use `list` subcommand to get list of voices'
 
-            vc.play(audio)
-            await ctx.react('✅')
+
+        tts = gtts.gTTS(
+            args[1:], lang=language_flag or 'en',
+            slow=flags.get('slow', False), lang_check=False
+        )
+
+        with TemporaryFile() as tts_file:
+            partial_tts = partial(tts.write_to_fp, tts_file)
+
+            try:
+                await self.bot.loop.run_in_executor(None, partial_tts)
+            except Exception:
+                return '{error} Problem with api response. Please, try again later'
+
+            tts_file.seek(0)
+
+            audio = PCMVolumeTransformer(FFmpegPCMAudio(tts_file, pipe=True), volume)
+
+            if voice_flag:
+                if vc.is_playing():
+                    vc.stop()
+
+                vc.play(audio)
+                await ctx.react('✅')
+
+            if flags.get('file', not voice_flag):
+                try:
+                    tts_file.seek(0)
+                    await ctx.send(file=File(tts_file.read(), filename='tts.mp3'))
+                except Exception:
+                    await ctx.send('Failed to send file')
