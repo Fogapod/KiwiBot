@@ -28,7 +28,7 @@ class KiwiBot(discord.AutoShardedClient):
     def __init__(self, **kwargs):
         KiwiBot._bot = self
 
-        super().__init__(**kwargs)
+        super().__init__(status='idle', **kwargs)
 
         # will be used as process exit code after stopping if not None
         self.exit_code = None
