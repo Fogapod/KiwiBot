@@ -17,21 +17,9 @@ class Permission(Exception):
         return getattr(channel.permissions_for(user), self.name.lower(), False)
 
 
-class PermissionBotOwner(Permission):
-
-    name = 'BOT_OWNER'
-    is_bot_missing = False
-
-    def check(self, channel, user):
-        return user.id == BOT_OWNER_ID
-
-
-class PermissionGuildOwner(Permission):
-
-    def check(channel, user):
-        self.is_bot_missing = user.id == (channel.guild if channel.guild is not None else channel).me.id
-
-        return channel.guild is not None and channel.guild.owner == user
+#
+# default discord permissions
+#
 
 
 class PermissionAddReactions(Permission):
@@ -172,3 +160,25 @@ class PermissionUseVoiceActivation(Permission):
 class PermissionViewAuditLog(Permission):
 
     name = 'VIEW_AUDIT_LOG'
+
+
+#
+# custom permissions
+#
+
+
+class PermissionBotOwner(Permission):
+
+    name = 'BOT_OWNER'
+    is_bot_missing = False
+
+    def check(self, channel, user):
+        return user.id == BOT_OWNER_ID
+
+
+class PermissionGuildOwner(Permission):
+
+    def check(self, channel, user):
+        self.is_bot_missing = user.id == (channel.guild if channel.guild is not None else channel).me.id
+
+        return channel.guild is not None and channel.guild.owner == user

@@ -46,14 +46,14 @@ class Module(ModuleBase):
         if not channel.permissions_for(ctx.author).send_messages:
             return '{warning} You don\'t have permission to send messages to this channel'
 
-        if len(user.display_name) < 2:
+        name = user.display_name if getattr(user, 'guild') == ctx.guild else user.name
+
+        if len(name) < 2:
             # minimum webhook name len is 2 characters, so transparent character is required
-            nickname = f' ุ{user.display_name}'
-        else:
-            nickname = user.display_name
+            name = ' ุ' + name
 
         try:
-            webhook = await channel.create_webhook(name=nickname)
+            webhook = await channel.create_webhook(name=name)
         except Exception:
             return '{error} Failed to create webhook. Probably maximum webhook count reached'
 
