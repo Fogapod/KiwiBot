@@ -42,8 +42,6 @@ class Module(ModuleBase):
             '_': self._last_result
         }
 
-        glob.update(globals())
-
         fake_stdout = io.StringIO()
 
         to_compile = 'async def func():\n' + textwrap.indent(program, '  ')
