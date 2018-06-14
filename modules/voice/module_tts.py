@@ -1,11 +1,18 @@
 from objects.modulebase import ModuleBase
 
-from utils.funcs import create_subprocess_exec, execute_process
-
-from discord import DMChannel, File, FFmpegPCMAudio, PCMVolumeTransformer
+import random
 
 from tempfile import TemporaryFile
 
+from discord import DMChannel, File, FFmpegPCMAudio, PCMVolumeTransformer
+
+from utils.funcs import create_subprocess_exec, execute_process
+
+
+ffmpeg_options = {
+    'pipe': True,
+    'options': '-v 0'
+}
 
 LANG_LIST = {
     'af': 'afrikaans' ,
@@ -18,14 +25,13 @@ LANG_LIST = {
     'da': 'danish',
     'de': 'german',
     'el': 'greek',
-    'en': 'default',
-    'en-gb': 'english',
+    'en': 'english',
     'en-sc': 'en-scottish',
     'en-uk-north': 'english-north',
     'en-uk-rp': 'english_rp',
     'en-uk-wmids': 'english_wmids',
     'en-us': 'english-us',
-   ' en-wi': 'en-westindies',
+    'en-wi': 'en-westindies',
     'eo': 'esperanto',
     'es': 'spanish',
     'es-la': 'spanish-latin-am',
@@ -80,7 +86,8 @@ LANG_LIST = {
 }
 
 ADDITIONAL_LANGS = {
-    'en1': 'mb-en1'
+    'en1': 'mb-en1',
+    'de2': 'mb-de2'
 }
 
 LANG_LIST.update(ADDITIONAL_LANGS)
@@ -94,13 +101,16 @@ class Module(ModuleBase):
         '\t[--file|-f]:                respond with audio file\n'
         '\t[--no-voice|-n]:            don\'t use voice channel\n'
         '\t[--volume|-v] <value>:      set volume in %\n'
-        '\t[--language|-l] <language>: select prefered language\n\n'
+        '\t[--speed|-s] <value>:       set speed value (default is 175)\n'
+        '\t[--language|-l] <language>: select prefered language\n'
+        '\t[--woman|-w]:               use female voice if added\n'
+        '\t[--quiet|-q]:               whisper text if added\n\n'
         'Subcommands:\n'
         '\t{prefix}{aliases} list:     show list of voices'
     )
 
     name = 'tts'
-    aliases = (name, )
+    aliases = (name, 'speak')
     category = 'Actions'
     min_args = 1
     flags = {
@@ -119,6 +129,18 @@ class Module(ModuleBase):
         'volume': {
             'alias': 'v',
             'bool': False
+        },
+        'speed': {
+            'alias': 's',
+            'bool': False
+        },
+        'woman': {
+            'alias': 'w',
+            'bool': True
+        },
+        'quiet': {
+            'alias': 'q',
+            'bool': True
         }
     }
 
@@ -156,12 +178,37 @@ class Module(ModuleBase):
 
         program = ['espeak', text, '--stdout']
 
-        language_flag = flags.get('language')
-        if language_flag:
-            if language_flag not in LANG_LIST:
-                return '{warning} Language not found. Use `list` subcommand to get list of voices'
+        speed_flag = flags.get('speed')
+        if speed_flag is not None:
+            try:
+                speed = int(speed_flag)
+            except ValueError:
+                return '{error} Invalid speed value'
 
-            program.extend(('-v', LANG_LIST[language_flag]))
+            program.extend(('-s', str(speed)))
+
+        language_flag = flags.get('language', 'en')
+
+        if language_flag not in LANG_LIST:
+            return '{warning} Language not found. Use `list` subcommand to get list of voices'
+
+        language = LANG_LIST[language_flag]
+
+        woman_flag = flags.get('woman', False)
+        quiet_flag = flags.get('quiet', False)
+
+        if woman_flag:
+            if quiet_flag:
+                return '{error} Can\'t apply both woman and quiet flags'
+
+            language += f'+f{random.randrange(1, 5)}'
+
+        elif quiet_flag:
+            language += '+whisper'
+        else:
+            language += f'+m{random.randrange(1, 8)}'
+
+        program.extend(('-v', language))
 
         process, pid = await create_subprocess_exec(*program)
         stdout, stderr = await execute_process(process)
@@ -169,7 +216,7 @@ class Module(ModuleBase):
         with TemporaryFile() as tmp:
             tmp.write(stdout)
             tmp.seek(0)
-            audio = PCMVolumeTransformer(FFmpegPCMAudio(tmp, pipe=True), volume)
+            audio = PCMVolumeTransformer(FFmpegPCMAudio(tmp, **ffmpeg_options), volume)
 
             if flags.get('file', not voice_flag):
                 try:

@@ -8,6 +8,11 @@ from discord import DMChannel, File, FFmpegPCMAudio, PCMVolumeTransformer
 import gtts
 
 
+ffmpeg_options = {
+    'pipe': True,
+    'options': '-v 0'
+}
+
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} <text>'
@@ -24,7 +29,7 @@ class Module(ModuleBase):
     )
 
     name = 'gtts'
-    aliases = (name, )
+    aliases = (name, 'gspeak')
     category = 'Actions'
     min_args = 1
     flags = {
@@ -104,7 +109,7 @@ class Module(ModuleBase):
 
             tts_file.seek(0)
 
-            audio = PCMVolumeTransformer(FFmpegPCMAudio(tts_file, pipe=True), volume)
+            audio = PCMVolumeTransformer(FFmpegPCMAudio(tts_file, **ffmpeg_options), volume)
 
             if voice_flag:
                 if vc.is_playing():
