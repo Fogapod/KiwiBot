@@ -310,7 +310,12 @@ class UpdatingPaginator(PaginatorABC):
         self.update_args = kwargs.pop('update_args', ())
         self.update_kwargs = kwargs.pop('update_kwargs', {})
 
-        self.add_page(**await self.get_fields())
+        fields = await self.get_fields()
+
+        if not fields:
+            return
+
+        self.add_page(**fields)
 
         await super().run(target, force_run=True, **kwargs)
 

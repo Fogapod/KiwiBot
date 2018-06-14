@@ -74,4 +74,6 @@ class Module(ModuleBase):
             e = Embed(colour=Colour.gold(), title=f'Tag: {tag}', url=response['url'])
             e.set_image(url=response['url'])
             e.set_footer(text='Click on 🆕 reaction to get new image')
-            return { 'embed': e }
+            return {'embed': e}
+        else:
+            return {'content': 'Problem with api response. Please try again later'}
