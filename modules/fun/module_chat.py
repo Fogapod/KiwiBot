@@ -130,6 +130,7 @@ class Module(ModuleBase):
 
             e = Embed(title=f'Created chat room #{new_room_id}', colour=Colour.gold())
             e.set_footer(text=user2, icon_url=user2.avatar_url)
+            e.description  = 'Now you can send messages with `chat say`'
 
             failed_to_notify = False
 
@@ -143,8 +144,6 @@ class Module(ModuleBase):
                         failed_to_notify = True
                 else:
                     failed_to_notify = True
-
-            e.description  = 'Now you can send messages with `chat say`'
 
             if failed_to_notify:
                 e.description += 'Warning: failed to notify 2nd user about chat creation'
