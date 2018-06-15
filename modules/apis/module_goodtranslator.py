@@ -1,8 +1,6 @@
 from objects.modulebase import ModuleBase
 from objects.permissions import PermissionEmbedLinks
 
-import random
-
 from discord import Embed, Colour
 
 
@@ -23,15 +21,20 @@ class Module(ModuleBase):
         'Subcommands:\n'
         '\tlist: get list of languages\n\n'
         'Command flags:\n'
+        '\t[--in|-i] <language>:  input language\n'
         '\t[--out|-o] <language>: output language'
     )
 
-    name = 'badtranslator'
-    aliases = (name, 'bt')
+    name = 'goodtranslator'
+    aliases = (name, 'gt')
     category = 'Actions'
     min_args = 1
     bot_perms = (PermissionEmbedLinks(), )
     flags = {
+        'in': {
+            'alias': 'i',
+            'bool': False
+        },
         'out': {
             'alias': 'o',
             'bool': False
@@ -43,32 +46,31 @@ class Module(ModuleBase):
 
     async def on_call(self, ctx, args, **flags):
         if args[1:].lower() == 'list':
-            return '\n'.join(f'`{k}`: {v}' for k, v in gt.LANGUAGES.items())
+            return '\n'.join(f'`{k}`: {v.capitalize()}' for k, v in gt.LANGUAGES.items())
+
+        in_lang = flags.get('in', None)
+        if in_lang and in_lang.lower() not in gt.LANGUAGES:
+            return '{warning} Invalid input language. Try using list subcommand'
 
         out_lang = flags.get('out', 'en').lower()
         if out_lang not in gt.LANGUAGES:
             return '{warning} Invalid out language. Try using list subcommand'
 
         async with ctx.channel.typing():
-            langs = random.sample(gt.LANGUAGES.keys(), 6)
-            if 'en' in langs:
-                langs.remove('en')
-            langs = langs[:5]
-            langs.append(out_lang)
-
             text = args[1:]
             try:
-                for l in langs:
-                    translation = await self.translator.translate(text, dest=l)
-                    text = translation.text
+                translation = await self.translator.translate(
+                    text, src=in_lang or 'auto', dest=out_lang)
             except Exception:
+                import traceback as tb
+                tb.print_exc()
                 return '{error} Failed to translate. Please, try again later'
 
-            e = Embed(colour=Colour.gold(), title='BadTranslator')
-            e.description = text[:2048]
+            e = Embed(colour=Colour.gold(), title='GoodTranslator')
+            e.description = translation.text[:2048]
             e.add_field(
-                name='Chain',
-                value=' -> '.join(gt.LANGUAGES[l].title() for l in langs[:-1])
+                name='Translated',
+                value=f'{gt.LANGUAGES[translation.src].capitalize()} -> {gt.LANGUAGES[out_lang].capitalize()}'
             )
             e.set_footer(text=ctx.author, icon_url=ctx.author.avatar_url)
 
