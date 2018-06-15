@@ -46,7 +46,7 @@ class Module(ModuleBase):
 
     async def on_call(self, ctx, args, **flags):
         if args[1:].lower() == 'list':
-            return '\n'.join(f'`{k}`: {v.capitalize()}' for k, v in gt.LANGUAGES.items())
+            return '\n'.join(f'`{k}`: {v}' for k, v in gt.LANGUAGES.items())
 
         in_lang = flags.get('in', None)
         if in_lang and in_lang.lower() not in gt.LANGUAGES:
@@ -70,7 +70,7 @@ class Module(ModuleBase):
             e.description = translation.text[:2048]
             e.add_field(
                 name='Translated',
-                value=f'{gt.LANGUAGES[translation.src].capitalize()} -> {gt.LANGUAGES[out_lang].capitalize()}'
+                value=f'{gt.LANGUAGES.get(translation.src, translation.src)} -> {gt.LANGUAGES[out_lang]}'
             )
             e.set_footer(text=ctx.author, icon_url=ctx.author.avatar_url)
 

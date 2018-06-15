@@ -68,7 +68,7 @@ class Module(ModuleBase):
             e.description = text[:2048]
             e.add_field(
                 name='Chain',
-                value=' -> '.join(gt.LANGUAGES[l].title() for l in langs[:-1])
+                value=' -> '.join(gt.LANGUAGES.get(l, l) for l in langs[:-1])
             )
             e.set_footer(text=ctx.author, icon_url=ctx.author.avatar_url)
 
