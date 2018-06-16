@@ -56,22 +56,18 @@ class Module(ModuleBase):
         if out_lang not in gt.LANGUAGES:
             return '{warning} Invalid out language. Try using list subcommand'
 
-        async with ctx.channel.typing():
-            text = args[1:]
-            try:
-                translation = await self.translator.translate(
-                    text, src=in_lang or 'auto', dest=out_lang)
-            except Exception:
-                import traceback as tb
-                tb.print_exc()
-                return '{error} Failed to translate. Please, try again later'
+        try:
+            translation = await self.translator.translate(
+                args[1:], src=in_lang or 'auto', dest=out_lang)
+        except Exception:
+            return '{error} Failed to translate. Please, try again later'
 
-            e = Embed(colour=Colour.gold(), title='GoodTranslator')
-            e.description = translation.text[:2048]
-            e.add_field(
-                name='Translated',
-                value=f'{gt.LANGUAGES.get(translation.src, translation.src)} -> {gt.LANGUAGES[out_lang]}'
-            )
-            e.set_footer(text=ctx.author, icon_url=ctx.author.avatar_url)
+        e = Embed(colour=Colour.gold(), title='GoodTranslator')
+        e.description = translation.text[:2048]
+        e.add_field(
+            name='Translated',
+            value=f'{gt.LANGUAGES.get(translation.src, translation.src)} -> {gt.LANGUAGES[out_lang]}'
+        )
+        e.set_footer(text=ctx.author, icon_url=ctx.author.avatar_url)
 
-            await ctx.send(embed=e)
+        await ctx.send(embed=e)
