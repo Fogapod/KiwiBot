@@ -64,11 +64,11 @@ class Module(ModuleBase):
             text = args[1:]
 
             try:
-                for l in langs:
+                for i, l in enumerate(langs):
                     params = {
                         'key': self.api_key,
                         'text': text,
-                        'lang': l
+                        'lang': f'{langs[i - 1] + "-" if i else ""}{l}'
                     }
                     async with self.bot.sess.post(API_URL + 'translate', params=params) as r:
                         if r.status != 200:
