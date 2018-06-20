@@ -1,10 +1,12 @@
 from objects.modulebase import ModuleBase
+from objects.permissions import PermissionEmbedLinks
+from objects.paginators import Paginator
 
 import random
 
 from tempfile import TemporaryFile
 
-from discord import DMChannel, File, FFmpegPCMAudio, PCMVolumeTransformer
+from discord import Embed, Colour, DMChannel, File, FFmpegPCMAudio, PCMVolumeTransformer
 
 from utils.funcs import create_subprocess_exec, execute_process
 
@@ -134,8 +136,8 @@ class Module(ModuleBase):
         'Command flags:\n'
         '\t[--file|-f]:                respond with audio file\n'
         '\t[--no-voice|-n]:            don\'t use voice channel\n'
-        '\t[--volume|-v] <value>:      set volume in %\n'
-        '\t[--speed|-s] <value>:       set speed value (default is 175)\n'
+        '\t[--volume|-v] <value>:      set volume in % from 0 to 200\n'
+        '\t[--speed|-s] <value>:       set speed value from 0 (default is 115)\n'
         '\t[--language|-l] <language>: select prefered language\n'
         '\t[--woman|-w]:               use female voice if added\n'
         '\t[--quiet|-q]:               whisper text if added\n\n'
@@ -147,6 +149,7 @@ class Module(ModuleBase):
     aliases = (name, 'speak')
     category = 'Actions'
     min_args = 1
+    bot_perms = (PermissionEmbedLinks(), )
     flags = {
         'language': {
             'alias': 'l',
@@ -180,7 +183,21 @@ class Module(ModuleBase):
 
     async def on_call(self, ctx, args, **flags):
         if args[1:].lower() == 'list':
-            return '\n'.join(f'`{k}`: {v}' for k, v in LANG_LIST.items())
+            lines = [f'{k:<15}| {v}' for k, v in LANG_LIST.items()]
+            lines_per_chunk = 30
+            chunks = [f'```{"code":<15}| name\n{"-" * 45}\n' + '\n'.join(lines[i:i + lines_per_chunk]) + '```' for i in range(0, len(lines), lines_per_chunk)]
+
+            p = Paginator(self.bot)
+            for i, chunk in enumerate(chunks):
+                e = Embed(
+                    title=f'Supported languages ({len(lines)})',
+                    colour=Colour.gold(),
+                    description=chunk
+                )
+                e.set_footer(text=f'Page {i + 1} / {len(chunks)}')
+                p.add_page(embed=e)
+
+            return await p.run(ctx)
 
         text = args[1:]
 
@@ -215,7 +232,7 @@ class Module(ModuleBase):
         speed_flag = flags.get('speed')
         if speed_flag is not None:
             try:
-                speed = int(speed_flag)
+                speed = int(speed_flag) - 80
             except ValueError:
                 return '{error} Invalid speed value'
 

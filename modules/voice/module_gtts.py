@@ -1,9 +1,11 @@
 from objects.modulebase import ModuleBase
+from objects.permissions import PermissionEmbedLinks
+from objects.paginators import Paginator
 
 from tempfile import TemporaryFile
 from functools import partial
 
-from discord import DMChannel, File, FFmpegPCMAudio, PCMVolumeTransformer
+from discord import Embed, Colour, DMChannel, File, FFmpegPCMAudio, PCMVolumeTransformer
 
 import gtts
 
@@ -21,8 +23,8 @@ class Module(ModuleBase):
         'Command flags:\n'
         '\t[--file|-f]:                respond with audio file\n'
         '\t[--no-voice|-n]:            don\'t use voice channel\n'
-        '\t[--volume|-v] <value>:      set volume in %\n'
-        '\t[--slow|-s]:                use slow mode\n'
+        '\t[--volume|-v] <value>:      set volume in % from 0 to 200\n'
+        '\t[--slow|-s]:                use slow mode if added\n'
         '\t[--language|-l] <language>: select prefered language\n\n'
         'Subcommands:\n'
         '\t{prefix}{aliases} list:     show list of languages'
@@ -32,6 +34,7 @@ class Module(ModuleBase):
     aliases = (name, 'gspeak')
     category = 'Actions'
     min_args = 1
+    bot_perms = (PermissionEmbedLinks(), )
     flags = {
         'language': {
             'alias': 'l',
@@ -60,7 +63,21 @@ class Module(ModuleBase):
 
     async def on_call(self, ctx, args, **flags):
         if args[1:].lower() == 'list':
-            return '\n'.join(f'`{k}`: {v}' for k, v in self.langs.items())
+            lines = [f'{k:<10}| {v}' for k, v in self.langs.items()]
+            lines_per_chunk = 30
+            chunks = [f'```{"code":<10}| name\n{"-" * 35}\n' + '\n'.join(lines[i:i + lines_per_chunk]) + '```' for i in range(0, len(lines), lines_per_chunk)]
+
+            p = Paginator(self.bot)
+            for i, chunk in enumerate(chunks):
+                e = Embed(
+                    title=f'Supported languages ({len(lines)})',
+                    colour=Colour.gold(),
+                    description=chunk
+                )
+                e.set_footer(text=f'Page {i + 1} / {len(chunks)}')
+                p.add_page(embed=e)
+
+            return await p.run(ctx)
 
         voice_flag = not flags.get(
             'no-voice', isinstance(ctx.channel, DMChannel))
