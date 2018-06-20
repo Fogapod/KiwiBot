@@ -46,7 +46,7 @@ class Module(ModuleBase):
         if not channel.permissions_for(ctx.author).send_messages:
             return '{warning} You don\'t have permission to send messages to this channel'
 
-        name = user.display_name if getattr(user, 'guild') == ctx.guild else user.name
+        name = user.display_name if getattr(user, 'guild', None) == ctx.guild else user.name
 
         if len(name) < 2:
             # minimum webhook name len is 2 characters, so transparent character is required
