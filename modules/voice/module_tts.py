@@ -232,7 +232,7 @@ class Module(ModuleBase):
         speed_flag = flags.get('speed')
         if speed_flag is not None:
             try:
-                speed = int(speed_flag) - 80
+                speed = int(speed_flag) + 80
             except ValueError:
                 return '{error} Invalid speed value'
 
