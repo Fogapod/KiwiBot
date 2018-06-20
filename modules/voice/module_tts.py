@@ -35,7 +35,7 @@ LANG_LIST = {
     'de': 'German',
     'el': 'Greek',
     'en-029': 'English_(Caribbean)',
-    'en-gb': 'English_(Great_Britain)',
+    # 'en-gb': 'English_(Great_Britain)',
     'en-gb-scotland': 'English_(Scotland)',
     'en-gb-x-gbclan': 'English_(Lancaster)',
     'en-gb-x-gbcwmd': 'English_(West_Midlands)',
@@ -120,10 +120,10 @@ LANG_LIST = {
 }
 
 ADDITIONAL_LANGS = {
-    'en1': 'mb-en1',
-    'us1': 'mb-us1',
-    'de1': 'mb-de1',
-    'de2': 'mb-de2'
+    'mb-en1': 'Better English 1',
+    'mb-us1': 'Better US English 1',
+    'mb-de1': 'Better German 1',
+    'mb-de2': 'Better German 2'
 }
 
 LANG_LIST.update(ADDITIONAL_LANGS)
@@ -238,12 +238,12 @@ class Module(ModuleBase):
 
             program.extend(('-s', str(speed)))
 
-        language_flag = flags.get('language', 'en-gb')
+        language_flag = flags.get('language', 'en-us')
 
         if language_flag not in LANG_LIST:
             return '{warning} Language not found. Use `list` subcommand to get list of voices'
 
-        language = LANG_LIST[language_flag]
+        language = language_flag
 
         woman_flag = flags.get('woman', False)
         quiet_flag = flags.get('quiet', False)
