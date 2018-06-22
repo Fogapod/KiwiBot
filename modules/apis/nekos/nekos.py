@@ -6,8 +6,8 @@ import random
 API_URL = 'https://nekos.life/api/v2'
 
 SFW_IMG_TAGS = [
-    'fox', 'lizard', 'meow', 'neko', 'avatar', 'holo', 'wallpaper',
-    'gasm', 'ngif','kemonomimi', 'eron', 'waifu'
+    'fox', 'lizard', 'meow', 'neko', 'avatar', 'holo',
+    'ngif','kemonomimi', 'eron', 'waifu'
 ]
 
 NSFW_IMG_TAGS = [
@@ -16,7 +16,7 @@ NSFW_IMG_TAGS = [
     'tits', 'smallboobs', 'femdom', 'keta', 'cum', 'hololewd',
     'yuri', 'lewdkemo', 'solog', 'lewdk', 'solo', 'feetg', 'erokemo',
     'hentai', 'blowjob', 'holoero', 'pwankg', 'ero', 'feet', 'eroyuri',
-    'erofeet', 'erok'
+    'erofeet', 'erok', 'wallpaper', 'gasm'
 ]
 
 TAG_NAME_REPLACEMENTS = {
