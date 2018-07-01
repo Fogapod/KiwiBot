@@ -18,6 +18,7 @@ class Module(ModuleBase):
     name = 'emoji'
     aliases = (name, 'e')
     category = 'Discord'
+    min_args = 1
     max_args = 1
     bot_perms = (PermissionEmbedLinks(), PermissionAttachFiles())
 
