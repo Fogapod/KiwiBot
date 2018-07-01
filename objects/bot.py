@@ -269,7 +269,10 @@ class KiwiBot(discord.AutoShardedClient):
         if sum(1 for m in channel.members if not m.bot) > 0:  # there are users in channel
             return
 
-        del self._leave_voice_channel_tasks[channel.id]
+        try:
+            del self._leave_voice_channel_tasks[channel.id]
+        except KeyError:
+            pass
 
         if vc.is_connected():
             await vc.disconnect()
