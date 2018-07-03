@@ -26,7 +26,7 @@ class Module(ModuleBase):
             return '{warning} User not found'
         reason = args[2:] or ''
 
-        if isinstance(user, Member):
+        if isinstance(user, Member) and user.guild == ctx.guild:
             if user == ctx.guild.owner:
                 return '{warning} Can\'t ban guild owner'
             if ctx.me.top_role <= user.top_role:
