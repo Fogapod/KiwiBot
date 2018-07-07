@@ -44,10 +44,7 @@ class Module(ModuleBase):
 
         if len(args) == 1:
             module_list = []
-            for module in self.bot.mm.get_all_modules():
-                if module.hidden:
-                    if not (hidden_flag):
-                        continue
+            for module in self.bot.mm.get_all_modules(hidden=hidden_flag):
                 if not module.hidden and hide_normal_flag:
                     continue
 
