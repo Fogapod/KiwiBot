@@ -73,3 +73,6 @@ class Module(ModuleBase):
             e.set_footer(text=ctx.author, icon_url=ctx.author.avatar_url)
 
             await ctx.send(embed=e)
+
+        async def on_unload(self):
+            await self.translator.close()
