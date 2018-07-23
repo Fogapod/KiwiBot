@@ -114,6 +114,9 @@ class ModuleManager:
                 logger.info(f'Failed to check command, stopped on module {name}')
                 logger.info(traceback.format_exc())
                 return
+
+            command_output = None
+
             try:
                 logger.trace(
                     f'{ctx.author}-{ctx.author.id} -> {module.name} in ' +
@@ -125,19 +128,29 @@ class ModuleManager:
                 except Exception:
                     logger.debug(f'Error dispatching command_use event')
                     logger.debug(traceback.format_exc())
-                return await module.call_command(ctx, args, **args.flags)
+                self.bot._processing_commands[ctx.message.id] = True
+
+                command_output = await module.call_command(ctx, args, **args.flags)
             except Permission as p:
-                return await module.on_missing_permissions(ctx, p)
+                command_output = await module.on_missing_permissions(ctx, p)
+            except CommandCancelled:
+                return
             except Exception as e:
                 module_tb = traceback.format_exc()
                 logger.info(f'Error occured calling {name}')
                 logger.info(module_tb)
                 logger.trace(f'Calling {name} on_error')
                 try:
-                    return await module.on_error(e, module_tb, ctx)
+                    command_output = await module.on_error(e, module_tb, ctx)
                 except Exception:
                     logger.debug(f'Error occured calling {name} on_error')
                     logger.debug(traceback.format_exc())
+
+            try:
+                del self.bot._processing_commands[ctx.message.id]
+            except IndexError:
+                pass
+            return command_output
 
     def get_all_modules(self, hidden=False, disabled=False):
         return [m for m in self.modules.values() if m.hidden <= hidden and m.disabled <= disabled]

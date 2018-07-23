@@ -63,6 +63,9 @@ class KiwiBot(discord.AutoShardedClient):
         self._last_messages = {}
         self._leave_voice_channel_tasks = {}
 
+        # currently processed commands
+        self._processing_commands = {}
+
     @staticmethod
     def get_bot():
         return KiwiBot._bot
@@ -217,6 +220,10 @@ class KiwiBot(discord.AutoShardedClient):
             await self.on_message(after, from_edit=True)
 
     async def on_raw_message_delete(self, event):
+        if event.message_id in self._processing_commands:
+            # cancel command
+            self._processing_commands[event.message_id] = False
+
         if await self.redis.exists(f'tracked_message:{event.message_id}'):
             await self.clear_responses_to_message(event.message_id)
         await self.redis.delete(f'tracked_message:{event.message_id}')
