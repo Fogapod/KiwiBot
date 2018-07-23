@@ -148,7 +148,7 @@ class ModuleManager:
 
             try:
                 del self.bot._processing_commands[ctx.message.id]
-            except IndexError:
+            except KeyError:
                 pass
             return command_output
 
