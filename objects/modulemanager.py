@@ -128,7 +128,9 @@ class ModuleManager:
                 except Exception:
                     logger.debug(f'Error dispatching command_use event')
                     logger.debug(traceback.format_exc())
-                self.bot._processing_commands[ctx.message.id] = True
+
+                if ctx.message.id not in self.bot._processing_commands:
+                    self.bot._processing_commands[ctx.message.id] = True
 
                 command_output = await module.call_command(ctx, args, **args.flags)
             except Permission as p:
