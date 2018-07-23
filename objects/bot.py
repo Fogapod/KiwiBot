@@ -212,6 +212,10 @@ class KiwiBot(discord.AutoShardedClient):
         if before.content == after.content:
             return
 
+        if before.id in self._processing_commands:
+            # cancel command
+            self._processing_commands[before.id] = False
+        
         if await self.redis.exists(f'tracked_message:{before.id}'):
             await self.clear_responses_to_message(before.id)
             ttl = await self.redis.ttl(f'tracked_message:{before.id}')
