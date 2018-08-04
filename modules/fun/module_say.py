@@ -42,6 +42,10 @@ class Module(ModuleBase):
     }
 
     async def on_call(self, ctx, args, **flags):
+        text = args[1:]
+        if not text:
+            return '{warning} Cannot send an empty message'
+
         channel = flags.get('channel', None)
         user = flags.get('user', None)
         tts = flags.get('tts', False)
@@ -90,7 +94,7 @@ class Module(ModuleBase):
             await self.bot.delete_message(ctx.message)
 
         m = await ctx.send(
-            args[1:], channel=channel, tts=tts, register=not delete_message)
+            text, channel=channel, tts=tts, register=not delete_message)
         if m is None:
             return '{error} Failed to deliver message. (blocked by user/no common servers/no permission to send messages to this channel)'
 
