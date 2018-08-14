@@ -24,7 +24,7 @@ ID_EXPR = '\d{17,19}'
 USER_MENTION_EXPR = f'<@!?({ID_EXPR})>'
 ROLE_MENTION_EXPR = f'<@&({ID_EXPR})>'
 CHANNEL_MENTION_EXPR = f'<#({ID_EXPR})>'
-EMOJI_EXPR = f'<(?P<animated>a?):(?P<name>[_a-zA-Z]{{2,32}}):(?P<id>{ID_EXPR})>'
+EMOJI_EXPR = f'<(?P<animated>a?):(?P<name>[_a-zA-Z0-9]{{2,32}}):(?P<id>{ID_EXPR})>'
 
 ID_REGEX = re.compile(ID_EXPR)
 USER_MENTION_REGEX = re.compile(USER_MENTION_EXPR)
