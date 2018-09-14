@@ -62,7 +62,7 @@ class Module(ModuleBase):
                     translation = await self.translator.translate(text, dest=l)
                     text = translation.text
             except Exception:
-                return '{error} Failed to translate. Please, try again later'
+                return '{error} Failed to translate. Please, try again later. If there are emojis in text, try removing them.'
 
             e = Embed(colour=Colour.gold(), title='BadTranslator')
             e.description = text[:2048]
