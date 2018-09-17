@@ -5,15 +5,16 @@ import random
 
 from discord import Embed, Colour
 
-
 try:
     import aiogoogletrans as gt
 except ImportError:
 	raise ImportError(
         'aiogoogletrans python library is required to use module'
         'You can install it at https://github.com/Fogapod/aiogoogletrans'
-    )
+)
 
+DEFAULT_CHAIN_LEN = 5
+MAX_CHAIN_LEN = 7  # 10 for patrons?
 
 class Module(ModuleBase):
 
@@ -23,7 +24,8 @@ class Module(ModuleBase):
         'Subcommands:\n'
         '\tlist: get list of languages\n\n'
         'Command flags:\n'
-        '\t[--out|-o] <language>: output language'
+        '\t[--out|-o] <language>: output language\n'
+        '\t[--len|-l] <number>:   set custom chain len'
     )
 
     name = 'badtranslator'
@@ -34,6 +36,10 @@ class Module(ModuleBase):
     flags = {
         'out': {
             'alias': 'o',
+            'bool': False
+        },
+        'len': {
+            'alias': 'l',
             'bool': False
         }
     }
@@ -49,11 +55,22 @@ class Module(ModuleBase):
         if out_lang not in gt.LANGUAGES:
             return '{warning} Invalid out language. Try using list subcommand'
 
+        chain_len = flags.get('len', DEFAULT_CHAIN_LEN)
+        if isinstance(chain_len, str) and not chain_len.isdigit():
+            return '{error} Wrong value given for chain len'
+
+        chain_len = int(chain_len)
+        if chain_len > MAX_CHAIN_LEN:
+            return '{warning} Max chain len is %d, you asked for %d' % (MAX_CHAIN_LEN, chain_len)
+
+        if chain_len < 2:
+            return '{error} Chain len should not be shorter than 2. Use goodtranslator instead'
+
         async with ctx.channel.typing():
             langs = random.sample(gt.LANGUAGES.keys(), 6)
             if 'en' in langs:
                 langs.remove('en')
-            langs = langs[:5]
+            langs = langs[:chain_len]
             langs.append(out_lang)
 
             text = args[1:]

@@ -8,6 +8,9 @@ from discord import Embed, Colour
 
 API_URL = 'https://translate.yandex.net/api/v1.5/tr.json/'
 
+DEFAULT_CHAIN_LEN = 5
+MAX_CHAIN_LEN = 7  # 10 for patrons?
+
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} <text>'
@@ -16,7 +19,8 @@ class Module(ModuleBase):
         'Subcommands:\n'
         '\tlist: get list of languages\n\n'
         'Command flags:\n'
-        '\t[--out|-o] <language>: output language'
+        '\t[--out|-o] <language>: output language\n'
+        '\t[--len|-l] <number>:   set custom chain len'
     )
 
     name = 'badtranslator2'
@@ -27,6 +31,10 @@ class Module(ModuleBase):
     flags = {
         'out': {
             'alias': 'o',
+            'bool': False
+        },
+        'len': {
+            'alias': 'l',
             'bool': False
         }
     }
@@ -54,11 +62,22 @@ class Module(ModuleBase):
         if out_lang not in self.langs:
             return '{warning} Invalid out language. Try using list subcommand'
 
+        chain_len = flags.get('len', DEFAULT_CHAIN_LEN)
+        if isinstance(chain_len, str) and not chain_len.isdigit():
+            return '{error} Wrong value given for chain len'
+
+        chain_len = int(chain_len)
+        if chain_len > MAX_CHAIN_LEN:
+            return '{warning} Max chain len is %d, you asked for %d' % (MAX_CHAIN_LEN, chain_len)
+
+        if chain_len < 2:
+            return '{error} Chain len should not be shorter than 2. Use goodtranslator2 instead'
+
         async with ctx.channel.typing():
-            langs = random.sample(self.langs.keys(), 6)
+            langs = random.sample(self.langs.keys(), chain_len + 1)
             if 'en' in langs:
                 langs.remove('en')
-            langs = langs[:5]
+            langs = langs[:chain_len]
             langs.append(out_lang)
 
             text = args[1:]
