@@ -67,7 +67,7 @@ class Module(ModuleBase):
             return '{error} Chain len should not be shorter than 2. Use goodtranslator instead'
 
         async with ctx.channel.typing():
-            langs = random.sample(gt.LANGUAGES.keys(), 6)
+            langs = random.sample(gt.LANGUAGES.keys(), chain_len + 1)
             if 'en' in langs:
                 langs.remove('en')
             langs = langs[:chain_len]
