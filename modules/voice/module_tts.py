@@ -214,12 +214,16 @@ class Module(ModuleBase):
             if not ctx.author.voice.channel.permissions_for(ctx.guild.me).connect:
                 return '{error} I don\'t have permission to connect to the voice channel'
 
-            if ctx.guild.voice_client is None:
+            if ctx.guild.voice_client is None:  # not connected to voice channel
                 try:
                     vc = await ctx.author.voice.channel.connect()
                 except Exception:
                     return '{warning} Failed to connect to voice channel'
-            else:
+            elif ctx.author not in ctx.guild.voice_client.channel.members:  # connected to a different voice channel
+                await ctx.guild.voice_client.move_to(ctx.author.voice.channel)
+
+                vc = ctx.guild.voice_client
+            else:  # already connected and is in the right place
                 vc = ctx.guild.voice_client
 
         try:
