@@ -27,15 +27,21 @@ class Module(ModuleBase):
     hidden = True
 
     async def on_call(self, ctx, args, **flags):
-        if flags.get('shell', False):
-            process, pid = await create_subprocess_shell(args[1:])
-        else:
-            process, pid = await create_subprocess_exec(*args.args[1:])
+        try:
+            if flags.get('shell', False):
+                process, pid = await create_subprocess_shell(args[1:])
+            else:
+                process, pid = await create_subprocess_exec(*args.args[1:])
+        except Exception as e:
+            return '{error} Error creating subprocess: ' + str(e)
         
         pid_message = await ctx.send(f'Started process `{pid}`')
 
         stdout, stderr = await execute_process(process)
-        result = stdout.decode()
+        try:
+            result = stdout.decode()
+        except Exception as e:
+            result = f'Error happened while decoding, raw result:\n\n{stdout}'
 
         if process.returncode != 0:
             result += '\n' + stderr.decode()
