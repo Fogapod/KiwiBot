@@ -42,7 +42,7 @@ class Module(ModuleBase):
     }
 
     async def on_load(self, from_reload):
-        self.translator = gt.Translator()
+        self.translator = gt.Translator(proxies=list(self.bot.proxies.keys()) + [None])
 
     async def on_call(self, ctx, args, **flags):
         if args[1:].lower() == 'list':

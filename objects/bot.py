@@ -39,6 +39,7 @@ class KiwiBot(discord.AutoShardedClient):
         # timestamp of bot launch, filled in first on_ready call
         self.start_time = 0
 
+        self.proxies = None
         self.sess = None
 
         self.config = Config('config.json', loop=self.loop)
@@ -119,6 +120,7 @@ class KiwiBot(discord.AutoShardedClient):
 
         self.is_first_on_ready_event = False
 
+        self.proxies = self.config.get('proxies')
         self.sess = ClientSession()
 
         redis_port = self.config.get('redis_port', None)
@@ -193,7 +195,10 @@ class KiwiBot(discord.AutoShardedClient):
                 module_response, ctx.message, self)
 
         if module_response:
-            await ctx.send(module_response)
+            try:
+                await ctx.send(module_response)
+            except Exception:
+                pass
 
     def register_last_user_message_timestamp(self, msg):
         # await self.redis.set(
