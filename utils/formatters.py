@@ -86,3 +86,17 @@ def lazy_format(s, *args, **kwargs):
             kwargs[key] = "{%s}" % key
         except (ValueError, AttributeError, IndexError, TypeError):
             return s
+
+def cleanup_code(text):
+    lang = None
+    if len(text) > 6 and text[:3] == '```' and text[-3:] == '```':
+        text = text[3:-3]
+        lang = ''
+        for i, c in enumerate(text):
+            if c.isspace():
+                if c == '\n':
+                    break
+            else:
+                lang += c
+        text = text[i + 1:]
+    return text, lang

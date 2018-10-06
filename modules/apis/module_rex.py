@@ -1,4 +1,5 @@
 from objects.modulebase import ModuleBase
+from utils.formatters import cleanup_code
 
 
 API_URL = 'http://rextester.com/rundotnet/api'
@@ -117,18 +118,26 @@ class Module(ModuleBase):
             'CompilerArgs':   ''
         }
 
-        if args[1].isdigit():
-            lang_code = int(args[1])
-            if lang_code in LANG_CODES.values():
-                params['LanguageChoice'] = lang_code
-        else:
-            params['LanguageChoice'] = LANG_CODES.get(args[1].lower(), '')
+        cleaned, lang = cleanup_code(args[1:])
+        if lang is not None:  # was cleaned
+            params['LanguageChoice'] = LANG_CODES.get(lang.lower(), '')
+        else:  # try to get language from 1st argument
+            if args[1].isdigit():
+                lang_code = int(args[1])
+                if lang_code in LANG_CODES.values():
+                    params['LanguageChoice'] = lang_code
+            else:
+                params['LanguageChoice'] = LANG_CODES.get(args[1].lower(), '')
+
+            cleaned, _ = cleanup_code(args[2:])
+            # we don't care about parsed language because
+            # it's already defined explicitly
 
         if not params['LanguageChoice']:
-            return '{warning} Invalid language'
+            return '{warning} Invalid language, try checking list of supported languages'
 
         params['CompilerArgs'] = COMPILE_OPTIONS.get(params['LanguageChoice'], '')
-        params['Program'] = args[2:]
+        params['Program'] = cleaned
 
         async with self.bot.sess.post(API_URL, params=params) as r:
             if r.status == 200:
@@ -136,7 +145,7 @@ class Module(ModuleBase):
                 result  = result_json['Result'] or ''
                 result += result_json['Errors'] or ''
             else:
-                return '{error} Problem with rex response. Please, try again later'
+                return '{error} Error connecting to rextester API. Please, try again later'
 
         if not result:
             result = 'Evaluated'

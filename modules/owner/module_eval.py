@@ -11,6 +11,8 @@ from contextlib import redirect_stdout
 
 import discord
 
+from utils.formatters import cleanup_code
+
 
 class Module(ModuleBase):
 
@@ -28,7 +30,7 @@ class Module(ModuleBase):
         self._last_result = None
 
     async def on_call(self, ctx, args, **flags):
-        program = args[1:]
+        program, _ = cleanup_code(args[1:])
 
         glob = {
             'self': self,
