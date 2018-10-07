@@ -392,7 +392,7 @@ class KiwiBot(discord.AutoShardedClient):
             emoji = self.get_emoji(reaction)
             if emoji is None:
                 if raise_on_errors:
-                    raise ValueError(f'Emoji with id {emoji} not found in cache')
+                    raise ValueError(f'Emoji with id {reaction} not found in cache')
                 else:
                     return
         elif reaction_type is discord.Emoji:
