@@ -35,6 +35,7 @@ async def format_response(response, message, bot):
 
 
 def trim_text(text, max_len=2000):
+    text = text.strip()
     if len(text) > max_len:
         return text[:max_len // 2 - 3] + '\n...\n' + text[-max_len // 2 + 2:]
 
