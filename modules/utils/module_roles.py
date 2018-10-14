@@ -26,11 +26,11 @@ class Module(ModuleBase):
             if user is None:
                 return '{warning} User not found'
             
-            roles = user.roles[::-1]
+            roles = user.roles
         else:
-            roles = ctx.guild.role_hierarchy
+            roles = ctx.guild.roles
 
-        lines = [f'{r.id:<19}| {r.name}' for r in roles]
+        lines = [f'{r.id:<19}| {r.name}' for r in roles[::-1]]
         lines_per_chunk = 30
         chunks = [f'```{"id":<19}| name\n{"-" * 53}\n' + '\n'.join(lines[i:i + lines_per_chunk]) + '```' for i in range(0, len(lines), lines_per_chunk)]
 

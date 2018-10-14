@@ -31,7 +31,7 @@ class Module(ModuleBase):
         invite = ''
 
         if guild == ctx.guild:
-            top_role = guild.role_hierarchy[0].mention
+            top_role = guild.roles[-1].mention
         else:
             try:
                 invite = await guild.channels[0].create_invite(
@@ -43,7 +43,7 @@ class Module(ModuleBase):
             else:
                 invite = invite.url
 
-            top_role = f'@{guild.role_hierarchy[0]}'
+            top_role = f'@{guild.roles[-1]}'
 
         bot_count = sum(1 for m in guild.members if m.bot)
 
