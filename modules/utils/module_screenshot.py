@@ -3,6 +3,7 @@ from objects.permissions import PermissionEmbedLinks, PermissionAttachFiles
 
 import time
 import asyncio
+import random
 
 from os import devnull
 
@@ -44,8 +45,10 @@ class Module(ModuleBase):
         if not url.startswith(('http://', 'https://')):
             url = 'http://' + url
 
+        proxy = random.choice(list(self.bot.proxies.keys()))
+
         try:
-            async with self.bot.sess.head(url, timeout=15) as r:
+            async with self.bot.sess.head(url, timeout=15, proxy=proxy) as r:
                 if (r.content_length or 0) > 100000000:
                     return await self.bot.edit_message(
                         m, 'Rejected to navigate')
@@ -56,7 +59,11 @@ class Module(ModuleBase):
  
         try:
             service = service = services.Chromedriver(log_file=devnull)
-            browser = browsers.Chrome(chromeOptions={'args': ['--headless', '--disable-gpu']})
+            browser = browsers.Chrome(
+                chromeOptions={
+                    'args': ['--headless', '--disable-gpu', f'proxy-server={proxy}']
+                }
+            )
 
             async with get_session(service, browser) as session:
                 await session.set_window_size(1920, 1080)
