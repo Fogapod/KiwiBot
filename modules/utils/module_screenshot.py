@@ -61,7 +61,12 @@ class Module(ModuleBase):
             service = service = services.Chromedriver(log_file=devnull)
             browser = browsers.Chrome(
                 chromeOptions={
-                    'args': ['--headless', '--disable-gpu', f'proxy-server={proxy}']
+                    'args': [
+                        '--headless', '--disable-gpu', f'proxy-server={proxy}', 'lang=en', '--limit-fps=1',
+                        '--disable-mojo-local-storage', '--hide-scrollbars', '--ipc-connection-timeout=5',
+                        # '--timeout=5000'
+                        # timeout flag completely breakes browser for some reason
+                    ]
                 }
             )
 
