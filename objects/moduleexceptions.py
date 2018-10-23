@@ -24,3 +24,8 @@ class TooManyArgs(ModuleCallError):
 class MissingPermissions(ModuleCallError):
     def __init__(self, *missing):
         self.missing = missing
+
+
+class Ratelimited(ModuleCallError):
+    def __init__(self, ttl):
+        self.time_left = ttl

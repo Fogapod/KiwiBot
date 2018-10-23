@@ -110,6 +110,8 @@ class ModuleManager:
                 return await module.on_too_many_arguments(ctx)
             except MissingPermissions as e:
                 return await module.on_missing_permissions(ctx, *e.missing)
+            except Ratelimited as e:
+                return await module.on_ratelimit(ctx, e.time_left)
             except Exception:
                 logger.info(f'Failed to check command, stopped on module {name}')
                 logger.info(traceback.format_exc())

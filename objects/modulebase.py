@@ -4,6 +4,7 @@ from constants import DEV_GUILD_ID, DEV_GUILD_INVITE
 from utils.funcs import get_local_prefix
 
 from objects.moduleexceptions import *
+from objects.ratelimiter import Ratelimiter
 
 
 class ModuleBase:
@@ -24,15 +25,17 @@ class ModuleBase:
     nsfw             = False  # can only be used in nsfw channel
     hidden           = False  # would be hidden when possible
     disabled         = False  # won't be checked or called
+    ratelimit_type   = 'user' # type of ratelimuter (see objects/ratelimiter.py)
+    ratelimit        = (1, 1) # number of allowed usage / seconds
     events           = {}     # (name: function) pairs of events module will handle
 
     def __init__(self, bot):
         self.bot = bot
 
-        if type(self.bot_perms) is not tuple:
+        if not isinstance(self.bot_perms, tuple):
             self.required_perms = (self.bot_perms, )
 
-        if type(self.user_perms) is not tuple:
+        if not isinstance(self.user_perms, tuple):
             self.require_perms = (self.user_perms, )
 
         # format call_flags dict
@@ -46,11 +49,18 @@ class ModuleBase:
                 self._flags[alias] = { 'alias': k }
             self._flags[k] = { 'alias': k, 'bool': bool }
 
+        self._ratelimiter = Ratelimiter(self.ratelimit_type, self.name, *self.ratelimit)
+
+
     async def on_guild_check_failed(self, ctx):
         return '{error} This command can only be used in guild'
 
     async def on_nsfw_permission_denied(self, ctx):
         return '{error} You can use this command only in channel marked as nsfw'
+
+    async def on_ratelimit(self, ctx, time_left):
+        # TODO: different output for different ratelimiter type
+        return '{warning} Please, try again in **' + str(time_left) + '** seconds'
 
     async def on_not_enough_arguments(self, ctx):
         return await self.on_doc_request(ctx)
@@ -113,6 +123,10 @@ class ModuleBase:
 
         if missing_permissions:
             raise MissingPermissions(*missing_permissions)
+
+        calls_left, ttl = await self._ratelimiter.test(ctx)
+        if calls_left <= 0:
+            raise Ratelimited(ttl)
 
         return True
 
