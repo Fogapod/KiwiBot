@@ -12,7 +12,7 @@ class Ratelimiter:
         self.time = time
 
     async def test(self, ctx):
-        # returns (amount of requests left, seconds until
+        # returns (amount of requests left, milliseconds until
 
         if self.rl_type == 'global':
             target_id = ''
@@ -31,4 +31,4 @@ class Ratelimiter:
         if amount == 1:  # was createdt
             await ctx.bot.redis.expire(key, self.time)
 
-        return self.amount - amount + 1, await ctx.bot.redis.ttl(key)
+        return self.amount - amount + 1, await ctx.bot.redis.pttl(key)

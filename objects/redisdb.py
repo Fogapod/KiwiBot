@@ -67,6 +67,9 @@ class RedisDB:
     async def ttl(self, key):
         return await self.execute('TTL', key)
 
+    async def pttl(self, key):
+        return await self.execute('PTTL', key)
+
     async def delete(self, *keys):
         return await self.execute('DEL', *keys)
 

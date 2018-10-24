@@ -60,7 +60,7 @@ class ModuleBase:
 
     async def on_ratelimit(self, ctx, time_left):
         # TODO: different output for different ratelimiter type
-        return '{warning} Please, try again in **' + str(time_left) + '** seconds'
+        return '{warning} Please, try again in **' + str(round(time_left / 1000, 1)) + '** seconds'
 
     async def on_not_enough_arguments(self, ctx):
         return await self.on_doc_request(ctx)
