@@ -54,19 +54,19 @@ class Module(ModuleBase):
 
         try:
             webhook = await channel.create_webhook(name=name)
+            #
+            # https://github.com/Rapptz/discord.py/issues/1242
+            #
+            webhook._adapter.store_user = webhook._adapter._store_user
         except Exception:
             return '{error} Failed to create webhook. Probably maximum webhook count reached'
 
         try:
-            # https://github.com/Rapptz/discord.py/issues/1242
-            #
-            # m = await self.bot.send_message(
-            #    args[2:], avatar_url=user.avatar_url_as(format='png'),
-            #    wait=True, response_to=ctx.message
-            # )
-            #
             await self.bot.send_message(
-                webhook, args[2:], avatar_url=user.avatar_url_as(format='png'))
+                webhook, args[2:],
+                avatar_url=user.avatar_url_as(format='png'),
+                wait=True, response_to=ctx.message
+            )
         except Exception:
             pass
 
