@@ -50,6 +50,9 @@ class Module(ModuleBase):
 
         try:
             async with self.bot.sess.head(url, timeout=15, proxy=proxy) as r:
+                if r.status == 503:
+                    return await self.bot.edit_message(m, 'Host resolving issue')
+
                 if (r.content_length or 0) > 100000000:
                     return await self.bot.edit_message(
                         m, 'Rejected to navigate')
