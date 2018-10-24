@@ -57,6 +57,7 @@ class Module(ModuleBase):
             'bool': False
         }
     }
+    ratelimit = (1, 5)
 
     async def on_load(self, from_reload):
         self.langs = gtts.lang.tts_langs()

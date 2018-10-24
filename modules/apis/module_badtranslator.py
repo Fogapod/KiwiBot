@@ -43,6 +43,7 @@ class Module(ModuleBase):
             'bool': False
         }
     }
+    ratelimit = (1, 5)
 
     async def on_load(self, from_reload):
         self.translator = gt.Translator(proxies=list(self.bot.proxies.keys()) + [None])

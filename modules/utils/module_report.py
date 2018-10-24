@@ -14,6 +14,7 @@ class Module(ModuleBase):
     aliases = (name, )
     category = 'Actions'
     min_args = 1
+    ratelimit = (1, 60)
 
     async def on_load(self, from_reload):
         self.report_channel = self.bot.get_channel(REPORT_CHANNEL_ID)

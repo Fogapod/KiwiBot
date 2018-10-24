@@ -32,6 +32,7 @@ class Module(ModuleBase):
     min_args = 1
     max_args = 1
     bot_perms = (PermissionEmbedLinks(), PermissionAttachFiles())
+    ratelimit = (1, 5)
 
     async def on_load(self, from_reload):
         self.lock = asyncio.Lock()
