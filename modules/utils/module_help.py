@@ -63,7 +63,7 @@ class Module(ModuleBase):
 
             chunks_by_category = {}
             for category, modules in sorted(modules_by_category.items(), key=lambda x: x[0]):
-                lines = sorted([f'{m.name:<20}{m.short_doc}' for m in modules])
+                lines = sorted([f'**{m.name}**: {m.short_doc}' for m in modules])
                 lines_per_chunk = 30
                 chunks = [lines[i:i + lines_per_chunk] for i in range(0, len(lines), lines_per_chunk)]
                 chunks_by_category[category] = chunks
@@ -74,7 +74,7 @@ class Module(ModuleBase):
             def make_page(title, chunk, page):
                 e = Embed(
                     colour=Colour.gold(), title=title,
-                    description='```\n' + '\n'.join(chunk) + '```'
+                    description='\n'.join(chunk)
                 )
                 e.set_footer(text=f'Current prefix: {local_prefix}')
 
@@ -87,13 +87,13 @@ class Module(ModuleBase):
             p.add_page(**make_page('Categories', [], 1))
 
             page = 2
-            p._pages[0]['embed'].description = f'```\n{"Category":<19} Pages\n'
+            p._pages[0]['embed'].description = 'Category: Pages\n\n'
             for category, chunks in chunks_by_category.items():
-                p._pages[0]['embed'].description += f'{category:.<19} {page:<2}- {page + len(chunks) - 1}\n'
+                p._pages[0]['embed'].description += f'{category}: **{page:<2}- {page + len(chunks) - 1}**\n'
                 for chunk in chunks:
                     p.add_page(**make_page(category, chunk, page))
                     page += 1
-            p._pages[0]['embed'].description += '```'
+            p._pages[0]['embed'].description
 
             return await p.run(ctx)
 
@@ -122,7 +122,7 @@ class Module(ModuleBase):
             module_list.append(module)
 
         if module_list:
-            lines = sorted([f'{m.name:<20}{m.short_doc}' for m in module_list])
+            lines = sorted([f'**{m.name}**: {m.short_doc}' for m in module_list])
             lines_per_chunk = 30
             chunks = [lines[i:i + lines_per_chunk] for i in range(0, len(lines), lines_per_chunk)]
 
@@ -131,7 +131,7 @@ class Module(ModuleBase):
                 p.add_page(
                     embed=Embed(
                         colour=Colour.gold(), title=category,
-                        description=f'```' + '\n'.join(chunk) + '```'
+                        description='\n'.join(chunk)
                     ),
                     content=f'Page **{i + 1}/{len(chunks)}** ({len(modules)}) commands'
                 )
