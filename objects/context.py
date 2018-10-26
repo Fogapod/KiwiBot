@@ -15,7 +15,7 @@ class Context:
         return self.guild.me if self.guild else self.bot.user
 
     async def send(self, content=None, *, channel=None, register=True, **kwargs):
-        if not self.bot._processing_commands.get(self.message.id, False):
+        if not self.bot._processing_commands.get(self.message.id, True):
             # command cancelled
             raise CommandCancelled()
 
@@ -26,7 +26,7 @@ class Context:
             channel, content, response_to=response_to, **kwargs)
 
     async def react(self, emoji, message=None, register=True, **kwargs):
-        if not self.bot._processing_commands.get(self.message.id, False):
+        if not self.bot._processing_commands.get(self.message.id, True):
             # command cancelled
             raise CommandCancelled()
 
