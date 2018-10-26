@@ -44,7 +44,7 @@ class Module(ModuleBase):
         if url.startswith('<') and url.endswith('>'):
             url = url[1:-1]
         if not url.startswith(('http://', 'https://')):
-            url = 'http://' + url
+            url = 'https://' + url
 
         proxy = random.choice(list(self.bot.proxies.keys()))
 
@@ -81,9 +81,8 @@ class Module(ModuleBase):
                 await asyncio.sleep(2)
                 screenshot = await session.get_screenshot()
         except UnknownArsenicError:
-            await self.bot.edit_message(
+            return await self.bot.edit_message(
                 m, 'Unknown exception happened')
-            return
         except Exception:
             return await self.bot.edit_message(
                 m, 'Could not open page, please check url and try again')
