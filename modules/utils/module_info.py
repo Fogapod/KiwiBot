@@ -2,7 +2,7 @@ from objects.modulebase import ModuleBase
 from objects.permissions import PermissionEmbedLinks
 
 from utils.funcs import create_subprocess_shell, execute_process, get_local_prefix
-from constants import BOT_OWNER_ID, DEV_GUILD_INVITE, ASCII_ART
+from constants import DEV_GUILD_INVITE, ASCII_ART
 
 from discord import Colour, Embed
 import discord
@@ -57,18 +57,11 @@ class Module(ModuleBase):
             git_commit = 'Could not get information.'
             repo_name = 'Unnamed Bot'
 
-        try:
-            user = await self.bot.get_user_info(BOT_OWNER_ID)
-        except Exception:
-            author = f'Not found! His id was {BOT_OWNER_ID}'
-        else:
-            author = str(user)
-
         e = Embed(
             colour=Colour.gold(), title='Information',
             url=git_url,
             description=(
-                f'Hello, I\'m a discord bot developed by **{author}**\n'
+                f'Hello, I\'m a discord bot owned by **{self.bot.owner}**\n'
                 f'```\n{ASCII_ART}```'
             )
         )

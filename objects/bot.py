@@ -39,6 +39,7 @@ class KiwiBot(discord.AutoShardedClient):
         # timestamp of bot launch, filled in first on_ready call
         self.start_time = 0
 
+        self.owner = None
         self.proxies = None
         self.sess = None
 
@@ -120,6 +121,7 @@ class KiwiBot(discord.AutoShardedClient):
 
         self.is_first_on_ready_event = False
 
+        self.owner = (await self.application_info()).owner
         self.proxies = self.config.get('proxies')
         self.sess = ClientSession()
 
