@@ -2,7 +2,7 @@ from objects.modulebase import ModuleBase
 from utils.formatters import cleanup_code
 
 
-API_URL = 'http://rextester.com/rundotnet/api'
+API_URL = 'https://rextester.com/rundotnet/api'
 
 LANG_CODES = {
     'c#':          1,
@@ -93,7 +93,7 @@ class Module(ModuleBase):
     )
 
     name = 'rex'
-    aliases = (name, )
+    aliases = (name, 'rextester', 'debug')
     category = 'Services'
     min_args = 1
 
