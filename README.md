@@ -20,4 +20,4 @@ Requirements:
 * [aioredis python library](https://aioredis.readthedocs.io/en/v1.1.0)
 * [uvloop python library](https://uvloop.readthedocs.io)
 * running [redis server](https://redis.io) on default port
-* And other libraries used commands
+* And other libraries used in commands
