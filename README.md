@@ -2,7 +2,7 @@
 
 <img align=right height=256 src=.github/avatar.png>
 
-Note: Please, read [this](https://github.com/Fogapod/whyKiwiBotIsBad) before using bot.
+Note: Please, read [this](https://github.com/WorstDiscordBots/KiwiBot/blob/master/README.md) before using bot.
 
 You can add bot to your guild [with](https://discordapp.com/oauth2/authorize?client_id=394793577160376320&scope=bot&permissions=8) or [without](https://discordapp.com/oauth2/authorize?client_id=394793577160376320&scope=bot&permissions=2146958583) administrator permision.
 
