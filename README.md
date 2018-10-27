@@ -1,6 +1,8 @@
 # KiwiBot
-<img align=right height=256 src=.github/avatar.png/>
-Bot is currently in early stage of development, but it's already usable and has several useful commands.
+
+<img align=right height=256 src=.github/avatar.png>
+
+Note: Please, read [this](https://github.com/Fogapod/whyKiwiBotIsBad) before using bot.
 
 You can add bot to your guild [with](https://discordapp.com/oauth2/authorize?client_id=394793577160376320&scope=bot&permissions=8) or [without](https://discordapp.com/oauth2/authorize?client_id=394793577160376320&scope=bot&permissions=2146958583) administrator permision.
 
@@ -18,3 +20,4 @@ Requirements:
 * [aioredis python library](https://aioredis.readthedocs.io/en/v1.1.0)
 * [uvloop python library](https://uvloop.readthedocs.io)
 * running [redis server](https://redis.io) on default port
+* And other libraries used commands
