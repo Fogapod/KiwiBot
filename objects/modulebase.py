@@ -52,14 +52,14 @@ class ModuleBase:
 
 
     async def on_guild_check_failed(self, ctx):
-        return '{error} This command can only be used in guild'
+        return await ctx.error('This command can only be used in guild')
 
     async def on_nsfw_permission_denied(self, ctx):
-        return '{error} You can use this command only in channel marked as nsfw'
+        return await ctx.error('You can use this command only in channel marked as nsfw')
 
     async def on_ratelimit(self, ctx, time_left):
         # TODO: different output for different ratelimiter type
-        return '{warning} Please, try again in **' + str(round(time_left / 1000, 1)) + '** seconds'
+        return await ctx.warn(f'Please, try again in **{round(time_left / 1000, 1)}** seconds')
 
     async def on_not_enough_arguments(self, ctx):
         return await self.on_doc_request(ctx)
@@ -77,12 +77,12 @@ class ModuleBase:
 
         if bot_missing:
             response += (
-                '{error} I\'m missing the following permission' + ('s' if len(bot_missing) > 1 else '') +
+                'I\'m missing the following permission' + ('s' if len(bot_missing) > 1 else '') +
                 ' to execute command: ' + '[' + ', '.join([f'`{p.name}`' for p in bot_missing]) + ']\n'
             )
         if user_missing:
             response += (
-                '{error} You\'re missing the following permission' + ('s' if len(user_missing) > 1 else '') +
+                'You\'re missing the following permission' + ('s' if len(user_missing) > 1 else '') +
                 ' to use command: ' + '[' + ', '.join([f'`{p.name}`' for p in user_missing]) + ']'
             )
 
@@ -156,12 +156,12 @@ class ModuleBase:
         return f'```\n{help_text}\n```'
 
     async def on_error(self, e, tb_text, ctx):
-        return (
-            '{error} Error appeared during execution **'
-            + self.name + '**: **' + e.__class__.__name__ + '**\n'
-            + 'Please, tell me what happened using **report** command '
-            + 'or contact bot owner **' + str(self.bot.owner) + '**'
-            + '\n```\n' + '\n'.join(tb_text.split('\n')[-4:]) + '\n```'
+        return await ctx.error(
+            f'Error appeared during execution **'
+            f'{self.name}**: **{e.__class__.__name__}**\n'
+            f'Please, tell me what happened using **report** command '
+            f'or contact bot owner **{self.bot.owner}**'
+            f'\n```\n' + '\n'.join(tb_text.split('\n')[-4:]) + '\n```'
         )
 
     async def on_unload(self):
