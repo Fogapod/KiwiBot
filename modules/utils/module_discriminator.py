@@ -22,7 +22,7 @@ class Module(ModuleBase):
             if args[1].isdigit() and len(args[1]) == 4:
                 discrim = args[1]
             else:
-                return '{warning} Invalid discriminator given'
+                return await ctx.warn('Invalid discriminator given')
 
         matched = []
         for user in self.bot.users:
@@ -30,7 +30,7 @@ class Module(ModuleBase):
                 matched.append(user)
 
         if not matched:
-            return '{warning} Users with discriminator **%s** not found' % discrim
+            return await ctx.warn(f'Users with discriminator **{discrim}** not found')
 
         lines = sorted([str(u) for u in matched], key=lambda s: (len(s), s))
         users_per_chunk = 30

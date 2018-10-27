@@ -27,7 +27,7 @@ class Module(ModuleBase):
             if domain == 'proxies':
                 result = ''
                 if not self.bot.proxies:
-                    return 'I don\'t have any proxies to ping'
+                    return await ctx.info('I don\'t have any proxies to ping')
 
                 tasks = []
                 result = ''

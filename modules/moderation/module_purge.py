@@ -49,7 +49,7 @@ class Module(ModuleBase):
         else:
             user = await find_user(user_string, ctx.message)
             if user is None:
-                return '{error} User **' + user_string + '** not found!'
+                return await ctx.error(f'User **{user_string}** not found!')
             check = lambda m: m.author.id == user.id
 
         deleted = await ctx.channel.purge(

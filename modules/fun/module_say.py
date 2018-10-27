@@ -12,7 +12,6 @@ class Module(ModuleBase):
     short_doc = 'Let me say something for you, lazy human'
     long_doc = (
         'Command flags:\n'
-        '\t[--delete|-d]:            Delete command message if added\n'
         '\t[--channel|-c] <channel>: Channel where to send message\n'
         '\t[--user|-u] <user>:       Target user to send direct message\n'
         '\t[--tts|-t]:               Send message as text-to-speech if added'
@@ -23,10 +22,6 @@ class Module(ModuleBase):
     category = 'Actions'
     min_args = 1
     flags = {
-        'delete': {
-            'alias': 'd',
-            'bool': True
-        },
         'channel': {
             'alias': 'c',
             'bool': False
@@ -85,18 +80,16 @@ class Module(ModuleBase):
         is_same_place = getattr(channel, 'guild', None) == ctx.guild
         if not is_same_place:
             if not PermissionBotOwner().check(ctx.channel, ctx.author):
-                return '{warning} Only bot owner can send messages to other guilds or users'
+                return await ctx.warn('Only bot owner can send messages to other guilds or users')
         elif not channel.permissions_for(ctx.author).send_messages:
-            return '{warning} You don\'t have permission to send messages to this channel'
+            return await ctx.warn('You don\'t have permission to send messages to this channel')
 
-        delete_message = flags.get('delete', False)
-        if delete_message:
-            await self.bot.delete_message(ctx.message)
-
-        m = await ctx.send(
-            text, channel=channel, tts=tts, register=not delete_message)
+        m = await ctx.send(text, channel=channel, tts=tts)
         if m is None:
-            return '{error} Failed to deliver message. (blocked by user/no common servers/no permission to send messages to this channel)'
+            return await ctx.error(
+                'Failed to deliver message. '
+                '(blocked by user/no common servers/no permission to send messages to this channel)'
+            )
 
         if not is_same_place:
             if isinstance(m.channel, DMChannel):

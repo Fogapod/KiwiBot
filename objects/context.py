@@ -14,6 +14,15 @@ class Context:
     def me(self):
         return self.guild.me if self.guild else self.bot.user
 
+    async def info(self, content=None, **kwargs):
+        return await self.send(f'ℹ {content or ""}', **kwargs)
+
+    async def warn(self, content=None, **kwargs):
+        return await self.send(f'⚠ {content or ""}', **kwargs)
+
+    async def error(self, content=None,  **kwargs):
+        return await self.send(f'‼ {content or ""}', **kwargs)
+
     async def send(self, content=None, *, channel=None, register=True, **kwargs):
         if not self.bot._processing_commands.get(self.message.id, True):
             # command cancelled

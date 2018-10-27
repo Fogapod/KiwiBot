@@ -29,13 +29,13 @@ class Module(ModuleBase):
                 include_voice=False, include_category=False
             )
             if channel is None:
-                return '{warning} Channel not found'
+                return await ctx.warn('Channel not found')
 
             author = channel.guild.get_member(ctx.author.id)
             if not author or not channel.permissions_for(author).read_messages:
-                return '{error} You don\'t have permission to read messages in that channel'
+                return await ctx.error('You don\'t have permission to read messages in that channel')
             if channel.is_nsfw() > ctx.channel.is_nsfw():
-                return '{warning} Trying to access nsfw channel from sfw channel'
+                return await ctx.warn('Trying to access nsfw channel from sfw channel')
 
         m = await ctx.send('Generating...')
 

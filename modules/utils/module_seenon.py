@@ -24,14 +24,14 @@ class Module(ModuleBase):
             user = await find_user(args[1:], ctx.message)
 
         if not user:
-            return '{warning} User not found'
+            return await ctx.warn('User not found')
 
         guilds = sorted(
             [g for g in self.bot.guilds if g.get_member(user.id) is not None],
             key=lambda g: (g.member_count, g.name), reverse=True
         )
         if not guilds:
-            return '{warning} No common guilds'
+            return await ctx.warn('No common guilds')
 
         lines = [f'{g.id:<19}| {g.name}' for g in guilds]
         lines_per_chunk = 30

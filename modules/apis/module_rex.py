@@ -134,7 +134,7 @@ class Module(ModuleBase):
             # it's already defined explicitly
 
         if not params['LanguageChoice']:
-            return '{warning} Invalid language, try checking list of supported languages'
+            return await ctx.warn('Invalid language, try checking list of supported languages')
 
         params['CompilerArgs'] = COMPILE_OPTIONS.get(params['LanguageChoice'], '')
         params['Program'] = cleaned
@@ -145,9 +145,9 @@ class Module(ModuleBase):
                 result  = result_json['Result'] or ''
                 result += result_json['Errors'] or ''
             else:
-                return '{error} Error connecting to rextester API. Please, try again later'
+                return await ctx.error('Error connecting to rextester API. Please, try again later')
 
         if not result:
-            result = 'Evaluated'
+            result = 'Empty output'
 
         return f'```\n{result}```'

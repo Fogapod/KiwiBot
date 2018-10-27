@@ -60,11 +60,11 @@ class Module(ModuleBase):
         interval = flags.get('interval', None)
         if interval is not None:
             if not interval.isdigit():
-                return '{warning} Interval is not integer'
+                return await ctx.warn('Interval is not integer')
 
             interval = int(interval)
             if interval < 20:
-                return '{warning} Minimum allowed interval is 20 seconds'
+                return await ctx.warn('Minimum allowed interval is 20 seconds')
 
             self.interval = interval
             await self.bot.redis.set('activity_interval', interval)
@@ -112,7 +112,8 @@ class Module(ModuleBase):
             if p.choice is not None:
                 await self.bot.redis.srem('activity', items[p.choice - 1])
                 return f'Deleted activity `{items[p.choice - 1]}`'
-
+            else:
+                return
         elif subcommand == 'playing':
             a_type = 0
             a_name = args[2:]

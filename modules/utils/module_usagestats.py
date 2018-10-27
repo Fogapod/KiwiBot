@@ -55,7 +55,7 @@ class Module(ModuleBase):
                     commands.append((name, int(u)))
 
         if not commands:
-            return '{error} No commands found'
+            return await ctx.error('No commands found')
 
         total_usage = sum(u for c, u in commands)
         lines = [f'{c:<20}{u}' for c, u in sorted(commands, key=lambda x: int(x[1]), reverse=True)]

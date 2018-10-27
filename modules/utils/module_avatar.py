@@ -23,7 +23,7 @@ class Module(ModuleBase):
             user = await find_user(args[1:], ctx.message)
 
         if user is None:
-            return '{warning} User not found'
+            return await ctx.warn('User not found')
 
         formats = ['png', 'webp', 'jpg']
         if user.is_avatar_animated():

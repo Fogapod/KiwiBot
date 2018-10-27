@@ -8,3 +8,5 @@ temp/
 *.log
 *.rdb
 *.db
+
+modules/testing/*

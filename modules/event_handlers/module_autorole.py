@@ -65,7 +65,7 @@ class Module(ModuleBase):
             bot_roles = await self.bot.redis.smembers(f'autorole_bots:{ctx.guild.id}')
             
             if not (human_roles or bot_roles):
-                return '{warning} No autoroles set'
+                return await ctx.warn('No autoroles set')
 
             e = Embed(colour=Colour.gold(), title='Guild autoroles')
             if human_roles:
@@ -83,15 +83,15 @@ class Module(ModuleBase):
         if args[1].lower() in ('set', 'add'):
             role = await find_role(args[2:], ctx.guild, self.bot)
             if role is None:
-                return '{error} Role not found'
+                return await ctx.error('Role not found')
 
             if role.position >= ctx.author.top_role.position:
                 if not ctx.author == ctx.guild.owner:
-                    return '{error} Role is higher or equal to your top role'
+                    return await ctx.error('Role is higher or equal to your top role')
             if role.permissions > ctx.author.guild_permissions:
-                return '{error} Role has higher permissions than you in guild'
+                return await ctx.error('Role has higher permissions than you in guild')
             if role.position >= ctx.guild.me.top_role.position:
-                return '{error} Role is higher or equal to my top role, I won\'t be able to assign it'
+                return await ctx.error('Role is higher or equal to my top role, I won\'t be able to assign it')
 
             if bot_flag:
                 await self.bot.redis.sadd(f'autorole_bots:{ctx.guild.id}', str(role.id))
@@ -103,7 +103,7 @@ class Module(ModuleBase):
         if args[1].lower() in ('delete', 'remove'):
             role = await find_role(args[2:], ctx.guild, self.bot)
             if role is None:
-                return '{error} Role not found'
+                return await ctx.error('Role not found')
 
             if bot_flag:
                 await self.bot.redis.srem(f'autorole_bots:{ctx.guild.id}', str(role.id))

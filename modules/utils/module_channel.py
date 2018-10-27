@@ -25,7 +25,7 @@ class Module(ModuleBase):
                 args[1:], ctx.guild, global_id_search=True)
 
         if channel is None:
-            return '{warning} Channel not found'
+            return await ctx.warn('Channel not found')
 
         e = Embed(colour=Colour.gold(), title=getattr(channel, 'name', 'DM Channel'))
         additional_fields = []

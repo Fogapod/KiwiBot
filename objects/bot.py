@@ -191,12 +191,12 @@ class KiwiBot(discord.AutoShardedClient):
 
         if module_response:
             if not isinstance(module_response, str):
+                if isinstance(module_response, discord.Message):
+                    return
+
+                logger.debug(f'Error: module response is {type(module_response)}, expected str or discord.Message')
                 return
 
-            module_response = await formatters.format_response(
-                module_response, ctx.message, self)
-
-        if module_response:
             try:
                 await ctx.send(module_response)
             except Exception:
@@ -316,7 +316,7 @@ class KiwiBot(discord.AutoShardedClient):
         if replace_mass_mentions:
             content = formatters.replace_mass_mentions(content)
 
-        fields['content'] = formatters.trim_text(content)
+        fields['content'] = formatters.trim_text(content.strip())
 
         message = None
         dm_message = None
@@ -356,7 +356,7 @@ class KiwiBot(discord.AutoShardedClient):
         if replace_mass_mentions:
             content = formatters.replace_mass_mentions(content)
 
-        fields['content'] = formatters.trim_text(content)
+        fields['content'] = formatters.trim_text(content.strip())
 
         try:
             return await msg.edit(**fields)

@@ -24,7 +24,7 @@ class Module(ModuleBase):
             rgb = ImageColor.getrgb(args[1:])
             colour = Colour.from_rgb(*rgb)
         except ValueError as e:
-            return '{warning} Not a colour'
+            return await ctx.warn('Not a colour')
 
         bytes_img = BytesIO()
         img = Image.new('RGB', (100, 100), rgb)

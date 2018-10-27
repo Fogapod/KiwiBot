@@ -29,7 +29,7 @@ class Module(ModuleBase):
         user = await find_user(args[1], ctx.message)
 
         if user is None:
-            return '{warning} User not found'
+            return await ctx.warn('User not found')
 
         channel = flags.get('channel', None)
 
@@ -38,13 +38,13 @@ class Module(ModuleBase):
                 channel, ctx.guild, include_voice=False, include_category=False)
 
             if channel is None:
-                return '{warning} Channel not found'
+                return await ctx.warn('Channel not found')
 
         if channel is None:
             channel = ctx.channel
 
         if not channel.permissions_for(ctx.author).send_messages:
-            return '{warning} You don\'t have permission to send messages to this channel'
+            return await ctx.warn('You don\'t have permission to send messages to this channel')
 
         name = user.display_name if getattr(user, 'guild', None) == ctx.guild else user.name
 
@@ -59,7 +59,7 @@ class Module(ModuleBase):
             #
             webhook._adapter.store_user = webhook._adapter._store_user
         except Exception:
-            return '{error} Failed to create webhook. Probably maximum webhook count reached'
+            return await ctx.error('Failed to create webhook. Probably maximum webhook count reached')
 
         try:
             await self.bot.send_message(

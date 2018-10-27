@@ -54,18 +54,18 @@ class Module(ModuleBase):
 
         out_lang = flags.get('out', 'en').lower()
         if out_lang not in gt.LANGUAGES:
-            return '{warning} Invalid out language. Try using list subcommand'
+            return await ctx.warn('Invalid out language. Try using list subcommand')
 
         chain_len = flags.get('len', DEFAULT_CHAIN_LEN)
         if isinstance(chain_len, str) and not chain_len.isdigit():
-            return '{error} Wrong value given for chain len'
+            return await ctx.error('Wrong value given for chain len')
 
         chain_len = int(chain_len)
         if chain_len > MAX_CHAIN_LEN:
-            return '{warning} Max chain len is %d, you asked for %d' % (MAX_CHAIN_LEN, chain_len)
+            return await ctx.warning(f'Max chain len is {MAX_CHAIN_LEN}, you asked for {chain_len}')
 
         if chain_len < 2:
-            return '{error} Chain len should not be shorter than 2. Use goodtranslator instead'
+            return await ctx.error('Chain len should not be shorter than 2. Use goodtranslator instead')
 
         async with ctx.channel.typing():
             langs = random.sample(gt.LANGUAGES.keys(), chain_len + 1)
@@ -80,7 +80,10 @@ class Module(ModuleBase):
                     translation = await self.translator.translate(text, dest=l)
                     text = translation.text
             except Exception:
-                return '{error} Failed to translate. Please, try again later. If there are emojis in text, try removing them.'
+                return await ctx.error(
+                    'Failed to translate. Please, try again later. '
+                    'If there are emojis in text, try removing them'
+                )
 
             e = Embed(colour=Colour.gold(), title='BadTranslator')
             e.description = text[:2048]

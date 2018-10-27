@@ -1,8 +1,6 @@
 from objects.modulebase import ModuleBase
 from objects.permissions import PermissionBotOwner
 
-from utils.formatters import format_response
-
 import traceback
 
 
@@ -52,8 +50,8 @@ class Module(ModuleBase):
             try:
                 await self.bot.mm.reload_modules()
             except Exception:
-                response = '{error} Failed to reload modules. Exception:```py\n' + traceback.format_exc() + '```'
-                response = await format_response(response, ctx, self.bot)
+                response = f'Failed to reload modules. Exception:```py\n{traceback.format_exc()}```'
+
                 return await self.bot.edit_message(
                     reload_message,
                     content=response
@@ -76,8 +74,7 @@ class Module(ModuleBase):
             try:
                 await self.bot.mm.reload_module(target)
             except Exception:
-                response = '{error} ' + f'Failed to reload module `{target}`. Exception:```py\n{traceback.format_exc()}```'
-                response = await format_response(response, ctx, self.bot)
+                response = f'Failed to reload module `{target}`. Exception:```py\n{traceback.format_exc()}```'
                 return await self.bot.edit_message(
                     reload_message,
                     content=response

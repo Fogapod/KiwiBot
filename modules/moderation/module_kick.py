@@ -21,16 +21,16 @@ class Module(ModuleBase):
         guild_member = await find_user(args[1], ctx.message, strict_guild=True)
 
         if not guild_member:
-            return '{warning} User not found'
+            return await ctx.warn('User not found')
 
         reason = args[2:] or ''
 
         if guild_member == ctx.guild.owner:
-            return '{warning} Can\'t kick guild owner'
+            return await ctx.warn('Can\'t kick guild owner')
         if ctx.me.top_role <= guild_member.top_role:
-            return '{warning} My top role is lower or equal to member\'s top role, can\'t kick'
+            return await ctx.warn('My top role is lower or equal to member\'s top role, can\'t kick')
         if ctx.author.top_role <= guild_member.top_role and ctx.guild.owner != ctx.author:
-            return '{warning} Your top role is lower or equal to member\'s top role, can\'t kick'
+            return await ctx.warn('Your top role is lower or equal to member\'s top role, can\'t kick')
 
         kick_msg = await ctx.send(
             (

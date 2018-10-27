@@ -26,7 +26,7 @@ class Module(ModuleBase):
             guild = await find_guild(args[1:])
 
         if guild is None:
-            return '{warning} Guild not found'
+            return await ctx.warn('Guild not found')
 
         invite = ''
 

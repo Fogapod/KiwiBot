@@ -70,7 +70,7 @@ class Module(ModuleBase):
                 channel, _, join_message = record.partition(':')
                 return f'Current join message: {join_message}\nChannel: **{channel}**'
             else:
-                 return '{warning} Welcome message not set'
+                 return await ctx.warn('Welcome message not set')
 
         manage_guild_perm = PermissionManageGuild()
         if not manage_guild_perm.check(ctx.channel, ctx.author):
@@ -87,7 +87,7 @@ class Module(ModuleBase):
                 include_voice=False, include_category=False
             )
             if channel is None:
-                return '{error} Channel not found'
+                return await ctx.error('Channel not found')
         else:
             channel = ctx.channel
 

@@ -24,7 +24,7 @@ class Module(ModuleBase):
         role = await find_role(args[1:], ctx.guild)
 
         if role is None:
-            return '{warning} Role not found'
+            return await ctx.warn('Role not found')
 
         e = Embed(colour=role.colour, title=role.name)
         e.add_field(

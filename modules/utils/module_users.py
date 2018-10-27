@@ -22,7 +22,7 @@ class Module(ModuleBase):
         users = await find_user(args[1:], ctx.message, max_count=-1)
 
         if not users:
-            return '{warning} Users not found'
+            return await ctx.warn('Users not found')
 
         lines = [f'{u.id:<19}| {u}' for u in users]
         lines_per_chunk = 30

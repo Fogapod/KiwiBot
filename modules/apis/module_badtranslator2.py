@@ -60,18 +60,18 @@ class Module(ModuleBase):
 
         out_lang = flags.get('out', 'en').lower()
         if out_lang not in self.langs:
-            return '{warning} Invalid out language. Try using list subcommand'
+            return await ctx.warn('Invalid out language. Try using list subcommand')
 
         chain_len = flags.get('len', DEFAULT_CHAIN_LEN)
         if isinstance(chain_len, str) and not chain_len.isdigit():
-            return '{error} Wrong value given for chain len'
+            return await ctx.error('Wrong value given for chain len')
 
         chain_len = int(chain_len)
         if chain_len > MAX_CHAIN_LEN:
-            return '{warning} Max chain len is %d, you asked for %d' % (MAX_CHAIN_LEN, chain_len)
+            return await ctx.warn(f'Max chain len is {MAX_CHAIN_LEN}, you asked for {chain_len}')
 
         if chain_len < 2:
-            return '{error} Chain len should not be shorter than 2. Use goodtranslator2 instead'
+            return await ctx.error('Chain len should not be shorter than 2. Use goodtranslator2 instead')
 
         async with ctx.channel.typing():
             langs = random.sample(self.langs.keys(), chain_len + 1)
@@ -91,11 +91,11 @@ class Module(ModuleBase):
                     }
                     async with self.bot.sess.post(API_URL + 'translate', params=params) as r:
                         if r.status != 200:
-                            return '{error} Failed to translate. Please, try again later'
+                            return await ctx.error('Failed to translate. Please, try again later')
 
                         text = (await r.json())['text'][0]
             except Exception:
-                return '{error} Failed to translate. Please, try again later'
+                return await ctx.error('Failed to translate. Please, try again later')
 
             e = Embed(colour=Colour.gold(), title='BadTranslator 2')
             e.description = text[:2048]

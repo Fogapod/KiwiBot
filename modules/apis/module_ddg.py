@@ -27,12 +27,13 @@ class Module(ModuleBase):
         }
 
         async with self.bot.sess.get(API_URL, params=params) as r:
+            print(r.url)
             if r.status != 200:
-                return '{error} request failed: ' + str(r.status)
+                return await ctx.error(f'Rquest failed: {r.status}')
             try:
                 r_json = await r.json(content_type='application/x-javascript')
             except aiohttp.ContentTypeError:  # (text/html; charset=utf-8) with query "osu!", ???
-                return '{error} Failed to read response'
+                return await ctx.error('Failed to read response')
 
         def make_embed(page):
             e = Embed(colour=Colour.gold(), title='DuckDuckGo')
@@ -53,7 +54,7 @@ class Module(ModuleBase):
             e.set_image(url=r_json['Image'])
             p.add_page(embed=e)
         elif not related:
-            return '{warning} Nothing found'
+            return await ctx.warn('Nothing found')
 
         topics = []
         for topic in related:

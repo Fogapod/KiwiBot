@@ -85,19 +85,19 @@ class Module(ModuleBase):
 
         if voice_flag:
             if not ctx.author.voice:
-                return '{warning} Please, join voice channel first'
+                return await ctx.warn('Please, join voice channel first')
 
             if not ctx.author.voice.channel.permissions_for(ctx.author).speak:
-                return '{error} You\'re muted!'
+                return await ctx.error('You\'re muted!')
 
             if not ctx.author.voice.channel.permissions_for(ctx.guild.me).connect:
-                return '{error} I don\'t have permission to connect to the voice channel'
+                return await ctx.error('I don\'t have permission to connect to the voice channel')
 
             if ctx.guild.voice_client is None:  # not connected to voice channel
                 try:
                     vc = await ctx.author.voice.channel.connect()
                 except Exception:
-                    return '{warning} Failed to connect to voice channel'
+                    return await ctx.warn('Failed to connect to voice channel')
             elif ctx.author not in ctx.guild.voice_client.channel.members:  # connected to a different voice channel
                 await ctx.guild.voice_client.move_to(ctx.author.voice.channel)
 
@@ -108,12 +108,12 @@ class Module(ModuleBase):
         try:
             volume = float(flags.get('volume', 100)) / 100
         except ValueError:
-            return '{error} Invalid volume value'
+            return await ctx.error('Invalid **volume** value')
 
         language_flag = flags.get('language')
         if language_flag:
             if language_flag not in self.langs:
-                return '{warning} language not found. Use `list` subcommand to get list of voices'
+                return await ctx.warn('Language not found. Use `list` subcommand to get list of voices')
 
 
         tts = gtts.gTTS(
@@ -127,7 +127,7 @@ class Module(ModuleBase):
             try:
                 await self.bot.loop.run_in_executor(None, partial_tts)
             except Exception:
-                return '{error} Problem with api response. Please, try again later'
+                return await ctx.error('Problem with api response. Please, try again later')
 
             tts_file.seek(0)
 
@@ -145,4 +145,4 @@ class Module(ModuleBase):
                     tts_file.seek(0)
                     await ctx.send(file=File(tts_file.read(), filename='tts.mp3'))
                 except Exception:
-                    await ctx.send('Failed to send file')
+                    await ctx.warn('Failed to send file')

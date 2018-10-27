@@ -30,6 +30,9 @@ class Module(ModuleBase):
         e.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
         e.set_footer(text=f'Author id: {ctx.author.id}')
 
-        await ctx.send(channel=self.report_channel, embed=e, register=False)
+        m = await ctx.send(channel=self.report_channel, embed=e, register=False)
+        if m is None:
+            return await ctx.error(
+                f'Something went wrong, failed to send report. Try contacting {self.bot.owner}')
 
         return f'Sent report to {self.report_channel.guild.name}'

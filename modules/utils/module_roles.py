@@ -24,7 +24,7 @@ class Module(ModuleBase):
         if len(args) > 1:
             user = await find_user(args[1:], ctx.message, global_search=False)
             if user is None:
-                return '{warning} User not found'
+                return await ctx.warn('User not found')
             
             roles = user.roles
         else:

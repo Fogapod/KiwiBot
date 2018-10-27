@@ -51,10 +51,10 @@ class Module(ModuleBase):
 
         if value:
             if flags:
-                return '{error} value flag conflict with all other flags'
+                return await ctx.error('**value** flag conflicts with all other flags')
 
             if not value.isdigit():
-                return '{error} value is not integer'
+                return await ctx.error('**value** is not integer')
 
             permissions = Permissions(permissions=int(value))
         else:
@@ -66,14 +66,14 @@ class Module(ModuleBase):
         else:
             channel = await find_channel(channel_flag, ctx.guild)
             if channel is None:
-                return '{warning} Channel not found'
+                return await ctx.warn('Channel not found')
 
         only_true  = flags.pop('t', False)
         only_false = flags.pop('f', False)
         use_global = flags.pop('global', False)
 
         if only_true and only_false:
-            return '{error} t and f flags conflict'
+            return await ctx.error('**t** and **f** flags conflict')
 
         if permissions is not None:
             target = value
@@ -112,7 +112,7 @@ class Module(ModuleBase):
             else:
                 member = await find_user(args[1:], ctx.message, strict_guild=True)
                 if member is None:
-                    return '{warning} Role or member not found'
+                    return await ctx.warn('Role or member not found')
 
                 if use_global:
                     permissions = member.guild_permissions

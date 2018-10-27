@@ -50,17 +50,20 @@ class Module(ModuleBase):
 
         in_lang = flags.get('in', None)
         if in_lang and in_lang.lower() not in gt.LANGUAGES:
-            return '{warning} Invalid input language. Try using list subcommand'
+            return await ctx.warn('Invalid input language. Try using list subcommand')
 
         out_lang = flags.get('out', 'en').lower()
         if out_lang not in gt.LANGUAGES:
-            return '{warning} Invalid out language. Try using list subcommand'
+            return await ctx.warn('Invalid out language. Try using list subcommand')
 
         try:
             translation = await self.translator.translate(
                 args[1:], src=in_lang or 'auto', dest=out_lang)
         except Exception:
-            return '{error} Failed to translate. Please, try again later. If there are emojis in text, try removing them.'
+            return await ctx.eror(
+                'Failed to translate. Please, try again later. '
+                'If there are emojis in text, try removing them'
+            )
 
         e = Embed(colour=Colour.gold(), title='GoodTranslator')
         e.description = translation.text[:2048]

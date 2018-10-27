@@ -49,7 +49,7 @@ class Module(ModuleBase):
             code = '-'.join(map(to_string, text))
             async with self.bot.sess.get(TWEMOJI_ENDPOINT.format(code)) as r:
                 if r.status != 200:
-                    return '{warning} Could not get emoji from input text'
+                    return await ctx.warn('Could not get emoji from input text')
                         
                 filename = 'emoji.png'
                 f = File(await r.read(), filename=filename)
@@ -61,7 +61,7 @@ class Module(ModuleBase):
             if emoji is None:
                 async with self.bot.sess.get(EMOJI_ENDPOINT.format(emoji_id)) as r:
                     if r.status != 200:
-                        return '{error} Emoji with given id not found'
+                        return await ctx.error('Emoji with given id not found')
                         
                     filename = f'emoji.{r.content_type[6:]}'
                     f = File(await r.read(), filename=filename)

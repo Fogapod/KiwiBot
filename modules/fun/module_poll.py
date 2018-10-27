@@ -76,7 +76,7 @@ class Module(ModuleBase):
         if args[1].lower() == 'cancel':
             task = self.polls.get(ctx.channel.id)
             if not task:
-                return '{warning} No active poll in channel found'
+                return await ctx.warn('No active poll in channel found')
 
             value = await self.bot.redis.get(f'poll:{ctx.channel.id}')
             author_id, poll_id = [int(i) for i in value.split(':')[:2]]
@@ -103,24 +103,24 @@ class Module(ModuleBase):
             return await self.on_not_enough_arguments(ctx)
 
         if ctx.channel.id in self.polls:
-            return '{warning} Channel already has active poll'
+            return await ctx.warn('Channel already has active poll')
 
         try:
             wait_until = timedelta_from_string(flags.get('timeout', '60'))
         except:
-            return '{error} Failed to convert time'
+            return await ctx.warn('Failed to convert time')
 
         expires_at = wait_until.replace(tzinfo=timezone.utc).timestamp() + 1
 
         if not 10 <= expires_at - time.time() <= 3600 * 24 * 7 + 60:
-            return '{error} Timeout should be between **10** seconds and **1** week'
+            return await ctx.error('Timeout should be between **10** seconds and **1** week')
 
         if len(args) > 11:
-            return '{error} Can\'t start poll with more than 9 items'
+            return await ctx.error('Can\'t start poll with more than 9 items')
 
         subject = f'Poll: {args[1]}'
         if len(subject) > 256:
-            return '{error} Subject name can\'t be longer than 250 characters'
+            return await ctx.error('Subject name can\'t be longer than 250 characters')
 
         choices = args.args[2:]
         emojis = [EMOJI_NUMBER_BASE.format(i + 1) for i in range(len(choices))]

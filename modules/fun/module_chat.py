@@ -40,7 +40,7 @@ class Module(ModuleBase):
         if subcommand in ('say', 'send'):
             room_id = await self.bot.redis.get(f'room_id_by_channel_and_user:{ctx.channel.id}:{ctx.author.id}')
             if room_id is None:
-                return '{warning} Your message wasn\'t delivered. Please, connect to chat room first'
+                return await ctx.warn('Your message wasn\'t delivered. Please, connect to chat room first')
             
             u1_target_channel, u2_target_channel = await self.bot.redis.smembers(f'chat_room:{room_id}')
 
@@ -53,7 +53,7 @@ class Module(ModuleBase):
             if target is None:
                 target = user2
                 if target is None:
-                    return '{error} 2nd user not found! Please, try again'
+                    return await ctx.error('2nd user not found! Please, try again')
 
             e = Embed(title='KiwiBot anonymous chat', description=args[2:], colour=Colour.gold())
             e.set_author(name=user2, icon_url=user2.avatar_url)
@@ -73,7 +73,7 @@ class Module(ModuleBase):
             try:
                 room_id = int(args[2])
             except ValueError:
-                return '{error} Chat id is not digit'
+                return await ctx.error('Chat id is not digit')
 
             room = await self.bot.redis.smembers(f'chat_room:{room_id}')
             if room:
@@ -96,7 +96,7 @@ class Module(ModuleBase):
 
                     return await ctx.send(f'Connected to room #{room_id}')
 
-            return '{warning} You\'re not a room member or room does not exist'
+            return await ctx.warn('You\'re not a room member or room does not exist')
 
         elif subcommand in ('new', 'create'):
             waiting_user = await self.bot.redis.get('waiting_chat_user')
@@ -106,7 +106,7 @@ class Module(ModuleBase):
 
             channel_id, user_id = waiting_user.split(':')
             if int(user_id) == ctx.author.id:
-                return '{warning} You\'re already queued. Please, wait for the 2nd user to connect'
+                return await ctx.warn('You\'re already queued. Please, wait for the 2nd user to connect')
 
             await self.bot.redis.delete('waiting_chat_user')
 
@@ -116,7 +116,7 @@ class Module(ModuleBase):
             if target is None:
                 target = user2
                 if target is None:
-                    return '{error} 2nd user not found! Please, try again'
+                    return await ctx.error('2nd user not found! Please, try again')
 
             new_room_id = int(await self.bot.redis.incr('last_chat_room_id'))
 
@@ -159,7 +159,7 @@ class Module(ModuleBase):
             try:
                 room_id = int(args[2])
             except ValueError:
-                return '{error} Chat id is not digit'
+                return await ctx.error('Chat id is not digit')
 
             room = await self.bot.redis.smembers(f'chat_room:{room_id}')
             if room:
@@ -215,4 +215,4 @@ class Module(ModuleBase):
             return await p.run(ctx)
 
         else:
-            return '{warning} Unknown subcommand'
+            return await ctx.warn('Unknown subcommand')

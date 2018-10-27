@@ -206,19 +206,19 @@ class Module(ModuleBase):
 
         if voice_flag:
             if not ctx.author.voice:
-                return '{warning} Please, join voice channel first'
+                return await ctx.warn('Please, join voice channel first')
 
             if not ctx.author.voice.channel.permissions_for(ctx.author).speak:
-                return '{error} You\'re muted!'
+                return await ctx.error('You\'re muted!')
 
             if not ctx.author.voice.channel.permissions_for(ctx.guild.me).connect:
-                return '{error} I don\'t have permission to connect to the voice channel'
+                return await ctx.error('I don\'t have permission to connect to the voice channel')
 
             if ctx.guild.voice_client is None:  # not connected to voice channel
                 try:
                     vc = await ctx.author.voice.channel.connect()
                 except Exception:
-                    return '{warning} Failed to connect to voice channel'
+                    return await ctx.error('Failed to connect to voice channel')
             elif ctx.author not in ctx.guild.voice_client.channel.members:  # connected to a different voice channel
                 await ctx.guild.voice_client.move_to(ctx.author.voice.channel)
 
@@ -229,7 +229,7 @@ class Module(ModuleBase):
         try:
             volume = float(flags.get('volume', 100)) / 100
         except ValueError:
-            return '{error} Invalid volume value'
+            return await ctx.error('Invalid **volume** value')
 
         program = ['espeak-ng', text, '--stdout']
 
@@ -238,14 +238,14 @@ class Module(ModuleBase):
             try:
                 speed = int(speed_flag) + 80
             except ValueError:
-                return '{error} Invalid speed value'
+                return await ctx.error('Invalid **speed** value')
 
             program.extend(('-s', str(speed)))
 
         language_flag = flags.get('language', 'en-us')
 
         if language_flag not in LANG_LIST:
-            return '{warning} Language not found. Use `list` subcommand to get list of voices'
+            return await ctx.warn('Language not found. Use `list` subcommand to get list of voices')
 
         language = language_flag
 
@@ -254,7 +254,7 @@ class Module(ModuleBase):
 
         if woman_flag:
             if quiet_flag:
-                return '{error} Can\'t apply both woman and quiet flags'
+                return await ctx.error('Can\'t combine **woman** and **quiet** flags')
 
             language += f'+f{random.randrange(1, 5)}'
 
@@ -277,7 +277,7 @@ class Module(ModuleBase):
                 try:
                     await ctx.send(file=File(stdout, filename='tts.wav'))
                 except Exception:
-                    await ctx.send('Failed to send file')
+                    await ctx.warn('Failed to send file')
 
         if voice_flag:
             if vc.is_playing():

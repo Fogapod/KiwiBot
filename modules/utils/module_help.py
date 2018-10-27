@@ -51,7 +51,7 @@ class Module(ModuleBase):
                 module_list.append(module)
 
             if not module_list:
-                return '{error} No commands found'
+                return await ctx.error('No commands found')
 
             modules_by_category = {}
             for module in module_list:
@@ -98,7 +98,7 @@ class Module(ModuleBase):
             return await p.run(ctx)
 
         if len(args) > 2:
-            return '{warning} help for subcommands is not supported yet'
+            return await ctx.warn('Help for subcommands is not supported yet')
 
         if args[1].lower() == 'all':
             category = 'All commands'
@@ -140,6 +140,6 @@ class Module(ModuleBase):
             module = self.bot.mm.get_module(args[1])
 
             if not module:
-                return '{warning} Unknown command or category'
+                return await ctx.warn('Unknown command or category')
 
             return await module.on_doc_request(ctx)

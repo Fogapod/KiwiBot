@@ -23,16 +23,16 @@ class Module(ModuleBase):
         user = await find_user(args[1], ctx.message)
 
         if not user:
-            return '{warning} User not found'
+            return await ctx.warn('User not found')
         reason = args[2:] or ''
 
         if isinstance(user, Member) and user.guild == ctx.guild:
             if user == ctx.guild.owner:
-                return '{warning} Can\'t ban guild owner'
+                return await ctx.warn('Can\'t ban guild owner')
             if ctx.me.top_role <= user.top_role:
-                return '{warning} My top role is lower or equal to member\'s top role, can\'t ban'
+                return await ctx.warn('My top role is lower or equal to member\'s top role, can\'t ban')
             if ctx.author.top_role <= user.top_role and ctx.author != ctx.guild.owner:
-                return '{warning} Your top role is lower or equal to member\'s top role, can\'t ban'
+                return await ctx.warn('Your top role is lower or equal to member\'s top role, can\'t ban')
 
         ban_msg = await ctx.send(
             (

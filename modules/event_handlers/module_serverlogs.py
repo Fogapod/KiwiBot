@@ -119,7 +119,7 @@ class Module(ModuleBase):
                 include_voice=False, include_category=False
             )
             if channel is None:
-                return '{warning} Channel not found'
+                return await ctx.error('Channel not found')
 
         log_channel_id = await self.bot.redis.get(f'serverlogs:{ctx.guild.id}')
 

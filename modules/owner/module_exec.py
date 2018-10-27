@@ -33,7 +33,7 @@ class Module(ModuleBase):
             else:
                 process, pid = await create_subprocess_exec(*args.args[1:])
         except Exception as e:
-            return '{error} Error creating subprocess: ' + str(e)
+            return await ctx.error(f'Error creating subprocess: {e}')
         
         pid_message = await ctx.send(f'Started process `{pid}`')
 

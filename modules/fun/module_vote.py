@@ -76,7 +76,7 @@ class Module(ModuleBase):
         if args[1].lower() == 'cancel':
             task = self.votes.get(ctx.channel.id)
             if not task:
-                return '{warning} No active vote in channel found'
+                return await ctx.warn('No active vote in channel found')
 
             value = await self.bot.redis.get(f'vote:{ctx.channel.id}')
             author_id, vote_id = [int(i) for i in value.split(':')[:2]]
@@ -100,17 +100,17 @@ class Module(ModuleBase):
             return await ctx.send(f'**{ctx.author}** cancelled vote.')
 
         if ctx.channel.id in self.votes:
-            return '{warning} Channel already have active vote'
+            return await ctx.warn('Channel already have active vote')
 
         try:
             wait_until = timedelta_from_string(flags.get('timeout', '60'))
         except:
-            return '{error} Failed to convert time'
+            return await ctx.error('Failed to convert time')
 
         expires_at = wait_until.replace(tzinfo=timezone.utc).timestamp() + 1
 
         if not 10 <= expires_at - time.time() <= 3600 * 24 * 7 + 60:
-            return '{error} Timeout should be between **10** seconds and **1** week'
+            return await ctx.error('Timeout should be between **10** seconds and **1** week')
 
         subject = args[1:]
 

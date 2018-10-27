@@ -154,6 +154,7 @@ class ModuleManager:
                 del self.bot._processing_commands[ctx.message.id]
             except KeyError:
                 pass
+
             return command_output
 
     def get_all_modules(self, hidden=False, disabled=False):

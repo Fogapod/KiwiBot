@@ -21,9 +21,9 @@ class Module(ModuleBase):
             prefix = await self.bot.redis.get(f'guild_prefix:{ctx.guild.id}')
 
             if not prefix:
-                return 'Custom prefix not set. Default is: **' + self.bot._default_prefix + '**'
+                return await ctx.info(f'Custom prefix not set. Default is: **{self.bot._default_prefix}**')
             else:
-                return f'Prefix for this guild is: **{prefix}**'
+                return await ctx.info(f'Prefix for this guild is: **{prefix}**')
 
         manage_guild_perm = PermissionManageGuild()
         if not manage_guild_perm.check(ctx.channel, ctx.author):

@@ -55,11 +55,11 @@ class Module(ModuleBase):
 
         in_lang = flags.get('in', None)
         if in_lang and in_lang.lower() not in self.langs:
-            return '{warning} Invalid input language. Try using list subcommand'
+            return await ctx.warn('Invalid input language. Try using list subcommand')
 
         out_lang = flags.get('out', 'en').lower()
         if out_lang not in self.langs:
-            return '{warning} Invalid out language. Try using list subcommand'
+            return await ctx.warn('Invalid out language. Try using list subcommand')
 
         params = {
             'key': self.api_key,
@@ -70,12 +70,12 @@ class Module(ModuleBase):
         try:
             async with self.bot.sess.post(API_URL + 'translate', params=params) as r:
                 if r.status != 200:
-                    return '{error} Failed to translate. Please, try again later'
+                    return await ctx.error('Failed to translate. Please, try again later')
                 r_json = await r.json()
                 text = r_json['text'][0]
                 source, destination = r_json['lang'].split('-')
         except Exception:
-            return '{error} Failed to translate. Please, try again later'
+            return await ctx.error('Failed to translate. Please, try again later')
 
         e = Embed(colour=Colour.gold(), title='GoodTranslator 2')
         e.description = text[:2048]

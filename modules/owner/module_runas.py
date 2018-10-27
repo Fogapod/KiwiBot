@@ -33,7 +33,7 @@ class Module(ModuleBase):
         user = await find_user(args[1], ctx.message, strict_guild=True)
 
         if user is None:
-            return '{warning} User not found'
+            return await ctx.warn('User not found')
 
         fake_msg = copy(ctx.message)
 
