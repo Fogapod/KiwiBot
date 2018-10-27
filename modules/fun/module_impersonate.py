@@ -10,17 +10,22 @@ class Module(ModuleBase):
     short_doc = 'Impersonate someone'
     long_doc = (
         'Command flags:\n'
-        '\t[--channel|-c] <channel>: Channel where to send message'
+        '\t[--channel|-c] <channel>: Channel where to send message\n'
+        '\t[--name|-n] <name>      : Use given name instead'
     )
 
     name = 'impersonate'
-    aliases = (name, )
+    aliases = (name, 'pretend')
     category = 'Actions'
     min_args = 2
     bot_perms = (PermissionManageWebhooks(), )
     flags = {
         'channel': {
             'alias': 'c',
+            'bool': False
+        },
+        'name': {
+            'alias': 'n',
             'bool': False
         }
     }
@@ -45,8 +50,12 @@ class Module(ModuleBase):
 
         if not channel.permissions_for(ctx.author).send_messages:
             return await ctx.warn('You don\'t have permission to send messages to this channel')
-
-        name = user.display_name if getattr(user, 'guild', None) == ctx.guild else user.name
+        name = flags.get('name', None)
+        if name is None:
+            name = user.display_name if getattr(user, 'guild', None) == ctx.guild else user.name
+        else:
+            if len(name) < 2 or len(name) > 32:
+                return await ctx.warn('Name length should be between 2 and 32')
 
         if len(name) < 2:
             # minimum webhook name len is 2 characters, so transparent character is required
