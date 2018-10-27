@@ -3,6 +3,7 @@ from objects.permissions import PermissionEmbedLinks, PermissionAttachFiles
 
 import time
 import asyncio
+import aiohttp
 import random
 
 from os import devnull
@@ -50,14 +51,13 @@ class Module(ModuleBase):
 
         try:
             async with self.bot.sess.head(url, timeout=15, proxy=proxy) as r:
-                if r.status == 503:
-                    return await self.bot.edit_message(m, 'Host resolving issue')
-
                 if (r.content_length or 0) > 100000000:
                     return await self.bot.edit_message(
                         m, 'Rejected to navigate')
-        except Exception:
+        except asyncio.TimeoutError:
             return await self.bot.edit_message(m, 'Connection timeout')
+        except aiohttp.ClientHttpProxyError:
+            return await self.bot.edit_message(m, 'Host resolving issue')
 
         await self.lock.acquire()
  
