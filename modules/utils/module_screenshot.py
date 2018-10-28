@@ -56,6 +56,8 @@ class Module(ModuleBase):
                         m, 'Rejected to navigate')
         except asyncio.TimeoutError:
             return await self.bot.edit_message(m, 'Connection timeout')
+        except aiohttp.InvalidURL:
+            return await self.bot.edit_message(m, 'Invalid url given')
         except aiohttp.ClientHttpProxyError:
             return await self.bot.edit_message(m, 'Host resolving issue')
 
@@ -102,7 +104,9 @@ class Module(ModuleBase):
 
         f = File(screenshot, filename='screenshot.png')
         e.set_footer(
-            text=f'Took {round(time.time() - (m.created_at or m.edited_at).timestamp(), 1)} seconds')
+                text=f'[{round(time.time() - (m.created_at or m.edited_at).timestamp(), 1)} sec] Note: above content is user-generated.',
+            icon_url=ctx.author.avatar_url
+        )
 
         await self.bot.delete_message(m)
         await ctx.send(embed=e, file=f)
