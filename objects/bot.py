@@ -213,22 +213,51 @@ class KiwiBot(discord.AutoShardedClient):
         else:
             self._last_messages[msg.channel.id][msg.author.id] = msg.edited_at or msg.created_at
 
-    async def on_message_edit(self, before, after):
-        if after.author.bot:
-            return
-        if before.content == after.content:
+    async def on_raw_message_edit(self, payload):
+        # modified version of _state.parse_message_update
+
+        data = payload.data
+        channel = self.get_channel(int(data['channel_id']))
+
+        if channel is None:
             return
 
-        if before.id in self._processing_commands:
+        message = channel._state._get_message(payload.message_id)
+
+        if message is None:
+            try:
+                message = await channel.get_message(payload.message_id)
+            except discord.NotFound:
+                return
+
+        else:
+            if 'call' in data:
+                # call state message edit
+                message._handle_call(data['call'])
+            elif 'content' not in data:
+                # embed only edit
+                message.embeds = data['embeds']
+            else:
+                message._update(channel=message.channel, **data)
+
+        # modified old on_message code
+
+        if message.author.bot:
+            return
+
+        if 'content' not in data:
+            return
+
+        if message.id in self._processing_commands:
             # cancel command
-            self._processing_commands[before.id] = False
-        
-        if await self.redis.exists(f'tracked_message:{before.id}'):
-            await self.clear_responses_to_message(before.id)
-            ttl = await self.redis.ttl(f'tracked_message:{before.id}')
-            await self.redis.expire(f'tracked_message:{before.id}', ttl + 60)
+            self._processing_commands[message.id] = False
 
-            await self.on_message(after, from_edit=True)
+        if await self.redis.exists(f'tracked_message:{message.id}'):
+            await self.clear_responses_to_message(message.id)
+            ttl = await self.redis.ttl(f'tracked_message:{message.id}')
+            await self.redis.expire(f'tracked_message:{message.id}', ttl + 60)
+
+            await self.on_message(message, from_edit=True)
 
     async def on_raw_message_delete(self, event):
         if event.message_id in self._processing_commands:

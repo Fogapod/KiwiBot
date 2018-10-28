@@ -12,7 +12,7 @@ class Ratelimiter:
         self.time = time
 
     async def test(self, ctx):
-        # returns (amount of requests left, milliseconds until
+        # returns (amount of requests left, milliseconds until ratelimit expires)
 
         if self.rl_type == 'global':
             target_id = ''
