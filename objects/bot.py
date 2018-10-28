@@ -229,16 +229,15 @@ class KiwiBot(discord.AutoShardedClient):
                 message = await channel.get_message(payload.message_id)
             except discord.NotFound:
                 return
-
         else:
             if 'call' in data:
                 # call state message edit
                 message._handle_call(data['call'])
             elif 'content' not in data:
                 # embed only edit
-                message.embeds = data['embeds']
+                message.embeds = [discord.Embed.from_data(d) for d in data['embeds']]
             else:
-                message._update(channel=message.channel, **data)
+                message._update(channel=message.channel, data=data)
 
         # modified old on_message code
 
