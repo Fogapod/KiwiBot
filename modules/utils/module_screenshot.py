@@ -7,10 +7,11 @@ import aiohttp
 import random
 
 from os import devnull
+from async_timeout import timeout
 
 from discord import Embed, Colour, File
-from arsenic import start_session, stop_session, services, browsers, get_session
-from arsenic.errors import UnknownArsenicError
+from arsenic import start_session, stop_session, services, browsers
+from arsenic.errors import UnknownArsenicError, UnknownError
 
 import logging
 import structlog
@@ -21,6 +22,7 @@ logger.setLevel(logging.CRITICAL)
 
 structlog.configure(logger_factory=lambda: logger)
 
+TIMEOUT = 20
 
 class Module(ModuleBase):
 
@@ -33,7 +35,7 @@ class Module(ModuleBase):
     min_args = 1
     max_args = 1
     bot_perms = (PermissionEmbedLinks(), PermissionAttachFiles())
-    ratelimit = (1, 5)
+    ratelimit = (1, 15)
 
     async def on_load(self, from_reload):
         self.lock = asyncio.Lock()
@@ -50,49 +52,55 @@ class Module(ModuleBase):
         proxy = random.choice(list(self.bot.proxies.keys()))
 
         try:
-            async with self.bot.sess.head(url, timeout=15, proxy=proxy) as r:
+            async with self.bot.sess.head(url, timeout=TIMEOUT, proxy=proxy) as r:
                 if (r.content_length or 0) > 100000000:
                     return await self.bot.edit_message(
-                        m, 'Rejected to navigate')
+                        m, 'Rejected to navigate, content is too long')
         except asyncio.TimeoutError:
             return await self.bot.edit_message(m, 'Connection timeout')
         except aiohttp.InvalidURL:
             return await self.bot.edit_message(m, 'Invalid url given')
         except aiohttp.ClientHttpProxyError:
-            return await self.bot.edit_message(m, 'Host resolving issue')
+            return await self.bot.edit_message(m, 'Host resolution error')
+        except (aiohttp.ClientConnectorCertificateError, aiohttp.ClientConnectorSSLError):
+            return await self.bot.edit_message(
+                m, f'Can\'t establish secure connection to {url}\nTry using http:// protocol')
 
         await self.lock.acquire()
  
-        try:
-            service = service = services.Chromedriver(log_file=devnull)
-            browser = browsers.Chrome(
-                chromeOptions={
-                    'args': [
-                        '--headless', '--disable-gpu', f'proxy-server={proxy}', 'lang=en', '--limit-fps=1',
-                        '--disable-mojo-local-storage', '--hide-scrollbars', '--ipc-connection-timeout=5',
-                        # '--timeout=5000'
-                        # timeout flag completely breakes browser for some reason
-                    ]
-                }
-            )
+        service = service = services.Chromedriver(log_file=devnull)
+        browser = browsers.Chrome(
+            chromeOptions={
+                'args': [
+                    '--headless', '--disable-gpu', f'proxy-server={proxy}', 'lang=en',
+                    '--limit-fps=1', '--disable-mojo-local-storage',
+                    '--hide-scrollbars', '--ipc-connection-timeout=5'
+                ]
+            }
+        )
 
-            async with get_session(service, browser) as session:
-                await session.set_window_size(1920, 1080)
+        session = await start_session(service, browser)
+        await session.set_window_size(1920, 1080)
+
+        try:
+            async with timeout(TIMEOUT + 2):
                 await session.get(url)
                 opened_url = await session.get_url()
                 await asyncio.sleep(2)
                 screenshot = await session.get_screenshot()
-        except UnknownArsenicError:
+        except asyncio.TimeoutError:
             return await self.bot.edit_message(
-                m, 'Unknown exception happened')
-        except Exception:
+                m, f'Screenshot timeout reached: **{TIMEOUT}** sec')
+        except (UnknownArsenicError, UnknownError):
             return await self.bot.edit_message(
-                m, 'Could not open page, please check url and try again')
+                m, 'Unknown browser error happened')
         finally:
             try:
-               self.lock.release()
+                self.lock.release()
             except Exception:
                 pass
+
+            await stop_session(session)
 
         try:
             title = opened_url.split('/')[2]

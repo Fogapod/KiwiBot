@@ -160,8 +160,9 @@ class ModuleBase:
             f'Error appeared during execution **'
             f'{self.name}**: **{e.__class__.__name__}**\n'
             f'Please, tell me what happened using **report** command '
-            f'or contact bot owner **{self.bot.owner}**'
-            f'\n```\n' + '\n'.join(tb_text.split('\n')[-4:]) + '\n```'
+            f'or contact bot owner **{self.bot.owner}**.\n'
+            f'Traceback:\n'
+            f'```\n' + '\n'.join(tb_text.split('\n')[-4:]) + '\n```'
         )
 
     async def on_unload(self):
