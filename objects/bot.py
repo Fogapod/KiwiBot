@@ -227,7 +227,7 @@ class KiwiBot(discord.AutoShardedClient):
         if message is None:
             try:
                 message = await channel.get_message(payload.message_id)
-            except discord.NotFound:
+            except discord.HTTPException:
                 return
         else:
             if 'call' in data:
