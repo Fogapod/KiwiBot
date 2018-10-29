@@ -14,6 +14,30 @@ class Ratelimiter:
     async def test(self, ctx):
         # returns (amount of requests left, milliseconds until ratelimit expires)
 
+        key = self._get_key(ctx)
+        amount = await ctx.bot.redis.incr(key)
+
+        if amount == 1:  # was created
+            await ctx.bot.redis.expire(key, self.time)
+
+        return self.amount - amount + 1, await ctx.bot.redis.pttl(key)
+
+    async def clear(self, ctx):
+        await ctx.bot.redis.delete(self._get_key(ctx))
+
+    async def decrease_time(self, amount, ctx):
+        key = self._get_key(ctx)
+        ttl = await ctx.bot.redis.ttl(key)
+        if ttl > 0:
+            await ctx.bot.redis.expire(key, ttl - amount)
+
+    async def increase_time(self, amount, ctx):
+        key = self._get_key(ctx)
+        ttl = await ctx.bot.redis.ttl(key)
+        if ttl > 0:
+            await ctx.bot.redis.expire(key, ttl + amount)
+
+    def _get_key(self, ctx):
         if self.rl_type == 'global':
             target_id = ''
         elif self.rl_type == 'guild':
@@ -25,10 +49,4 @@ class Ratelimiter:
         else:
             raise ValueError('Invalid ratelimiter type')
 
-        key = f'ratelimit:{self.name}:{target_id}'
-        amount = await ctx.bot.redis.incr(key)
-
-        if amount == 1:  # was createdt
-            await ctx.bot.redis.expire(key, self.time)
-
-        return self.amount - amount + 1, await ctx.bot.redis.pttl(key)
+        return  f'ratelimit:{self.name}:{target_id}'
