@@ -55,7 +55,7 @@ class Module(ModuleBase):
         else:
             return await self.on_doc_request(ctx)
 
-        if getattr(ctx.channel, 'is_nsfw', lambda: isinstance(ctx.channel, DMChannel))() < nsfw:
+        if ctx.channel.is_nsfw() < nsfw:
             return await self.on_nsfw_permission_denied(ctx)
 
         p = UpdatingPaginator(self.bot)
