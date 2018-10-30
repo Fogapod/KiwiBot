@@ -40,7 +40,7 @@ class KiwiBot(discord.AutoShardedClient):
         self.start_time = 0
 
         self.owner = None
-        self.proxies = None
+        self.proxies = {}
         self.sess = None
 
         self.config = Config('config.json', loop=self.loop)
@@ -122,7 +122,7 @@ class KiwiBot(discord.AutoShardedClient):
         self.is_first_on_ready_event = False
 
         self.owner = (await self.application_info()).owner
-        self.proxies = self.config.get('proxies')
+        self.proxies = self.config.get('proxies', {})
         self.sess = ClientSession()
 
         redis_port = self.config.get('redis_port', None)

@@ -14,6 +14,10 @@ class Context:
     def me(self):
         return self.guild.me if self.guild else self.bot.user
 
+    @property
+    def is_nsfw(self):
+        return getattr(self.channel, 'is_nsfw', lambda: True)()
+
     async def info(self, content=None, **kwargs):
         return await self.send(f'ℹ {content or ""}', **kwargs)
 
