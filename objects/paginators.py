@@ -12,12 +12,17 @@ from objects.context import Context
 
 class PaginatorABC:
 
-    def __init__(self, bot, looped=True, timeout=180, additional_time=20):
+    def __init__(self, bot, looped=True, timeout=180, additional_time=20, page_middleware=None):
         self.bot = bot
 
         self.looped = looped
         self.timeout = timeout
         self.additional_time = additional_time
+
+        async def default_page_middleware(page, paginator):
+            return page
+
+        self._page_middleware = page_middleware or default_page_middleware
 
         self.index  = 0
         self._pages = []
@@ -33,34 +38,34 @@ class PaginatorABC:
         if len(self._pages) == 1:
             self.current_page = page
 
-    def switch_to_next_page(self):
+    async def switch_to_next_page(self):
         if self.index == len(self._pages) - 1:
             if not self.looped:
-                return self.current_page
+                return await self._page_middleware(self.current_page, self)
             self.index = 0
         else:
             self.index += 1
         
-        return self._pages[self.index]
+        return await self._page_middleware(self._pages[self.index], self)
 
-    def switch_to_prev_page(self):
+    async def switch_to_prev_page(self):
         if self.index == 0:
             if not self.looped:
-                return self.current_page
+                return await self._page_middleware(self.current_page, self)
             self.index = len(self._pages) - 1
         else:
             self.index -= 1
         
-        return self._pages[self.index]
+        return await self._page_middleware(self._pages[self.index], self)
 
-    def switch_to_page(self, index):
+    async def switch_to_page(self, index):
         if len(self._pages) > index and index >= 0:
             self.index = index
         else:
             self.index = 0
         self.current_page = self._pages[self.index]
 
-        return self.current_page
+        return await self._page_middleware(self.current_page, self)
 
     async def init_reactions(self, force=False):
         if len(self._pages) <= 1 and not force:
@@ -210,14 +215,14 @@ class Paginator(PaginatorABC):
             return
 
         await self.bot.edit_message(
-            self.target_message, **self.switch_to_prev_page())
+            self.target_message, **await self.switch_to_prev_page())
 
     async def on_go_right(self, reaction, user):
         if not self.looped and self.index == len(self._pages) - 1:
             return
 
         await self.bot.edit_message(
-            self.target_message, **self.switch_to_next_page())
+            self.target_message, **await self.switch_to_next_page())
 
     async def on_use_index(self, reaction, user):
         index_request_message = None
@@ -235,7 +240,7 @@ class Paginator(PaginatorABC):
             index_response_message = await self.bot.wait_for('message', timeout=10, check=check)
             index = int(index_response_message.content) - 1
             if index != self.index:
-                await self.bot.edit_message(self.target_message, **self.switch_to_page(index))
+                await self.bot.edit_message(self.target_message, **await self.switch_to_page(index))
         except TimeoutError:
             pass
         finally:
