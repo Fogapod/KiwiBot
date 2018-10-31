@@ -22,12 +22,18 @@ logger.setLevel(logging.CRITICAL)
 
 structlog.configure(logger_factory=lambda: logger)
 
-TIMEOUT = 20
+TIMEOUT = 15
+DEFAULT_WAIT_TIME = 2
+MAX_WAIT_TIME = 10
 
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} <url>'
     short_doc = 'Screenshot webpage'
+    long_doc = (
+        'Command flags:\n'
+        '\t[--wait|-w] <seconds>: stay on page for given amount of seconds before making a screenshot'
+    )
 
     name = 'screenshot'
     aliases = (name, 'ss')
@@ -35,12 +41,29 @@ class Module(ModuleBase):
     min_args = 1
     max_args = 1
     bot_perms = (PermissionEmbedLinks(), PermissionAttachFiles())
-    ratelimit = (1, 15)
+    ratelimit = (1, 13)
+    flags = {
+        'wait': {
+            'alias': 'w',
+            'bool': False
+        }
+    }
 
     async def on_load(self, from_reload):
         self.lock = asyncio.Lock()
 
     async def on_call(self, ctx, args, **flags):
+        try:
+            wait_time = int(flags.get('wait', DEFAULT_WAIT_TIME))
+        except Exception:
+            return await ctx.warn('Failed to parse wait time')
+
+        if wait_time < 0:
+            return await ctx.warn('Wait time should be above or equal to 0')
+
+        if wait_time > MAX_WAIT_TIME:
+            return await ctx.warn(f'Wait time should belower or equal to {MAX_WAIT_TIME}')
+
         m = await ctx.send('Taking screenshot...')
 
         url = args[1]
@@ -66,6 +89,8 @@ class Module(ModuleBase):
             return await self.bot.edit_message(
                 m, f'Can\'t establish secure connection to {url}\nTry using http:// protocol')
 
+        await self._ratelimiter.increase_time(wait_time, ctx)
+
         await self.lock.acquire()
  
         service = service = services.Chromedriver(log_file=devnull)
@@ -83,10 +108,10 @@ class Module(ModuleBase):
         await session.set_window_size(1920, 1080)
 
         try:
-            async with timeout(TIMEOUT + 2):
+            async with timeout(TIMEOUT + wait_time):
                 await session.get(url)
                 opened_url = await session.get_url()
-                await asyncio.sleep(2)
+                await asyncio.sleep(wait_time)
                 screenshot = await session.get_screenshot()
         except asyncio.TimeoutError:
             return await self.bot.edit_message(
