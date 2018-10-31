@@ -53,7 +53,8 @@ class Module(ModuleBase):
             if r.status != 200:
                 return await ctx.error(f'Rquest failed: {r.status}')
 
-            soup = await self.bot.loop.run_in_executor(None, BeautifulSoup, await r.read(), 'html.parser')
+            soup = await self.bot.loop.run_in_executor(
+                None, BeautifulSoup, await r.read(), 'lxml')
 
         elements = soup.find_all('div', class_= 'rg_meta')
         metas = [json.loads(e.text) for e in elements]
