@@ -11,7 +11,7 @@ from objects.logger import Logger
 
 from constants import (
     ID_REGEX, USER_MENTION_OR_ID_REGEX, ROLE_OR_ID_REGEX,
-    CHANNEL_OR_ID_REGEX, COLOUR_REGEX, TIME_REGEX
+    CHANNEL_OR_ID_REGEX, COLOUR_REGEX, TIME_REGEX, EMOJI_REGEX
 )
 
 
@@ -225,6 +225,103 @@ async def find_channel(
             [c for c, mp in found[:max_count]]
 
     return None
+
+
+async def _find_image(pattern, ctx, *, limit=200, include_gif=True, download_timeout=10):
+    """Returns array with url and bytes fields that can be missing"""
+
+    static_formats = ('png', 'jpg', 'webp')
+    default_static_format = 'png'
+
+    img = {
+        'url': None,
+        'bytes': None
+    }
+
+    if pattern:
+        # check if pattern is custom emoji
+        emoji_match = EMOJI_REGEX.fullmatch(pattern)
+        if emoji_match:
+            groups = emoji_match.groupdict()
+            emoji_id = int(groups['id'])
+
+            emoji = ctx.bot.get_emoji(emoji_id)
+            if emoji:
+                img['url'] = emoji.url
+                return img
+
+            fmt = 'gif' if include_gif else default_static_format
+            async with ctx.bot.sess.get(
+                    f'https://cdn.discordapp.com/emojis/{emoji_id}.{fmt}', timeout=download_timeout) as r:
+                if r.status != 200:  # image not found
+                    return img
+
+                img['url'] = r.url
+                img['bytes'] = await r.read()
+            return img
+
+        # check if pattern is normal emoji
+        # thanks NotSoSuper#0001 for the API
+        def to_string(c):
+            digit = f'{ord(c):x}'
+            return f'{digit:>04}'
+
+        code = '-'.join(map(to_string, pattern))
+        async with ctx.bot.sess.get(
+                f'https://bot.mods.nyc/twemoji/{code}.png', timeout=download_timeout) as r:
+            if r.status == 200:
+                img['url'] = r.url
+                img['bytes'] = await r.read()
+                return img
+
+        # check if pattern is user mention
+        user = await find_user(pattern, ctx.message)
+        if user:
+            img['url'] = user.avatar_url_as(
+                format='gif' if user.is_avatar_animated() and include_gif else default_static_format)
+            return img
+
+        return img
+
+    # check channel history for attachments
+    async for m in ctx.channel.history(
+            limit=limit, before=ctx.message.edited_at or ctx.message.created_at):
+        # check attachments (files uploaded to discord)
+        for attachment in m.attachments:
+            file_fmt = attachment.filename.lower().partition('.')[-1]
+            if file_fmt == 'gif' and not include_gif:
+                continue
+            else:
+                if file_fmt not in static_formats:
+                    return img
+
+            img['url'] = attachment.url
+            return img
+
+        # check embeds (user posted image url)
+        for embed in m.embeds:
+            # TODO: handle 'rich' embed
+            if embed.type != 'image':
+                continue
+
+            img['url'] = embed.url
+            return img
+
+    return img
+
+
+async def find_image(pattern, ctx, download_timeout=10, **kwargs):
+    """Returns image bytes, is a wrapper for _find_image"""
+
+    img = await _find_image(pattern, ctx, download_timeout=download_timeout, **kwargs)
+    if img['bytes']:
+        return img['bytes']
+    if not img['url']:
+        return None
+
+    async with ctx.bot.sess.get(
+            img['url'], timeout=download_timeout, raise_for_status=True) as r:
+        return await r.read()
 
 
 def _get_last_user_message_timestamp(user_id, channel_id):

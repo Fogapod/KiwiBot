@@ -109,7 +109,7 @@ class PaginatorABC:
         """
 
         if isinstance(target, Context):
-            self.target_message = await target.send(**self.current_page)
+            self.target_message = await target.send(**await self._page_middleware(self.current_page, self))
             if self.target_message is None:
                 return await self.cleanup()
             target_user = kwargs.pop('target_user', target.author)
