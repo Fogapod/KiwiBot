@@ -231,7 +231,7 @@ async def find_channel(
 async def _find_image(pattern, ctx, *, limit=200, include_gif=True, download_timeout=10):
     """Returns array with url and bytes fields that can be missing"""
 
-    static_formats = ('png', 'jpg', 'webp')
+    static_formats = ('png', 'jpg', 'jpeg', 'webp')
     default_static_format = 'png'
 
     img = {

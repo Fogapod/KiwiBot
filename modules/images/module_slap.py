@@ -2,11 +2,11 @@ from objects.modulebase import ModuleBase
 
 import io
 
-from utils.funcs import find_image
-
 import discord
 
 from PIL import Image
+
+from utils.funcs import find_image
 
 
 class Module(ModuleBase):
