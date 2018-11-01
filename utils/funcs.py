@@ -325,14 +325,17 @@ async def _find_image(pattern, ctx, *, limit=200, include_gif=True, download_tim
             img['url'] = attachment.url
             return img
 
-        # check embeds (user posted image url)
+        # check embeds (user posted image url / bot posted rich embed)
         for embed in m.embeds:
-            # TODO: handle 'rich' embed
-            if embed.type != 'image':
-                continue
-
-            img['url'] = embed.url
-            return img
+            # check rich embed image field
+            if embed.type == 'rich':
+                if embed.image:
+                    img['url'] = embed.image.url
+                    return img
+            # check image embed
+            elif embed.type == 'image':
+                img['url'] = embed.url
+                return img
 
     return img
 
