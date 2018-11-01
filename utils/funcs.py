@@ -1,4 +1,5 @@
 import re
+import random
 import asyncio
 
 from dateutil.relativedelta import relativedelta
@@ -281,19 +282,45 @@ async def _find_image(pattern, ctx, *, limit=200, include_gif=True, download_tim
                 format='gif' if user.is_avatar_animated() and include_gif else default_static_format)
             return img
 
-        return img
+        # check if pattern is url
+        if pattern.startswith('<') and pattern.endswith('>'):
+            pattern = pattern[1:-1]
+        if not pattern.startswith(('http://', 'https://')):
+            return img
+
+        proxy = random.choice(list(ctx.bot.proxies.keys()))
+        try:
+            r = await ctx.bot.sess.get(
+                pattern, proxy=proxy, timeout=download_timeout, raise_for_status=True)
+            if r.content_length > 7000000:
+                return img
+            fmt = r.content_type.partition('/')[-1]
+            if fmt == 'gif':
+                if not include_gif:
+                    return img
+            else:
+                if fmt not in static_formats:
+                    return img
+
+            img['url'] = r.url
+            img['bytes'] = await r.read()
+            return img
+        except Exception as e:
+            return img
 
     # check channel history for attachments
-    async for m in ctx.channel.history(
-            limit=limit, before=ctx.message.edited_at or ctx.message.created_at):
+    # command can be invoked by message edit, but we still want to check messages before created_at
+    history = await ctx.channel.history(limit=limit, before=ctx.message.created_at).flatten()
+    for m in [ctx.message] + history:
         # check attachments (files uploaded to discord)
         for attachment in m.attachments:
             file_fmt = attachment.filename.lower().partition('.')[-1]
-            if file_fmt == 'gif' and not include_gif:
-                continue
+            if file_fmt == 'gif':
+                if not include_gif:
+                    continue
             else:
                 if file_fmt not in static_formats:
-                    return img
+                    continue
 
             img['url'] = attachment.url
             return img

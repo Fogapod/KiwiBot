@@ -51,7 +51,7 @@ class Module(ModuleBase):
 
         async with self.bot.sess.get(BASE_URL, params=params, headers=headers, proxy=proxy) as r:
             if r.status != 200:
-                return await ctx.error(f'Rquest failed: {r.status}')
+                return await ctx.error(f'Request failed: {r.status}')
 
             soup = await self.bot.loop.run_in_executor(
                 None, BeautifulSoup, await r.read(), 'lxml')

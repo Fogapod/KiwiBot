@@ -60,7 +60,7 @@ class Module(ModuleBase):
             translation = await self.translator.translate(
                 args[1:], src=in_lang or 'auto', dest=out_lang)
         except Exception:
-            return await ctx.eror(
+            return await ctx.error(
                 'Failed to translate. Please, try again later. '
                 'If there are emojis in text, try removing them'
             )
