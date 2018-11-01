@@ -1,7 +1,7 @@
 from objects.modulebase import ModuleBase
 from objects.permissions import PermissionEmbedLinks
 
-from constants import BOT_OWNER_ID, DEV_GUILD_INVITE
+from constants import DEV_GUILD_INVITE
 
 from discord import Colour, Embed, NotFound
 
@@ -10,7 +10,7 @@ DISCORD_AUTH_URL = 'https://discordapp.com/oauth2/authorize?client_id={id}&scope
 
 class Module(ModuleBase):
     
-    short_doc = 'Get bot invite link'
+    short_doc = 'Returns bot invite link'
 
     name = 'invite'
     aliases = (name, )
@@ -21,21 +21,15 @@ class Module(ModuleBase):
         e = Embed(
             title='My invite links', colour=Colour.gold(),
             description='   |   '.join((
-                '[admin](' + DISCORD_AUTH_URL.format(id=self.bot.user.id, perms=8) + ')',
-                '[no admin](' + DISCORD_AUTH_URL.format(id=self.bot.user.id, perms=2146958583) + ')'
+                f'[admin]({DISCORD_AUTH_URL.format(id=self.bot.user.id, perms=8)})',
+                f'[no admin]({DISCORD_AUTH_URL.format(id=self.bot.user.id, perms=2146958583)})'
             ))
         )
-        owner = self.bot.get_user(BOT_OWNER_ID)
-        if owner is None:
-            try:
-                owner = await self.bot.get_user_info(BOT_OWNER_ID)
-            except NotFound:
-                pass
 
         e.add_field(
             name='Contact developar',
             value=(
-                f'Feel free to contact owner: **{owner}** [**{BOT_OWNER_ID}**]\n'
+                f'Feel free to contact owner: **{self.bot.owner}** [**{self.bot.owner.id}**]\n'
                 f'[development server]({DEV_GUILD_INVITE})'
             )
         )
