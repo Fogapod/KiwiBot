@@ -36,7 +36,7 @@ class Module(ModuleBase):
         if image.error:
             return await ctx.warn(image.error)
 
-        source = Image.open(io.BytesIO(image))
+        source = Image.open(io.BytesIO(image.bytes))
         if sum(source.size) > 10000:
             return await ctx.error('Input image is too big')
 
