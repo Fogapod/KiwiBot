@@ -7,6 +7,7 @@ from aiohttp import ClientSession
 import traceback
 import asyncio
 import time
+import random
 import sys
 
 import discord
@@ -75,6 +76,15 @@ class KiwiBot(discord.AutoShardedClient):
     @property
     def uptime(self):
         return time.time() - self.start_time
+
+    def get_proxy(self, allow_none=False):
+        proxies = list(self.proxies.keys())
+        if allow_none:
+            proxies += [None]
+        if not proxies:
+            raise ValueError('Bot has no proxy to use')
+
+        return random.choice(proxies)
 
     async def init_prefixes(self):
         bot_id = self.user.id

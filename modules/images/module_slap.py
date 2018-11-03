@@ -32,8 +32,9 @@ class Module(ModuleBase):
 
     async def on_call(self, ctx, args, **flags):
         image = await find_image(args[1:], ctx, include_gif=False)
-        if not image:
-            return await ctx.warn('Give me an image to slap')
+        await image.ensure()
+        if image.error:
+            return await ctx.warn(image.error)
 
         source = Image.open(io.BytesIO(image))
         if sum(source.size) > 10000:

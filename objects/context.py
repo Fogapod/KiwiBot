@@ -2,6 +2,8 @@ from objects.moduleexceptions import CommandCancelled
 
 
 class Context:
+    __slots__ = ('bot', 'message', 'prefix', 'guild', 'channel', 'author', )
+
     def __init__(self, bot, msg, prefix):
         self.bot = bot
         self.message = msg
@@ -18,14 +20,17 @@ class Context:
     def is_nsfw(self):
         return getattr(self.channel, 'is_nsfw', lambda: True)()
 
-    async def info(self, content=None, **kwargs):
-        return await self.send(f'ℹ {content or ""}', **kwargs)
+    async def info(self, content=None, send=True, **kwargs):
+        s = f'ℹ {content or ""}'
+        return await self.send(s, **kwargs) if send else s
 
-    async def warn(self, content=None, **kwargs):
-        return await self.send(f'⚠ {content or ""}', **kwargs)
+    async def warn(self, content=None, send=True, **kwargs):
+        s = f'⚠ {content or ""}'
+        return await self.send(s, **kwargs) if send else s
 
-    async def error(self, content=None,  **kwargs):
-        return await self.send(f'‼ {content or ""}', **kwargs)
+    async def error(self, content=None, send=True, **kwargs):
+        s = f'‼ {content or ""}'
+        return await self.send(s, **kwargs) if send else s
 
     async def send(self, content=None, *, channel=None, register=True, **kwargs):
         if not self.bot._processing_commands.get(self.message.id, True):
