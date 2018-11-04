@@ -4,16 +4,24 @@ class EmptyImage(Exception):
 
 
 class Image:
-    __slots__ = ('_ctx', 'type', 'extension', 'url', 'bytes', 'error', )
+    __slots__ = ('_ctx', 'type', 'extension', 'url', 'bytes', 'error', '_use_proxy')
 
-    def __init__(self, ctx, type=None, extension=None, url=None, bytes=None, error=None):
+    def __init__(self, ctx, type=None, extension=None, url=None, bytes=None, error=None, use_proxy=True):
         self._ctx = ctx
 
         self.type = type
         self.extension = extension
-        self.url = url
+        self.url = url if url is None else str(url)
         self.bytes = bytes
         self.error = error
+
+        self._use_proxy = use_proxy
+
+    def __str__(self):
+        return self.url or ''
+
+    def __repr__(self):
+        return f"<Image type='{self.type}' extension='{self.extension}' url='{self.url}' error='{self.error}'>"
 
     async def ensure(self, raise_on_error=False, timeout=10):
         """Ensures image bytes are downloaded"""
@@ -24,10 +32,13 @@ class Image:
         if not self.url:
             raise EmptyImage
 
+        print(self.url, self._use_proxy)
         try:
-            async with self._ctx.bot.sess.get(
+            proxy = self._ctx.bot.get_proxy() if self._use_proxy else None
+
+            async with self._ctx.session.get(
                     self.url, timeout=timeout, raise_for_status=True,
-                    proxy=self._ctx.bot.get_proxy()) as r:
+                    proxy=proxy) as r:
 
                 self.bytes = await r.read()
         except Exception as e:
@@ -37,4 +48,3 @@ class Image:
                 self.error = f'Error downloading image: {e}'
 
         return self
-

@@ -304,11 +304,11 @@ async def find_image(pattern, ctx, *, limit=200, include_gif=True, timeout=10):
         except Exception as e:
             return Image(ctx, error=f'Error downloading image: {e}')
 
-        if r.content_length > 7000000:
+        if (r.content_length or 0) > 7000000:
             return Image(
                 ctx, error='Error: content on requested page is too long')
 
-        extension = r.content_type.partition('/')[-1]
+        extension = r.content_type.rpartition('/')[-1]
         if extension == 'gif':
             if not include_gif:
                 return Image(
@@ -323,34 +323,66 @@ async def find_image(pattern, ctx, *, limit=200, include_gif=True, timeout=10):
             url=r.url, bytes=await r.read()
         )
 
+    def check_extension(url):
+        extension = url.rpartition('.')[-1].lower()
+        if extension == 'gif':
+            if not include_gif:
+                return
+        else:
+            if extension not in static_formats:
+                return
+
+        return extension
+
     # check channel history for attachments
     # command can be invoked by message edit, but we still want to check messages before created_at
-    history = await ctx.channel.history(limit=limit, before=ctx.message.created_at).flatten()
+    history = await ctx.channel.history(
+        limit=limit, before=ctx.message.created_at).flatten()
+
     for m in [ctx.message] + history:
         # check attachments (files uploaded to discord)
         for attachment in m.attachments:
-            extension = attachment.filename.lower().partition('.')[-1]
-            if extension == 'gif':
-                if not include_gif:
-                    continue
-            else:
-                if extension not in static_formats:
-                    continue
+            extension = check_extension(attachment.filename)
+            if not extension:
+                continue
 
             return Image(
                 ctx, type='attachment', extension=extension,
-                url=attachment.url
+                url=attachment.url, use_proxy=False
             )
 
         # check embeds (user posted image url / bot posted rich embed)
         for embed in m.embeds:
             # check rich embed image field
             if embed.type == 'rich':
-                if embed.image:
-                    return Image(ctx, type='embed', url=embed.image.url)
-            # check image embed
-            elif embed.type == 'image':
-                return Image(ctx, type='embed', url=embed.url)
+                if not embed.image:
+                    continue
+
+                extension = check_extension(embed.image.proxy_url)
+                if not extension:
+                    continue
+
+                return Image(
+                    ctx, type='embed', url=embed.image.proxy_url,
+                    use_proxy=False
+                )
+
+            # check other embed types
+            elif embed.type in ('image', 'article', 'video', 'link'):
+                if not embed.thumbnail:  # not sure if it can be missing (article)
+                    continue
+
+                extension = check_extension(embed.thumbnail.proxy_url)
+                if not extension:
+                    continue
+
+                return Image(
+                    ctx, type='embed', extension=extension,
+                    url=embed.thumbnail.url
+                )
+            else:
+                return Image(
+                    ctx, error=f'Unsupported embed type found: {embed.type}')
 
     return Image(ctx, error='Nothing found in latest 200 messages')
 
