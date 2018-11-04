@@ -2,7 +2,7 @@ from objects.moduleexceptions import CommandCancelled
 
 
 class Context:
-    __slots__ = ('bot', 'message', 'prefix', 'guild', 'channel', 'author', )
+    __slots__ = ('bot', 'message', 'prefix', 'guild', 'channel', 'author', 'session', )
 
     def __init__(self, bot, msg, prefix):
         self.bot = bot
@@ -11,6 +11,7 @@ class Context:
         self.guild = msg.guild
         self.channel = msg.channel
         self.author = msg.author
+        self.session = bot.sess
 
     @property
     def me(self):
