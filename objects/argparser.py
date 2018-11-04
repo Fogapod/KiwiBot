@@ -98,7 +98,7 @@ class ArgParser:
 
             flag = ''
 
-            if arg[:1] == '-':
+            if arg[:1] == '-' and arg != '-':
                 if arg[:2] == '--':
                     flag = arg[2:]
                     if not flag:
@@ -116,7 +116,7 @@ class ArgParser:
                 if i > 0 and len(self._separators) >= i:
                     seps.append(self._separators[i - 1])
 
-        self.args = args[:-1]
+        self.args = args[:-1] if args and not args[-1] else args  # last flag can eat empty argument from end
         self._separators = seps
         self.flags = flags
 
