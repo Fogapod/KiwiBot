@@ -32,7 +32,6 @@ class Image:
         if not self.url:
             raise EmptyImage
 
-        print(self.url, self._use_proxy)
         try:
             proxy = self._ctx.bot.get_proxy() if self._use_proxy else None
 

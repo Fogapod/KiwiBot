@@ -362,10 +362,7 @@ async def find_image(pattern, ctx, *, limit=200, include_gif=True, timeout=10):
                 if not extension:
                     continue
 
-                return Image(
-                    ctx, type='embed', url=embed.image.proxy_url,
-                    use_proxy=False
-                )
+                return Image(ctx, type='embed', url=embed.image.url)
 
             # check other embed types
             elif embed.type in ('image', 'article', 'video', 'link'):
