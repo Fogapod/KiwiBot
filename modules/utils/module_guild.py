@@ -3,7 +3,7 @@ from objects.permissions import PermissionEmbedLinks, PermissionExternalEmojis
 
 from utils.funcs import find_guild
 
-from discord import Embed, HTTPException, VoiceChannel, TextChannel, Colour
+from discord import Embed, VoiceChannel, TextChannel, Colour
 
 import random
 from datetime import datetime
@@ -12,7 +12,7 @@ from datetime import datetime
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} [guild]'
-    short_doc = 'Get information about matched guild'
+    short_doc = 'Shows matched guild info'
 
     name = 'guild'
     aliases = (name, 'guildinfo', 'server', 'serverinfo')
@@ -28,21 +28,9 @@ class Module(ModuleBase):
         if guild is None:
             return await ctx.warn('Guild not found')
 
-        invite = ''
-
         if guild == ctx.guild:
             top_role = guild.roles[-1].mention
         else:
-            try:
-                invite = await guild.channels[0].create_invite(
-                    reason=f'requested by {ctx.author}-{ctx.author.id}' + (f' in guild {ctx.guild}-{ctx.guild.id}' if ctx.guild else ''),
-                    max_age=3600 * 12  # 12 hours
-                )
-            except HTTPException:
-                pass
-            else:
-                invite = invite.url
-
             top_role = f'@{guild.roles[-1]}'
 
         bot_count = sum(1 for m in guild.members if m.bot)
@@ -61,10 +49,8 @@ class Module(ModuleBase):
         for em in guild.emojis or []:
             (static_emojis, animated_emojis)[em.animated].append(em)
 
-        e = Embed(
-            title=guild.name, url=invite,
-            colour=Colour.gold()
-        )
+        e = Embed(title=guild.name, colour=Colour.gold())
+
         if guild.icon_url:
             e.set_thumbnail(url=guild.icon_url)
         else:
@@ -72,40 +58,40 @@ class Module(ModuleBase):
             pass
 
         e.add_field(
-            name='created', inline=False,
+            name='Created at', inline=False,
             value=f'`{guild.created_at.replace(microsecond=0)}` ({(datetime.now() - guild.created_at).days} days ago)'
         )
-        e.add_field(name='owner', value=guild.owner.mention)
-        e.add_field(name='region', value=guild.region)
+        e.add_field(name='Owner', value=guild.owner.mention)
+        e.add_field(name='Region', value=guild.region)
         e.add_field(
-            name='members',
+            name='Members',
             value=f'{guild.member_count - bot_count} + {bot_count} robots'
         )
         e.add_field(
-            name='channels',
+            name='Channels',
             value=f'{text_channels_num} text, {voice_channels_num} voice'
         )
-        e.add_field(name='total roles', value=len(guild.roles))
-        e.add_field(name='top role', value=top_role)
+        e.add_field(name='Total roles', value=len(guild.roles) - 1)
+        e.add_field(name='Top role', value=top_role)
         if guild.icon_url:
             formats = ['png', 'webp', 'jpg']
             e.add_field(
-                name='avatar',
+                name='Icon',
                 value=' | '.join(f'[{f}]({guild.icon_url_as(format=f)})' for f in formats)
             )
         if guild == ctx.guild or PermissionExternalEmojis().check(ctx.channel, self.bot.user):
             e.add_field(
-                name='static emotes', inline=False,
+                name='Static emotes', inline=False,
                 value=(
                     f'**{min(max_emoji, len(static_emojis))} / {len(static_emojis)}** shown: ' +
                     ' '.join(
                         str(e) for e in sorted(
                             random.sample(static_emojis, min(max_emoji, len(static_emojis))),
                             key=lambda e: e.name))
-                ) if static_emojis else 'Guild does not have them :/'
+                ) if static_emojis else 'Guild does not have any'
             )
             e.add_field(
-                name='animated emotes', inline=False,
+                name='Animated emotes', inline=False,
                 value=(
                     f'**{min(max_emoji, len(animated_emojis))} / {len(animated_emojis)}** shown: ' +
                     ' '.join(
@@ -114,7 +100,7 @@ class Module(ModuleBase):
                             key=lambda e: e.name
                         )
                     )
-                ) if animated_emojis else 'Guild does not have them :/'
+                ) if animated_emojis else 'Guild does not have any'
             )
         else:
             e.add_field(
