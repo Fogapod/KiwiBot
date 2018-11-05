@@ -13,6 +13,13 @@ except ImportError:
     )
 
 
+translate_urls = [
+    'translate.google.com', 'translate.google.co.kr',
+    'translate.google.at', 'translate.google.de',
+    'translate.google.ru', 'translate.google.ch',
+    'translate.google.fr', 'translate.google.es'
+]
+
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} <text>'
@@ -42,7 +49,8 @@ class Module(ModuleBase):
     }
 
     async def on_load(self, from_reload):
-        self.translator = gt.Translator(proxies=list(self.bot.proxies.keys()) + [None])
+        self.translator = gt.Translator(
+            service_urls=translate_urls, proxies=list(self.bot.proxies.keys()) + [None])
 
     async def on_call(self, ctx, args, **flags):
         if args[1:].lower() == 'list':

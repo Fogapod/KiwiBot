@@ -1,6 +1,7 @@
 from objects.modulebase import ModuleBase
 from objects.permissions import PermissionEmbedLinks
 
+import asyncio
 import random
 
 from discord import Embed, Colour
@@ -12,6 +13,14 @@ except ImportError:
         'aiogoogletrans python library is required to use module'
         'You can install it at https://github.com/Fogapod/aiogoogletrans'
 )
+
+translate_urls = [
+    'translate.google.com', 'translate.google.co.kr',
+    'translate.google.at', 'translate.google.de',
+    'translate.google.ru', 'translate.google.ch',
+    'translate.google.fr', 'translate.google.es'
+]
+
 
 DEFAULT_CHAIN_LEN = 5
 MAX_CHAIN_LEN = 7  # 10 for patrons?
@@ -46,7 +55,8 @@ class Module(ModuleBase):
     ratelimit = (1, 5)
 
     async def on_load(self, from_reload):
-        self.translator = gt.Translator(proxies=list(self.bot.proxies.keys()) + [None])
+        self.translator = gt.Translator(
+            service_urls=translate_urls, proxies=list(self.bot.proxies.keys()) + [None])
 
     async def on_call(self, ctx, args, **flags):
         if args[1:].lower() == 'list':
