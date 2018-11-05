@@ -74,17 +74,15 @@ class Module(ModuleBase):
     def slap(self, robin, bat):
         template = Image.open('templates/slap.png')
 
+        bat = bat.convert('RGBA')
         bat = mirror(bat.resize((220, 220), Image.ANTIALIAS).rotate(10, expand=True))
-        channels = bat.split()
-        mask = channels[3] if len(channels) >= 4 else None
 
-        template.paste(bat, (460, 200), mask=mask)
+        template.paste(bat, (460, 200), mask=bat.split()[3])
 
+        robin = robin.convert('RGBA')
         robin = robin.resize((260, 260), Image.ANTIALIAS)
-        channels = robin.split()
-        mask = channels[3] if len(channels) >= 4 else None
 
-        template.paste(robin, (200, 310), mask=mask)
+        template.paste(robin, (200, 310), mask=robin.split()[3])
 
         result = io.BytesIO()
         template.save(result, format='PNG')
