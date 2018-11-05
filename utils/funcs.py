@@ -230,7 +230,7 @@ async def find_channel(
 
 
 # TODO: better extension checks
-async def find_image(pattern, ctx, *, limit=200, include_gif=True, timeout=10):
+async def find_image(pattern, ctx, *, limit=200, include_gif=True, timeout=5):
     """Returns array with url and bytes fields that can be missing"""
 
     static_formats = ('png', 'jpg', 'jpeg', 'webp')
@@ -247,7 +247,7 @@ async def find_image(pattern, ctx, *, limit=200, include_gif=True, timeout=10):
             emote = ctx.bot.get_emoji(emote_id)
             if emote:
                 return Image(
-                    ctx, type='emote', url=emote.url,
+                    ctx, type='emote', url=emote.url, use_proxy=False,
                     extension='gif' if emote.animated else 'png'  # emotes are either pngs or gifs
                 )
 
@@ -284,7 +284,7 @@ async def find_image(pattern, ctx, *, limit=200, include_gif=True, timeout=10):
         if user:
             extension = 'gif' if user.is_avatar_animated() and include_gif else default_static_format
             return Image(
-                ctx, type='user', extension=extension,
+                ctx, type='user', extension=extension, use_proxy=False,
                 url=user.avatar_url_as(format=extension)
             )
 
@@ -335,7 +335,9 @@ async def find_image(pattern, ctx, *, limit=200, include_gif=True, timeout=10):
         return extension
 
     # check channel history for attachments
-    # command can be invoked by message edit, but we still want to check messages before created_at
+    #
+    # command can be invoked by message edit, but we still want
+    # to check messages before created_at
     history = await ctx.channel.history(
         limit=limit, before=ctx.message.created_at).flatten()
 
@@ -351,41 +353,31 @@ async def find_image(pattern, ctx, *, limit=200, include_gif=True, timeout=10):
                 url=attachment.url, use_proxy=False
             )
 
-        # check embeds (user posted image url / bot posted rich embed)
+        # check embeds (user posted url / bot posted rich embed)
         for embed in m.embeds:
-            # check rich embed image field
-            if embed.type == 'rich':
-                if not embed.image:
-                    continue
-
+            if embed.image:
                 extension = check_extension(embed.image.proxy_url)
-                if not extension:
-                    continue
+                if extension:
+                    return Image(ctx, type='embed', url=embed.image.url)
 
-                return Image(ctx, type='embed', url=embed.image.url)
+            # bot condition because we do not want image from
+            # rich embed thumbnail
+            if not embed.thumbnail or (m.author.bot and embed.type == 'rich'):
+                continue
 
-            # check other embed types
-            elif embed.type in ('image', 'article', 'video', 'link'):
-                if not embed.thumbnail:  # not sure if it can be missing (article)
-                    continue
+            extension = check_extension(embed.thumbnail.proxy_url)
+            if not extension:
+                continue
 
-                extension = check_extension(embed.thumbnail.proxy_url)
-                if not extension:
-                    continue
-
-                return Image(
-                    ctx, type='embed', extension=extension,
-                    url=embed.thumbnail.url
-                )
-            else:
-                return Image(
-                    ctx, error=f'Unsupported embed type found: {embed.type}')
+            return Image(
+                ctx, type='embed', extension=extension,
+                url=embed.thumbnail.url
+            )
 
     return Image(ctx, error='Nothing found in latest 200 messages')
 
 
 def _get_last_user_message_timestamp(user_id, channel_id):
-    # ts = await bot.redis.get(f'last_message_timestamp:{channel_id}:{author_id}')
     channel = bot._last_messages.get(channel_id)
     if channel is not None:
         if user_id in channel:

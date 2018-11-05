@@ -23,7 +23,7 @@ class Image:
     def __repr__(self):
         return f"<Image type='{self.type}' extension='{self.extension}' url='{self.url}' error='{self.error}'>"
 
-    async def ensure(self, raise_on_error=False, timeout=10):
+    async def ensure(self, raise_on_error=False, timeout=5):
         """Ensures image bytes are downloaded"""
 
         if self.bytes or self.error:
