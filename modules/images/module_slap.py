@@ -10,22 +10,24 @@ from PIL.ImageOps import mirror
 from utils.funcs import find_image
 
 
+MAX_SIZE = 10000
+
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} [image]'
     short_doc = 'Makes a slap meme'
     long_doc = (
         'Flags:\n'
-        '\t[--avatar|-a]: don\'t place author avatar on Batman\'s face if added'
+        '\t[--batface|-b] <image>: uses custom second image'
     )
 
     name = 'slap'
     aliases = (name, )
     category = 'Images'
     flags = {
-        'avatar': {
-            'alias': 'a',
-            'bool': True
+        'batface': {
+            'alias': 'b',
+            'bool': False
         }
     }
     ratelimit = (1, 3)
@@ -36,38 +38,55 @@ class Module(ModuleBase):
         if image.error:
             return await ctx.warn(image.error)
 
-        source = Image.open(io.BytesIO(image.bytes))
-        if sum(source.size) > 10000:
-            return await ctx.error('Input image is too big')
+        robin = image.bytes
 
-        if flags.get('avatar', False):
-            author_source = None
+        batface_flag = flags.get('batface')
+        if batface_flag is not None:
+            image = await find_image(batface_flag, ctx, include_gif=False)
+            await image.ensure()
+            if image.error:
+                return await ctx.warn(
+                    f'Error finding second image: {image.error}'
+                )
+
+            bat = image.bytes
         else:
             try:
                 async with self.bot.sess.get(
                         ctx.author.avatar_url_as(format='png'), raise_for_status=True) as r:
-                    author_source = Image.open(io.BytesIO(await r.read()))
+                    bat = await r.read()
             except Exception:
-                return await ctx.error(
-                    'Failed to download author avatar, use **--avatar** flag to disable it')
+                return await ctx.error('Failed to download author\'s avatar')
 
-        template = Image.open('templates/slap')
+        robin = Image.open(io.BytesIO(robin))
+        if sum(robin.size) > MAX_SIZE:
+            return await ctx.error('First image is too big')
 
-        if author_source is not None:
-            author_resized = author_source.resize((240, 240), Image.ANTIALIAS)
-            author_flipped = mirror(author_resized)
-            author_channels = author_flipped.split()
-            author_mask = author_channels[3] if len(author_channels) >= 4 else None
+        bat = Image.open(io.BytesIO(bat))
+        if sum(bat.size) > MAX_SIZE:
+            return await ctx.error('Second image is too big')
 
-            template.paste(author_flipped, (480, 200), mask=author_mask)
+        result = await self.bot.loop.run_in_executor(
+            None, self.slap, robin, bat)
 
-        resized = source.resize((280, 280), Image.ANTIALIAS)
-        channels = resized.split()
+        await ctx.send(file=discord.File(result, filename=f'slap.png'))
+
+    def slap(self, robin, bat):
+        template = Image.open('templates/slap.png')
+
+        bat = mirror(bat.resize((220, 220), Image.ANTIALIAS).rotate(10, expand=True))
+        channels = bat.split()
         mask = channels[3] if len(channels) >= 4 else None
 
-        template.paste(resized, (200, 310), mask=mask)
+        template.paste(bat, (460, 200), mask=mask)
+
+        robin = robin.resize((260, 260), Image.ANTIALIAS)
+        channels = robin.split()
+        mask = channels[3] if len(channels) >= 4 else None
+
+        template.paste(robin, (200, 310), mask=mask)
 
         result = io.BytesIO()
         template.save(result, format='PNG')
 
-        await ctx.send(file=discord.File(result.getvalue(), filename=f'slap.png'))
+        return result.getvalue()
