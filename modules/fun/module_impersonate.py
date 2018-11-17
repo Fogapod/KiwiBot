@@ -73,7 +73,7 @@ class Module(ModuleBase):
         try:
             await self.bot.send_message(
                 webhook, args[2:],
-                avatar_url=user.avatar_url_as(format='webp'),
+                avatar_url=user.avatar_url_as(format='png'),
                 wait=True, response_to=ctx.message
             )
         except Exception:
