@@ -39,14 +39,14 @@ class Module(ModuleBase):
     async def on_call(self, ctx, args, **flags):
         text = args[1:]
         if not text:
-            return '{warning} Cannot send an empty message'
+            return await ctx.warn('Cannot send an empty message')
 
         channel = flags.get('channel', None)
         user = flags.get('user', None)
         tts = flags.get('tts', False)
 
         if channel and user:
-            return '{warning} channel and user flags are conflicting'
+            return await ctx.warn('Channel and user flags are conflicting')
 
         if channel:
             channel = await find_channel(
@@ -54,15 +54,15 @@ class Module(ModuleBase):
                 include_voice=False, include_category=False
             )
             if channel is None:
-                return '{warning} Channel not found'
+                return await ctx.warn('Channel not found')
 
         elif user:
             user = await find_user(user, ctx.message)
             if user is None:
-                return '{warning} User not found'
+                return await ctx.warn('User not found')
 
             if user.bot:
-                return '{warning} Can\'t send message to bot'
+                return await ctx.warn('Cannot send message to bot')
 
             channel = user.dm_channel
             if channel is None:
@@ -87,7 +87,7 @@ class Module(ModuleBase):
         m = await ctx.send(text, channel=channel, tts=tts)
         if m is None:
             return await ctx.error(
-                'Failed to deliver message. '
+                'Failed to deliver message '
                 '(blocked by user/no common servers/no permission to send messages to this channel)'
             )
 
