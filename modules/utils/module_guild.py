@@ -86,8 +86,8 @@ class Module(ModuleBase):
                     str(e) for e in sorted(
                         random.sample(static_emojis, min(max_emoji, len(static_emojis))),
                         key=lambda e: e.name)
-                    )
-                ) if static_emojis else 'Guild does not have any'
+                    ) if static_emojis else 'Guild does not have any'
+            )
             e.add_field(
                 name=f'Animated emotes ({min(max_emoji, len(animated_emojis))} / {len(animated_emojis)}) shown',
                 inline=False, value=' '.join(
