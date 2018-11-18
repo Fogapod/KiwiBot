@@ -42,7 +42,7 @@ class Module(ModuleBase):
             elif isinstance(channel, TextChannel):
                 text_channels_num += 1
 
-        max_emoji = 30
+        max_emoji = 25
 
         static_emojis = []
         animated_emojis = []
@@ -81,26 +81,21 @@ class Module(ModuleBase):
             )
         if guild == ctx.guild or PermissionExternalEmojis().check(ctx.channel, self.bot.user):
             e.add_field(
-                name='Static emotes', inline=False,
-                value=(
-                    f'**{min(max_emoji, len(static_emojis))} / {len(static_emojis)}** shown: ' +
-                    ' '.join(
-                        str(e) for e in sorted(
-                            random.sample(static_emojis, min(max_emoji, len(static_emojis))),
-                            key=lambda e: e.name))
-                ) if static_emojis else 'Guild does not have any'
-            )
-            e.add_field(
-                name='Animated emotes', inline=False,
-                value=(
-                    f'**{min(max_emoji, len(animated_emojis))} / {len(animated_emojis)}** shown: ' +
-                    ' '.join(
-                        str(e) for e in sorted(
-                            random.sample(animated_emojis, min(max_emoji, len(animated_emojis))),
-                            key=lambda e: e.name
-                        )
+                name=f'Static emotes ({min(max_emoji, len(static_emojis))} / {len(static_emojis)}) shown',
+                inline=False, value=' '.join(
+                    str(e) for e in sorted(
+                        random.sample(static_emojis, min(max_emoji, len(static_emojis))),
+                        key=lambda e: e.name)
                     )
-                ) if animated_emojis else 'Guild does not have any'
+                ) if static_emojis else 'Guild does not have any'
+            e.add_field(
+                name=f'Animated emotes ({min(max_emoji, len(animated_emojis))} / {len(animated_emojis)}) shown',
+                inline=False, value=' '.join(
+                    str(e) for e in sorted(
+                        random.sample(animated_emojis, min(max_emoji, len(animated_emojis))),
+                        key=lambda e: e.name
+                        )
+                    ) if animated_emojis else 'Guild does not have any'
             )
         else:
             e.add_field(
