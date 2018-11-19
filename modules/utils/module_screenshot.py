@@ -4,7 +4,6 @@ from objects.permissions import PermissionEmbedLinks, PermissionAttachFiles
 import time
 import asyncio
 import aiohttp
-import random
 
 from os import devnull
 from async_timeout import timeout
@@ -72,7 +71,7 @@ class Module(ModuleBase):
         if not url.startswith(('http://', 'https://')):
             url = 'https://' + url
 
-        proxy = random.choice(list(self.bot.proxies.keys()))
+        proxy = self.bot.get_proxy()
 
         try:
             async with self.bot.sess.head(url, timeout=TIMEOUT, proxy=proxy) as r:
@@ -88,6 +87,9 @@ class Module(ModuleBase):
         except (aiohttp.ClientConnectorCertificateError, aiohttp.ClientConnectorSSLError):
             return await self.bot.edit_message(
                 m, f'Can\'t establish secure connection to {url}\nTry using http:// protocol')
+        except aiohttp.ClientConnectionError as e:
+            return await self.bot.edit_message(
+                m, f'Unknown connection error happened: {e}\nTry using http:// protocol')
 
         await self._ratelimiter.increase_time(wait_time, ctx)
 
@@ -104,11 +106,11 @@ class Module(ModuleBase):
             }
         )
 
-        session = await start_session(service, browser)
-        await session.set_window_size(1920, 1080)
-
         try:
             async with timeout(TIMEOUT + wait_time):
+                session = await start_session(service, browser)
+                await session.set_window_size(1920, 1080)
+
                 await session.get(url)
                 opened_url = await session.get_url()
                 await asyncio.sleep(wait_time)
