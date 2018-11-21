@@ -55,8 +55,7 @@ class Module(ModuleBase):
     ratelimit = (1, 5)
 
     async def on_load(self, from_reload):
-        self.translator = gt.Translator(
-            service_urls=translate_urls, proxies=list(self.bot.proxies.keys()) + [None])
+        self.translator = gt.Translator(service_urls=translate_urls)
 
     async def on_call(self, ctx, args, **flags):
         if args[1:].lower() == 'list':
@@ -87,7 +86,10 @@ class Module(ModuleBase):
             text = args[1:]
             try:
                 for l in langs:
-                    translation = await self.translator.translate(text, dest=l)
+                    translation = await self.translator.translate(
+                        text, dest=l,
+                        proxy=self.bot.get_proxy(allow_none=True)
+                    )
                     text = translation.text
             except Exception:
                 return await ctx.error(

@@ -49,8 +49,7 @@ class Module(ModuleBase):
     }
 
     async def on_load(self, from_reload):
-        self.translator = gt.Translator(
-            service_urls=translate_urls, proxies=list(self.bot.proxies.keys()) + [None])
+        self.translator = gt.Translator(service_urls=translate_urls)
 
     async def on_call(self, ctx, args, **flags):
         if args[1:].lower() == 'list':
@@ -66,7 +65,9 @@ class Module(ModuleBase):
 
         try:
             translation = await self.translator.translate(
-                args[1:], src=in_lang or 'auto', dest=out_lang)
+                args[1:], src=in_lang or 'auto', dest=out_lang,
+                proxy=self.bot.get_proxy(allow_none=True)
+            )
         except Exception:
             return await ctx.error(
                 'Failed to translate. Please, try again later. '
