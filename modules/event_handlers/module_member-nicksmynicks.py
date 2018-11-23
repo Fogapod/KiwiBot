@@ -23,6 +23,8 @@ class Module(ModuleBase):
 
     async def on_member_update(self, before, after):
         if after.guild.id == DEV_GUILD_ID:
+            if before.display_name == after.display_name:
+                return
             await self.set_nick(after)
 
     async def set_nick(self, member):
