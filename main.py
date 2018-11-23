@@ -1,12 +1,16 @@
 import sys
-import uvloop
 import asyncio
 
 from objects.bot import KiwiBot
 from objects.logger import Logger
 
+try:
+    import uvloop
+except ImportError:
+    print('Failed to import uvloop. Is it installed?')
+else:
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 logger = Logger.get_logger()
 
