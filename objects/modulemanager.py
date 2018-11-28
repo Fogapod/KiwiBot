@@ -141,7 +141,7 @@ class ModuleManager:
             except Permission as p:
                 command_output = await module.on_missing_permissions(ctx, p)
             except asyncio.CancelledError:
-                logger.info(f'Command {name} by {ctx.author} was cancelled')
+                logger.trace(f'Command {name} by {ctx.author} was cancelled')
             except Exception as e:
                 module_tb = traceback.format_exc()
                 logger.info(f'Error occured calling {name}')
