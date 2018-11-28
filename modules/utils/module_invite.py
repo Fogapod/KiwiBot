@@ -22,7 +22,8 @@ class Module(ModuleBase):
             title='My invite links', colour=Colour.gold(),
             description='   |   '.join((
                 f'[admin]({DISCORD_AUTH_URL.format(id=self.bot.user.id, perms=8)})',
-                f'[no admin]({DISCORD_AUTH_URL.format(id=self.bot.user.id, perms=2146958583)})'
+                f'[all perms]({DISCORD_AUTH_URL.format(id=self.bot.user.id, perms=2146958583)})',
+                f'[no perms]({DISCORD_AUTH_URL.format(id=self.bot.user.id, perms=0)})'
             ))
         )
 
