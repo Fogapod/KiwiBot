@@ -1,6 +1,3 @@
-class CommandCancelled(Exception):
-	pass
-
 class ModuleCallError(Exception):
     pass
 

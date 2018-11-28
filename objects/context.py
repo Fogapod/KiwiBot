@@ -1,6 +1,3 @@
-from objects.moduleexceptions import CommandCancelled
-
-
 class Context:
     __slots__ = ('bot', 'message', 'prefix', 'guild', 'channel', 'author', 'session', )
 
@@ -34,10 +31,6 @@ class Context:
         return await self.send(s, **kwargs) if send else s
 
     async def send(self, content=None, *, channel=None, register=True, **kwargs):
-        if not self.bot._processing_commands.get(self.message.id, True):
-            # command cancelled
-            raise CommandCancelled()
-
         channel = self.channel if channel is None else channel
         response_to = kwargs.pop('response_to', None) or self.message if register else None
 
@@ -45,10 +38,6 @@ class Context:
             channel, content, response_to=response_to, **kwargs)
 
     async def react(self, emoji, message=None, register=True, **kwargs):
-        if not self.bot._processing_commands.get(self.message.id, True):
-            # command cancelled
-            raise CommandCancelled()
-
         response_to = (kwargs.pop('response_to', None) or self.message) if register else None
 
         return await self.bot.add_reaction(

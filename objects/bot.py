@@ -67,7 +67,7 @@ class KiwiBot(discord.AutoShardedClient):
         self._leave_voice_channel_tasks = {}
 
         # currently processed commands
-        self._processing_commands = {}
+        self._commands_in_progress = {}
 
     @staticmethod
     def get_bot():
@@ -224,10 +224,10 @@ class KiwiBot(discord.AutoShardedClient):
             self._last_messages[msg.channel.id][msg.author.id] = msg.edited_at or msg.created_at
 
     async def on_raw_message_edit(self, payload):
-        # modified version of _state.parse_message_update
+        if payload.message_id in self._commands_in_progress:
+            self._commands_in_progress[payload.message_id].cancel()
 
-        data = payload.data
-        channel = self.get_channel(int(data['channel_id']))
+        channel = self.get_channel(int(payload.data['channel_id']))
 
         if channel is None:
             return
@@ -239,27 +239,9 @@ class KiwiBot(discord.AutoShardedClient):
                 message = await channel.get_message(payload.message_id)
             except discord.HTTPException:
                 return
-        else:
-            if 'call' in data:
-                # call state message edit
-                message._handle_call(data['call'])
-            elif 'content' not in data:
-                # embed only edit
-                message.embeds = [discord.Embed.from_data(d) for d in data['embeds']]
-            else:
-                message._update(channel=message.channel, data=data)
-
-        # modified old on_message code
 
         if message.author.bot:
             return
-
-        if 'content' not in data:
-            return
-
-        if message.id in self._processing_commands:
-            # cancel command
-            self._processing_commands[message.id] = False
 
         if await self.redis.exists(f'tracked_message:{message.id}'):
             await self.clear_responses_to_message(message.id)
@@ -269,9 +251,8 @@ class KiwiBot(discord.AutoShardedClient):
             await self.on_message(message, from_edit=True)
 
     async def on_raw_message_delete(self, event):
-        if event.message_id in self._processing_commands:
-            # cancel command
-            self._processing_commands[event.message_id] = False
+        if event.message_id in self._commands_in_progress:
+            self._commands_in_progress[event.message_id].cancel()
 
         if await self.redis.exists(f'tracked_message:{event.message_id}'):
             await self.clear_responses_to_message(event.message_id)

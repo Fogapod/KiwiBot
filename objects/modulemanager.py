@@ -1,5 +1,6 @@
 import os
 import sys
+import asyncio
 import traceback
 
 from importlib import reload
@@ -131,14 +132,16 @@ class ModuleManager:
                     logger.debug(f'Error dispatching command_use event')
                     logger.debug(traceback.format_exc())
 
-                if ctx.message.id not in self.bot._processing_commands:
-                    self.bot._processing_commands[ctx.message.id] = True
+                task = self.bot.loop.create_task(
+                    module.call_command(ctx, args, **args.flags))
 
-                command_output = await module.call_command(ctx, args, **args.flags)
+                self.bot._commands_in_progress[ctx.message.id] = task
+
+                command_output = await task
             except Permission as p:
                 command_output = await module.on_missing_permissions(ctx, p)
-            except CommandCancelled:
-                return
+            except asyncio.CancelledError:
+                logger.info(f'Command {name} by {ctx.author} was cancelled')
             except Exception as e:
                 module_tb = traceback.format_exc()
                 logger.info(f'Error occured calling {name}')
@@ -149,11 +152,8 @@ class ModuleManager:
                 except Exception:
                     logger.debug(f'Error occured calling {name} on_error')
                     logger.debug(traceback.format_exc())
-
-            try:
-                del self.bot._processing_commands[ctx.message.id]
-            except KeyError:
-                pass
+            finally:
+                del self.bot._commands_in_progress[ctx.message.id]
 
             return command_output
 
