@@ -224,6 +224,9 @@ class KiwiBot(discord.AutoShardedClient):
             self._last_messages[msg.channel.id][msg.author.id] = msg.edited_at or msg.created_at
 
     async def on_raw_message_edit(self, payload):
+        if 'content' not in payload.data:  # embed update
+            return
+
         if payload.message_id in self._commands_in_progress:
             self._commands_in_progress[payload.message_id].cancel()
 
