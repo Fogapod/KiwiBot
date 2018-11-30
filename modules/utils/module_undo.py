@@ -24,8 +24,6 @@ class Module(ModuleBase):
         else:
             amount = 1
 
-        await self.bot.delete_message(ctx.message)
-
         deleted = 0
         failed = 0
 
@@ -53,3 +51,5 @@ class Module(ModuleBase):
             f'Deleted responses to **{deleted}** command(s), failed to delete **{failed}** messages',
             delete_after=4,
         )
+
+        await self.bot.delete_message(ctx.message)
