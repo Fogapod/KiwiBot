@@ -36,7 +36,7 @@ class Module(ModuleBase):
         image = await find_image(args[1:], ctx, include_gif=False)
         await image.ensure()
         if image.error:
-            return await ctx.warn(image.error)
+            return await ctx.warn(f'Error downloading first image: {image.error}')
 
         robin = image.bytes
 

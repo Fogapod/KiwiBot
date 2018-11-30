@@ -9,7 +9,7 @@ import discord
 
 from objects.bot import KiwiBot
 from objects.logger import Logger
-from objects.image import Image
+from objects.image import Image, STATIC_FORMATS, DEFAULT_STATIC_FORMAT
 
 from constants import (
     ID_REGEX, USER_MENTION_OR_ID_REGEX, ROLE_OR_ID_REGEX,
@@ -231,10 +231,7 @@ async def find_channel(
 
 # TODO: better extension checks
 async def find_image(pattern, ctx, *, limit=200, include_gif=True, timeout=5):
-    """Returns array with url and bytes fields that can be missing"""
-
-    static_formats = ('png', 'jpg', 'jpeg', 'webp')
-    default_static_format = 'png'
+    """Returns Image object"""
 
     if pattern:
         # check if pattern is custom emote
@@ -282,7 +279,7 @@ async def find_image(pattern, ctx, *, limit=200, include_gif=True, timeout=5):
         # check if pattern is user mention
         user = await find_user(pattern, ctx.message)
         if user:
-            extension = 'gif' if user.is_avatar_animated() and include_gif else default_static_format
+            extension = 'gif' if user.is_avatar_animated() and include_gif else DEFAULT_STATIC_FORMAT
             return Image(
                 ctx, type='user', extension=extension, use_proxy=False,
                 url=user.avatar_url_as(format=extension)
@@ -296,27 +293,7 @@ async def find_image(pattern, ctx, *, limit=200, include_gif=True, timeout=5):
                 ctx, error='Was not able to find anything. If input is url, it must begin with http/https'
             )
 
-        try:
-            r = await ctx.bot.sess.get(
-                pattern, proxy=ctx.bot.get_proxy(),
-                timeout=timeout, raise_for_status=True
-            )
-        except Exception as e:
-            return Image(ctx, error=f'Error downloading image: {e}')
-
-        if (r.content_length or 0) > 7000000:
-            return Image(
-                ctx, error='Error: content on requested page is too long')
-
-        extension = r.content_type.rpartition('/')[-1]
-        if extension == 'gif':
-            if not include_gif:
-                return Image(
-                    ctx, error='Found GIF, but GIF images were not allowed')
-        else:
-            if extension not in static_formats:
-                return Image(
-                    ctx, error=f'Error: unknown file extension: {extension}')
+        return Image(ctx, type=f'url{"" if include_gif else "/static"}', url=pattern)
 
         return Image(
             ctx, type='image', extension=extension,
@@ -328,9 +305,8 @@ async def find_image(pattern, ctx, *, limit=200, include_gif=True, timeout=5):
         if extension == 'gif':
             if not include_gif:
                 return
-        else:
-            if extension not in static_formats:
-                return
+        elif extension not in STATIC_FORMATS:
+            return
 
         return extension
 
