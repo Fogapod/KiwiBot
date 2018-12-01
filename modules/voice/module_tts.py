@@ -9,6 +9,7 @@ from tempfile import TemporaryFile
 from discord import Embed, Colour, DMChannel, File, FFmpegPCMAudio, PCMVolumeTransformer
 
 from utils.funcs import create_subprocess_exec, execute_process
+from utils.voice import connect, play, VoiceConnectionError
 
 
 ffmpeg_options = {
@@ -205,26 +206,10 @@ class Module(ModuleBase):
             'no-voice', isinstance(ctx.channel, DMChannel))
 
         if voice_flag:
-            if not ctx.author.voice:
-                return await ctx.warn('Please, join voice channel first')
-
-            if not ctx.author.voice.channel.permissions_for(ctx.author).speak:
-                return await ctx.error('You\'re muted!')
-
-            if not ctx.author.voice.channel.permissions_for(ctx.guild.me).connect:
-                return await ctx.error('I don\'t have permission to connect to the voice channel')
-
-            if ctx.guild.voice_client is None:  # not connected to voice channel
-                try:
-                    vc = await ctx.author.voice.channel.connect()
-                except Exception:
-                    return await ctx.error('Failed to connect to voice channel')
-            elif ctx.author not in ctx.guild.voice_client.channel.members:  # connected to a different voice channel
-                await ctx.guild.voice_client.move_to(ctx.author.voice.channel)
-
-                vc = ctx.guild.voice_client
-            else:  # already connected and is in the right place
-                vc = ctx.guild.voice_client
+            try:
+                vc = await connect(ctx)
+            except VoiceConnectionError as e:
+                return await ctx.error(e)
 
         try:
             volume = float(flags.get('volume', 100)) / 100
@@ -254,7 +239,8 @@ class Module(ModuleBase):
 
         if woman_flag:
             if quiet_flag:
-                return await ctx.error('Can\'t combine **woman** and **quiet** flags')
+                return await ctx.error(
+                    'Can not use **woman** and **quiet** flags together')
 
             language += f'+f{random.randrange(1, 5)}'
 
@@ -271,7 +257,8 @@ class Module(ModuleBase):
         with TemporaryFile() as tmp:
             tmp.write(stdout)
             tmp.seek(0)
-            audio = PCMVolumeTransformer(FFmpegPCMAudio(tmp, **ffmpeg_options), volume)
+            audio = PCMVolumeTransformer(
+                FFmpegPCMAudio(tmp, **ffmpeg_options), volume)
 
             if flags.get('file', not voice_flag):
                 try:
@@ -280,8 +267,5 @@ class Module(ModuleBase):
                     await ctx.warn('Failed to send file')
 
         if voice_flag:
-            if vc.is_playing():
-                vc.stop()
-
-            vc.play(audio)
+            play(vc, audio)
             await ctx.react('✅')

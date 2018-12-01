@@ -9,6 +9,8 @@ from discord import Embed, Colour, DMChannel, File, FFmpegPCMAudio, PCMVolumeTra
 
 import gtts
 
+from utils.voice import connect, play, VoiceConnectionError
+
 
 ffmpeg_options = {
     'pipe': True,
@@ -64,6 +66,8 @@ class Module(ModuleBase):
 
     async def on_call(self, ctx, args, **flags):
         if args[1:].lower() == 'list':
+            if not hasattr(self, 'langs'):
+                return await ctx.error('No languages, probably failed to fetch list')
             lines = [f'{k:<10}| {v}' for k, v in self.langs.items()]
             lines_per_chunk = 30
             chunks = [f'```{"code":<10}| name\n{"-" * 35}\n' + '\n'.join(lines[i:i + lines_per_chunk]) + '```' for i in range(0, len(lines), lines_per_chunk)]
@@ -84,26 +88,10 @@ class Module(ModuleBase):
             'no-voice', isinstance(ctx.channel, DMChannel))
 
         if voice_flag:
-            if not ctx.author.voice:
-                return await ctx.warn('Please, join voice channel first')
-
-            if not ctx.author.voice.channel.permissions_for(ctx.author).speak:
-                return await ctx.error('You\'re muted!')
-
-            if not ctx.author.voice.channel.permissions_for(ctx.guild.me).connect:
-                return await ctx.error('I don\'t have permission to connect to the voice channel')
-
-            if ctx.guild.voice_client is None:  # not connected to voice channel
-                try:
-                    vc = await ctx.author.voice.channel.connect()
-                except Exception:
-                    return await ctx.warn('Failed to connect to voice channel')
-            elif ctx.author not in ctx.guild.voice_client.channel.members:  # connected to a different voice channel
-                await ctx.guild.voice_client.move_to(ctx.author.voice.channel)
-
-                vc = ctx.guild.voice_client
-            else:  # already connected and is in the right place
-                vc = ctx.guild.voice_client
+            try:
+                vc = await connect(ctx)
+            except VoiceConnectionError as e:
+                return await ctx.error(e)
 
         try:
             volume = float(flags.get('volume', 100)) / 100
@@ -134,10 +122,7 @@ class Module(ModuleBase):
             audio = PCMVolumeTransformer(FFmpegPCMAudio(tts_file, **ffmpeg_options), volume)
 
             if voice_flag:
-                if vc.is_playing():
-                    vc.stop()
-
-                vc.play(audio)
+                play(vc, audio)
                 await ctx.react('✅')
 
             if flags.get('file', not voice_flag):
