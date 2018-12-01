@@ -292,9 +292,18 @@ class KiwiBot(discord.AutoShardedClient):
         if not member.guild.me.voice:  # voice connection doesn't exist
             return
 
-        if before.channel and after.channel != before.channel:  # user left or moved
-            if not member.bot or member == self.user:  # action by user or bot was moved
-                if sum(1 for m in before.channel.members if not m.bot) == 0:  # no users in channel left
+        if member.id == self.user.id and before.channel and before.channel != after.channel:  # bot moved
+            if before.channel.id in self._leave_voice_channel_tasks:
+                self._leave_voice_channel_tasks[before.channel.id].cancel()
+                del self._leave_voice_channel_tasks[before.channel.id]
+
+                if sum(1 for m in after.channel.members if not m.bot) == 0:  # no users left in channel
+                    self._leave_voice_channel_tasks[after.channel.id] = self.loop.create_task(
+                        self._voice_disconnect_task(after.channel, member.guild.voice_client))
+
+        elif before.channel and after.channel != before.channel:  # user left or moved
+            if not member.bot:  # action by user
+                if sum(1 for m in before.channel.members if not m.bot) == 0:  # no users left in channel
                     self._leave_voice_channel_tasks[before.channel.id] = self.loop.create_task(
                         self._voice_disconnect_task(before.channel, member.guild.voice_client))
 
@@ -305,7 +314,7 @@ class KiwiBot(discord.AutoShardedClient):
                     del self._leave_voice_channel_tasks[after.channel.id]
 
     async def _voice_disconnect_task(self, channel, vc):
-        await asyncio.sleep(60)
+        await asyncio.sleep(15)
         if sum(1 for m in channel.members if not m.bot) > 0:  # there are users in channel
             return
 
