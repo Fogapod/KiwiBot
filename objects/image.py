@@ -28,7 +28,7 @@ class Image:
         return self.url or ''
 
     def __repr__(self):
-        return f"<Image type='{self.type}' extension='{self.extension}' url='{self.url}' error='{self.error}'>"
+        return f'<Image type={self.type!r} extension={self.extension!r} url={self.url!r} error={self.error!r}>'
 
     async def ensure(self, raise_on_error=False, timeout=5):
         """Ensures image bytes are downloaded"""
