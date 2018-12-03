@@ -251,7 +251,7 @@ class KiwiBot(discord.AutoShardedClient):
             ttl = await self.redis.ttl(f'tracked_message:{message.id}')
             await self.redis.expire(f'tracked_message:{message.id}', ttl + 60)
 
-            await self.on_message(message, from_edit=True)
+        await self.on_message(message, from_edit=True)
 
     async def on_raw_message_delete(self, event):
         if event.message_id in self._commands_in_progress:
