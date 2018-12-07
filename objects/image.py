@@ -1,4 +1,8 @@
+from io import BytesIO
 from asyncio import TimeoutError
+
+import PIL
+
 
 STATIC_FORMATS = ('png', 'jpg', 'jpeg', 'webp')
 DEFAULT_STATIC_FORMAT = 'png'
@@ -71,3 +75,13 @@ class Image:
                     self.error += str(e)
 
         return self
+
+    async def to_pil_image(self):
+        await self.ensure()
+        if self.error:
+            return
+
+        try:
+            return PIL.Image.open(BytesIO(self.bytes))
+        except PIL.Image.DecompressionBombError:
+            self.error = f'Failed to open image, exceeds **{PIL.Image.MAX_IMAGE_PIXELS}** pixel limit'

@@ -1,8 +1,8 @@
 from objects.modulebase import ModuleBase
 
-import io
-
 import discord
+
+from io import BytesIO
 
 from PIL import Image
 from PIL.ImageOps import mirror
@@ -34,37 +34,29 @@ class Module(ModuleBase):
 
     async def on_call(self, ctx, args, **flags):
         image = await find_image(args[1:], ctx, include_gif=False)
-        await image.ensure()
+        robin = await image.to_pil_image()
         if image.error:
-            return await ctx.warn(f'Error downloading first image: {image.error}')
+            return await ctx.warn(f'Error getting first image: {image.error}')
 
-        robin = image.bytes
+        if sum(robin.size) > MAX_SIZE:
+            return await ctx.error('Robin is too large')
 
         batface_flag = flags.get('batface')
         if batface_flag is not None:
             image = await find_image(batface_flag, ctx, include_gif=False)
-            await image.ensure()
+            bat = await image.to_pil_image()
             if image.error:
-                return await ctx.warn(
-                    f'Error finding second image: {image.error}'
-                )
-
-            bat = image.bytes
+                return await ctx.warn(f'Error getting second image: {image.error}')
         else:
             try:
                 async with self.bot.sess.get(
                         ctx.author.avatar_url_as(format='png'), raise_for_status=True) as r:
-                    bat = await r.read()
+                    bat = Image.open(BytesIO(await r.read()))
             except Exception:
                 return await ctx.error('Failed to download author\'s avatar')
 
-        robin = Image.open(io.BytesIO(robin))
-        if sum(robin.size) > MAX_SIZE:
-            return await ctx.error('First image is too big')
-
-        bat = Image.open(io.BytesIO(bat))
         if sum(bat.size) > MAX_SIZE:
-            return await ctx.error('Second image is too big')
+            return await ctx.error('Batman is too large')
 
         result = await self.bot.loop.run_in_executor(
             None, self.slap, robin, bat)
@@ -84,7 +76,7 @@ class Module(ModuleBase):
 
         template.paste(robin, (200, 310), mask=robin.split()[3])
 
-        result = io.BytesIO()
+        result = BytesIO()
         template.save(result, format='PNG')
 
         return result.getvalue()
