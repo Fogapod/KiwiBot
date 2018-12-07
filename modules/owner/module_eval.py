@@ -67,7 +67,7 @@ class Module(ModuleBase):
                 if from_stdout:
                     return f'```py\n{from_stdout}\n```'
                 try:
-                    await ctx.react('✅', raise_on_errors=True)
+                    await ctx.react('✅')
                 except discord.Forbidden:
                     return 'Evaluated'
             else:
