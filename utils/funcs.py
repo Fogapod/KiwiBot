@@ -295,11 +295,6 @@ async def find_image(pattern, ctx, *, limit=200, include_gif=True, timeout=5):
 
         return Image(ctx, type=f'url{"" if include_gif else "/static"}', url=pattern)
 
-        return Image(
-            ctx, type='image', extension=extension,
-            url=r.url, bytes=await r.read()
-        )
-
     def check_extension(url):
         extension = url.rpartition('.')[-1].lower()
         if extension == 'gif':
