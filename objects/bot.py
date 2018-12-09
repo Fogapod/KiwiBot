@@ -364,9 +364,9 @@ class KiwiBot(discord.AutoShardedClient):
                     await self.register_response(response_to, error_dm_message)
                     dm_message = await response_to.author.send(**fields)
                     await self.register_response(response_to, dm_message)
-                except Exception:
+                except discord.HTTPException:
                     pass
-        except Exception:
+        except discord.HTTPException:
             exception = traceback.format_exc()
             exception = '\n'.join(exception.split('\n')[-4:])
             exception = f'❗ Message delivery failed\n```\n{exception}```'
@@ -392,9 +392,8 @@ class KiwiBot(discord.AutoShardedClient):
         try:
             return await msg.edit(**fields)
         except discord.errors.NotFound:
-            logger.debug('edit_message: message not found')
             return None
-        except Exception:
+        except discord.HTTPException:
             exception = traceback.format_exc()
             exception = '\n'.join(exception.split('\n')[-4:])
             exception = f'❗ Message edit failed\n```\n{exception}```'
