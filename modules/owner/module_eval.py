@@ -58,6 +58,8 @@ class Module(ModuleBase):
         try:
             with redirect_stdout(fake_stdout):
                 returned = await func()
+        except asyncio.CancelledError:
+            raise
         except Exception as e:
             return f'```py\n{fake_stdout.getvalue()}{traceback.format_exc()}\n```'
         else:
