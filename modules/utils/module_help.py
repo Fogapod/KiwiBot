@@ -7,6 +7,7 @@ import random
 
 from discord import Embed, Colour
 
+from objects.flags import Flag, FlagType
 from utils.funcs import get_local_prefix
 
 
@@ -27,16 +28,18 @@ class Module(ModuleBase):
         PermissionEmbedLinks(), PermissionAddReactions(),
         PermissionReadMessageHistory()
     )
-    flags = {
-        'show-hidden': {
-            'alias': 'h',
-            'bool': True
-        },
-        'hide-normal': {
-            'alias': 'n',
-            'bool': True
-        }
-    }
+    flags = [
+        Flag(
+            'show-hidden', 'h',
+            type=FlagType.BOOL,
+            hidden=True
+        ),
+        Flag(
+            'hide-normal', 'n',
+            type=FlagType.BOOL,
+            hidden=True
+        )
+    ]
 
     async def on_call(self, ctx, args, **flags):
         hidden_flag = flags.get('show-hidden', False)

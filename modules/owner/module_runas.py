@@ -3,6 +3,7 @@ from objects.permissions import PermissionBotOwner
 
 from copy import copy
 
+from objects.flags import Flag, FlagType
 from utils.funcs import find_user, get_local_prefix
 
 
@@ -10,10 +11,6 @@ class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} <user> <command>'
     short_doc = 'Replace message author and run command'
-    long_doc = (
-        'Flags:'
-        '\t[--no-prefix|-n]: do not append prefix to the message'
-    )
 
     name = 'runas'
     aliases = (name, )
@@ -21,12 +18,13 @@ class Module(ModuleBase):
     min_args = 2
     user_perms = (PermissionBotOwner(), )
     guild_only = True
-    flags = {
-        'no-prefix': {
-            'alias': 'n',
-            'bool': True
-        }
-    }
+    flags = [
+        Flag(
+            'no-prefix', 'n',
+            type=FlagType.BOOL,
+            descr='Do not prepend prefix to message if added'
+        )
+    ]
     hidden = True
 
     async def on_call(self, ctx, args, **flags):

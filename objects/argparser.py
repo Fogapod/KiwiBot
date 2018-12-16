@@ -1,3 +1,6 @@
+from objects.flags import FlagType
+
+
 class ArgParser:
 
     def __init__(self, string):
@@ -66,33 +69,34 @@ class ArgParser:
 
         return args, seps
 
-    def parse_flags(self, known_flags={}):
+    async def parse_flags(self, known_flags=()):
         args = []
         seps = []
         flags = {}
         flag = ''
 
-        def try_to_add_flag(name, arg=''):
-            flag = known_flags.get(name, name)
+        async def try_to_add_flag(name, arg=''):
+            flag = name
+            for f in known_flags:
+                if name in (f.name, f.alias):
+                    flag = f
 
             if not flag:
                 return 0
 
-            if isinstance(flag, dict):
-                alias = flag['alias']
-
-                if known_flags[alias]['bool']:
-                    flags[alias] = 1
-                else:
-                    flags[alias] = arg
-                    return 1
-            else:  # unknown flag
+            if isinstance(flag, str):  # unknown flag
                 flags[flag] = True
+                return 0
 
-            return 0
+            if flag.type == FlagType.BOOL:
+                flags[flag.name] = True
+                return 0
+            else:
+                flags[flag.name] = await flag.convert(arg)
+                return 1
 
         for i, arg in enumerate(self.args + ['']):
-            if try_to_add_flag(flag, arg):
+            if await try_to_add_flag(flag, arg):
                 flag = ''
                 continue
 
@@ -108,7 +112,7 @@ class ArgParser:
                         break
                 else:
                     for c in arg[1:-1]:
-                        try_to_add_flag(c)
+                        await try_to_add_flag(c)
 
                     flag = arg[-1]
             else:

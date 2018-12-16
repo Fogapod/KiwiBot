@@ -19,7 +19,7 @@ class ModuleBase:
     user_perms       = ()     # needed user permissions
     min_args         = 0      # minimum number if arguments
     max_args         = -1     # maximum number of arguments. -1 if no limit
-    flags            = {}     # flags are specified here
+    flags            = ()     # list of objects.flags.Flag objects, command flags
     guild_only       = False  # can only be used in guild
     nsfw             = False  # can only be used in nsfw channel
     hidden           = False  # would be hidden when possible
@@ -37,17 +37,6 @@ class ModuleBase:
         if not isinstance(self.user_perms, tuple):
             self.require_perms = (self.user_perms, )
 
-        # format call_flags dict
-        self._flags = {}
-
-        for k, v in self.flags.items():
-            alias = v.get('alias', None)
-            bool  = v.get('bool', False)
-
-            if alias is not None:
-                self._flags[alias] = { 'alias': k }
-            self._flags[k] = { 'alias': k, 'bool': bool }
-
         self._ratelimiter = Ratelimiter(self.ratelimit_type, self.name, *self.ratelimit)
 
 
@@ -60,6 +49,9 @@ class ModuleBase:
     async def on_ratelimit(self, ctx, time_left):
         # TODO: different output for different ratelimiter type
         return await ctx.warn(f'Please, try again in **{round(time_left / 1000, 1)}** seconds')
+
+    async def on_flag_parse_error(self, ctx, e):
+        return await ctx.warn(e)
 
     async def on_not_enough_arguments(self, ctx):
         return await self.on_doc_request(ctx)
@@ -103,7 +95,7 @@ class ModuleBase:
         if getattr(ctx.channel, 'is_nsfw', lambda: isinstance(ctx.channel, DMChannel))() < self.nsfw:
             raise NSFWPermissionDenied
 
-        args.parse_flags(known_flags=self._flags)
+        await args.parse_flags(known_flags=self.flags)
 
         if len(args) - 1 < self.min_args:
             raise NotEnoughArgs
@@ -136,9 +128,16 @@ class ModuleBase:
         pass
 
     async def on_doc_request(self, ctx):
+        flags = [f for f in self.flags if not f.hidden]
+
         help_text = ''
         help_text += f'{self.usage_doc}'     if self.usage_doc else ''
         help_text += f'\n\n{self.short_doc}' if self.short_doc else ''
+
+        if flags:
+            help_text += '\n\nFlags:\n'
+            help_text += '\n'.join(f.doc_line() for f in flags)
+
         help_text += f'\n\n{self.long_doc}'  if self.long_doc else ''
 
         help_text = help_text.strip()

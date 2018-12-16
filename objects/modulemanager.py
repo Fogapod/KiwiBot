@@ -7,6 +7,7 @@ from importlib import reload
 
 from objects.logger import Logger
 from objects.argparser import ArgParser
+from objects.flags import FlagParseError
 from objects.permissions import Permission
 from objects.moduleexceptions import *
 
@@ -105,6 +106,8 @@ class ModuleManager:
                 return await module.on_guild_check_failed(ctx)
             except NSFWPermissionDenied:
                 return await module.on_nsfw_permission_denied(ctx)
+            except FlagParseError as e:
+                return await module.on_flag_parse_error(ctx, e)
             except NotEnoughArgs:
                 return await module.on_not_enough_arguments(ctx)
             except TooManyArgs:
@@ -153,7 +156,10 @@ class ModuleManager:
                     logger.debug(f'Error occured calling {name} on_error')
                     logger.debug(traceback.format_exc())
             finally:
-                del self.bot._commands_in_progress[ctx.message.id]
+                try:
+                    del self.bot._commands_in_progress[ctx.message.id]
+                except KeyError:
+                    pass
 
             return command_output
 
