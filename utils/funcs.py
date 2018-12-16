@@ -86,7 +86,7 @@ async def find_user(pattern, msg, strict_guild=False, max_count=1, global_search
             if member.nick is not None and not global_search:
                 match_pos = member.nick.lower().find(pattern)
             if match_pos == -1:
-                match_pos = (member.name + '#' + member.discriminator).lower().find(pattern)
+                match_pos = f'{member.name.lower()}#{member.discriminator}'.find(pattern)
             if match_pos == -1:
                 continue
             found.append((member, match_pos))
