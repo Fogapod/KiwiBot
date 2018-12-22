@@ -13,7 +13,7 @@ class Module(ModuleBase):
     long_doc = ('Became possible with the use of https://nekos.life')
 
     name = 'owoify'
-    aliases = (name, )
+    aliases = (name, 'owo')
     category = 'Services'
     min_args = 1
     bot_perms = (PermissionEmbedLinks(), )
