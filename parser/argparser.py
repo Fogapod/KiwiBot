@@ -1,18 +1,18 @@
-from objects.flags import FlagType
-
-
 class ArgParser:
 
-    def __init__(self, string):
+    def __init__(self, string, ctx):
+        self.ctx = ctx
+
         self.args = []
+        self.args_raw = []
         self.flags = {}
         self._separators = []
 
         self._split(string)
 
     @classmethod
-    def parse(cls, string):
-        return cls(string)
+    def parse(cls, string, ctx):
+        return cls(string, ctx)
 
     def _split(self, string):
         args, seps = [], []
@@ -64,6 +64,7 @@ class ArgParser:
 
             # print(f'Char {"[" + c + "]":<3} Str {"[" + s + "]":<20} Quote {quote}')
 
+        self.args_raw = args
         self.args = args
         self._separators = seps
 
@@ -88,14 +89,14 @@ class ArgParser:
                 flags[flag] = True
                 return 0
 
-            if flag.type == FlagType.BOOL:
+            if flag.is_bool:
                 flags[flag.name] = True
                 return 0
             else:
-                flags[flag.name] = await flag.convert(arg)
+                flags[flag.name] = await flag.convert(arg, self.ctx)
                 return 1
 
-        for i, arg in enumerate(self.args + ['']):
+        for i, arg in enumerate(self.args_raw + ['']):
             if await try_to_add_flag(flag, arg):
                 flag = ''
                 continue
@@ -106,7 +107,7 @@ class ArgParser:
                 if arg[:2] == '--':
                     flag = arg[2:]
                     if not flag:
-                        args += self.args[i + 1:] + ['']
+                        args += self.args_raw[i + 1:] + ['']
                         if i > 0:
                             seps += self._separators[i - 1:]
                         break
@@ -120,11 +121,24 @@ class ArgParser:
                 if i > 0 and len(self._separators) >= i:
                     seps.append(self._separators[i - 1])
 
-        self.args = args[:-1] if args and not args[-1] else args  # last flag can eat empty argument from end
+        self.args_raw = args[:-1] if args and not args[-1] else args  # last flag can eat empty argument from end
         self._separators = seps
         self.flags = flags
 
         return flags
+
+    async def convert_args(self, converters):
+        converted = [self.args[0]]
+
+        for i, arg in enumerate(self.args[1:]):
+            if i + 1 > len(converters):
+                converted.append(arg)
+            else:
+                converted.append(await converters[i].convert(arg, self.ctx))
+
+        self.args = converted
+
+        return self.args
 
     def __len__(self):
         return len(self.args)
@@ -144,15 +158,15 @@ class ArgParser:
             result = ''
 
             start = value.start or 0
-            end = value = value.stop or len(self.args)
+            end = value = value.stop or len(self.args_raw)
 
             if start < 0:
-                start = len(self.args) + start
+                start = len(self.args_raw) + start
             if end < 0:
-                end = len(self.args) + end
+                end = len(self.args_raw) + end
 
             for i in range(start, end):
-                result += self.args[i] + (seps[i] if i != end - 1 else '')
+                result += self.args_raw[i] + (seps[i] if i != end - 1 else '')
             return result
         else:
             return self.args[value]

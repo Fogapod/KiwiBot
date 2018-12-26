@@ -1,6 +1,6 @@
-from discord import DMChannel
+import inspect
 
-from utils.funcs import get_local_prefix
+from discord import DMChannel
 
 from objects.moduleexceptions import *
 from objects.ratelimiter import Ratelimiter
@@ -19,14 +19,21 @@ class ModuleBase:
     user_perms       = ()     # needed user permissions
     min_args         = 0      # minimum number if arguments
     max_args         = -1     # maximum number of arguments. -1 if no limit
-    flags            = ()     # list of objects.flags.Flag objects, command flags
+    args             = ()     # list of parser.Argument objects, command arguments
+    flags            = ()     # list of parser.Flag objects, command flags
     guild_only       = False  # can only be used in guild
     nsfw             = False  # can only be used in nsfw channel
     hidden           = False  # would be hidden when possible
     disabled         = False  # won't be checked or called
     ratelimit_type   = 'user' # type of ratelimuter (see objects/ratelimiter.py)
     ratelimit        = (1, 1) # number of allowed usage / seconds
-    events           = {}     # (name: function) pairs of events module will handle
+
+    # internal properties
+    bot             = None    # main bot object reference
+    _ratelimiter    = None    # current ratelimiter object
+    _events         = {}      # event handlers (example: event_message_edit)
+    _subcommands    = {}      # subcommands of 1st level (example: sub_test)
+
 
     def __init__(self, bot):
         self.bot = bot
@@ -38,6 +45,18 @@ class ModuleBase:
             self.require_perms = (self.user_perms, )
 
         self._ratelimiter = Ratelimiter(self.ratelimit_type, self.name, *self.ratelimit)
+
+        # iterate to find event handlers and subcommands
+        for i in dir(self):
+            if not inspect.iscoroutinefunction(getattr(self, i)):
+                continue
+
+            if i.startswith('event_'):
+                self._events[i[6:]] = getattr(self, i)
+                continue
+
+            if i.startswith('sub_'):
+                self._subcommands[i[4:]] = getattr(self, i)
 
 
     async def on_guild_check_failed(self, ctx):
@@ -80,7 +99,7 @@ class ModuleBase:
 
         return response
 
-    async def on_load(self, from_reload):
+    async def on_load(self):
         pass
 
     async def check_message(self, ctx, args):
@@ -88,14 +107,18 @@ class ModuleBase:
             return False
         return await self.on_check_message(ctx, args)
 
+    async def route_subcommand(self, ctx, args):
+        pass
+
     async def on_check_message(self, ctx, args):
         if (ctx.guild is not None) < self.guild_only:
             raise GuildOnly
 
-        if getattr(ctx.channel, 'is_nsfw', lambda: isinstance(ctx.channel, DMChannel))() < self.nsfw:
+        if ctx.is_nsfw < self.nsfw:
             raise NSFWPermissionDenied
 
         await args.parse_flags(known_flags=self.flags)
+        await args.convert_args(self.args)
 
         if len(args) - 1 < self.min_args:
             raise NotEnoughArgs
@@ -131,7 +154,8 @@ class ModuleBase:
         flags = [f for f in self.flags if not f.hidden]
 
         help_text = ''
-        help_text += f'{self.usage_doc}'     if self.usage_doc else ''
+        help_text += self.usage_doc + ' '.join(self.args)
+        # help_text += f'{self.usage_doc}'     if self.usage_doc else ''
         help_text += f'\n\n{self.short_doc}' if self.short_doc else ''
 
         if flags:
@@ -145,7 +169,7 @@ class ModuleBase:
         return await self._format_help(help_text, ctx)
 
     async def _format_help(self, help_text, ctx):
-        help_text = help_text.replace('{prefix}', await get_local_prefix(ctx))
+        help_text = help_text.replace('{prefix}', await ctx.local_prefix())
 
         if len(self.aliases) == 1:
             help_text = help_text.replace('{aliases}', self.aliases[0])

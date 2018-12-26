@@ -10,7 +10,7 @@ from async_timeout import timeout
 
 from discord import Embed, Colour, File
 from arsenic import start_session, stop_session, services, browsers
-from arsenic.errors import UnknownArsenicError, UnknownError
+from arsenic.errors import WebdriverError, ArsenicError
 
 import logging
 import structlog
@@ -78,6 +78,7 @@ class Module(ModuleBase):
                 if (r.content_length or 0) > 100000000:
                     return await self.bot.edit_message(
                         m, 'Rejected to navigate, content is too long')
+                url = str(r.url)
         except asyncio.TimeoutError:
             return await self.bot.edit_message(m, 'Connection timeout')
         except aiohttp.InvalidURL:
@@ -95,7 +96,7 @@ class Module(ModuleBase):
 
         await self.lock.acquire()
  
-        service = service = services.Chromedriver(log_file=devnull)
+        service = services.Chromedriver(log_file=devnull)
         browser = browsers.Chrome(
             chromeOptions={
                 'args': [
@@ -118,23 +119,32 @@ class Module(ModuleBase):
         except asyncio.TimeoutError:
             return await self.bot.edit_message(
                 m, f'Screenshot timeout reached: **{TIMEOUT}** sec')
-        except (UnknownArsenicError, UnknownError):
+        except WebdriverError as e:
             return await self.bot.edit_message(
-                m, 'Unknown browser error happened')
+                m, f'Browser error happened, unable to take a screenshot: {e.__class__.__name__}')
+        except ArsenicError as e:
+            return await self.bot.edit_message(
+                 m, f'Client error happened: {e}')
         finally:
             try:
                 self.lock.release()
-            except Exception:
+            except RuntimeError:
                 pass
 
-            await stop_session(session)
+            try:
+                await stop_session(session)
+            except UnboundLocalError:
+                pass
 
         try:
             title = opened_url.split('/')[2]
         except IndexError:
             title = "Screenshot"
 
-        e = Embed(title=title[:256], colour=Colour.gold(), url=url)
+        e = Embed(
+            title=title[:256], colour=Colour.gold(),
+            url=url if len(url) <= 2048 else None
+        )
         e.set_image(url='attachment://screenshot.png')
 
         f = File(screenshot, filename='screenshot.png')
@@ -142,6 +152,5 @@ class Module(ModuleBase):
                 text=f'[{round(time.time() - (m.created_at or m.edited_at).timestamp(), 1)} sec] Note: above content is user-generated.',
             icon_url=ctx.author.avatar_url
         )
-
         await self.bot.delete_message(m)
         await ctx.send(embed=e, file=f)

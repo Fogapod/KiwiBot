@@ -5,9 +5,9 @@ import traceback
 
 from importlib import reload
 
+from parser import ArgParser
+
 from objects.logger import Logger
-from objects.argparser import ArgParser
-from objects.flags import FlagParseError
 from objects.permissions import Permission
 from objects.moduleexceptions import *
 
@@ -34,7 +34,7 @@ class ModuleManager:
             module_name = module_path[module_path.rfind(os.sep) + 8:-3]
             try:
                 module = await self.load_module(module_path)
-                await self.init_module(module, from_reload=False)
+                await self.init_module(module)
             except Exception:
                 logger.info(f'Failed to load module {module_name}')
                 logger.info(traceback.format_exc())
@@ -55,13 +55,13 @@ class ModuleManager:
 
         return module
 
-    async def init_modules(self, from_reload=True):
+    async def init_modules(self):
         for module in self.modules.values():
-            await self.init_module(module, from_reload=from_reload)
+            await self.init_module(module)
 
-    async def init_module(self, module, from_reload=True):
+    async def init_module(self, module):
         logger.trace(f'Calling {module.name} on_load')
-        await module.on_load(from_reload)
+        await module.on_load()
 
     async def reload_modules(self):
         for module_name in self.modules:
@@ -85,16 +85,16 @@ class ModuleManager:
         reloaded = reload(self._modules[name])
         module = getattr(reloaded, 'Module')(self.bot)
 
-        await self.init_module(module, from_reload=True)
+        await self.init_module(module)
 
         self._modules[name] = reloaded
         self.modules[name] = module
 
     async def unload_module(self, name):
-        pass
+        self.modules[name].disabled = True
 
     async def check_modules(self, ctx, clean_content):
-        args = ArgParser.parse(clean_content)
+        args = ArgParser.parse(clean_content, ctx)
 
         for name, module in self.modules.items():
             if module.disabled:
@@ -106,7 +106,7 @@ class ModuleManager:
                 return await module.on_guild_check_failed(ctx)
             except NSFWPermissionDenied:
                 return await module.on_nsfw_permission_denied(ctx)
-            except FlagParseError as e:
+            except ArgParseError as e:
                 return await module.on_flag_parse_error(ctx, e)
             except NotEnoughArgs:
                 return await module.on_not_enough_arguments(ctx)
@@ -116,6 +116,8 @@ class ModuleManager:
                 return await module.on_missing_permissions(ctx, *e.missing)
             except Ratelimited as e:
                 return await module.on_ratelimit(ctx, e.time_left)
+            except asyncio.CancelledError:
+                return
             except Exception:
                 logger.info(f'Failed to check command, stopped on module {name}')
                 logger.info(traceback.format_exc())
@@ -131,6 +133,8 @@ class ModuleManager:
                 await self.bot.redis.incr(f'command_usage:{module.name}')
                 try:
                     self.bot.dispatch('command_use', module, ctx, args)
+                except asyncio.CancelledError:
+                    return
                 except Exception:
                     logger.debug(f'Error dispatching command_use event')
                     logger.debug(traceback.format_exc())

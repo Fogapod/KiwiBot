@@ -86,6 +86,9 @@ class KiwiBot(discord.AutoShardedClient):
 
         return random.choice(proxies)
 
+    async def make_ctx(self, message, prefix=None):
+        return Context(self, message, prefix)
+
     async def init_prefixes(self):
         bot_id = self.user.id
 
@@ -125,7 +128,6 @@ class KiwiBot(discord.AutoShardedClient):
 
     async def on_ready(self):
         if not self.is_first_on_ready_event:
-            await self.mm.init_modules()
             logger.info('Bot reconnected')
             return
 
@@ -194,7 +196,9 @@ class KiwiBot(discord.AutoShardedClient):
             return
 
         await self.process_command(
-            Context(self, msg, prefix), msg.content[len(p):].lstrip())
+            await self.make_ctx(msg, prefix),
+            msg.content[len(p):].lstrip()
+        )
 
     async def process_command(self, ctx, clean_content):
         module_response = await self.mm.check_modules(ctx, clean_content)
@@ -470,7 +474,7 @@ class KiwiBot(discord.AutoShardedClient):
         super().dispatch(event, *args, **kwargs)
 
         for module in self.mm.modules.values():
-            handler = module.events.get(event)
+            handler = module._events.get(event)
             if handler:
                 coro = self._run_event(handler, event, *args, **kwargs)
                 asyncio.ensure_future(coro, loop=self.loop)

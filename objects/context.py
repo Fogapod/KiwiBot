@@ -1,13 +1,15 @@
 class Context:
     __slots__ = ('bot', 'message', 'prefix', 'guild', 'channel', 'author', 'session', )
 
-    def __init__(self, bot, msg, prefix):
+    def __init__(self, bot, message, prefix):
         self.bot = bot
-        self.message = msg
+        self.message = message
         self.prefix = prefix
-        self.guild = msg.guild
-        self.channel = msg.channel
-        self.author = msg.author
+
+        # shortcuts
+        self.guild = message.guild
+        self.channel = message.channel
+        self.author = message.author
         self.session = bot.sess
 
     @property
@@ -18,16 +20,28 @@ class Context:
     def is_nsfw(self):
         return getattr(self.channel, 'is_nsfw', lambda: True)()
 
+    @property
+    def from_edit(self):
+        return self.message.edited_at is not None
+
+    async def local_prefix(self):
+        if self.guild is None:
+            return self.bot._default_prefix
+
+        guild_prefix = self.bot._guild_prefixes.get(self.guild.id)
+        if guild_prefix is not None:
+            return guild_prefix
+
     async def info(self, content=None, send=True, **kwargs):
-        s = f'ℹ {content or ""}'
+        s = '\N{INFORMATION SOURCE}' + f'{content or ""}'
         return await self.send(s, **kwargs) if send else s
 
     async def warn(self, content=None, send=True, **kwargs):
-        s = f'⚠ {content or ""}'
+        s = '\N{WARNING SIGN}' + f'{content or ""}'
         return await self.send(s, **kwargs) if send else s
 
     async def error(self, content=None, send=True, **kwargs):
-        s = f'‼ {content or ""}'
+        s = '\N{DOUBLE EXCLAMATION MARK}' + f'{content or ""}'
         return await self.send(s, **kwargs) if send else s
 
     async def send(self, content=None, *, channel=None, register=True, **kwargs):
@@ -42,3 +56,6 @@ class Context:
 
         return await self.bot.add_reaction(
             message or self.message, emoji, response_to=response_to, **kwargs)
+
+    def __repr__(self):
+        return f'Context prefix={self.prefix!r}'

@@ -7,7 +7,7 @@ from datetime import datetime
 
 import discord
 
-from objects.bot import KiwiBot
+# from objects.bot import KiwiBot
 from objects.logger import Logger
 from objects.image import Image, STATIC_FORMATS, DEFAULT_STATIC_FORMAT
 
@@ -17,7 +17,7 @@ from constants import (
 )
 
 
-bot = KiwiBot.get_bot()
+# bot = KiwiBot.get_bot()
 logger = Logger.get_logger()
 
 
@@ -348,21 +348,13 @@ async def find_image(pattern, ctx, *, limit=200, include_gif=True, timeout=5):
     return Image(ctx, error='Nothing found in latest 200 messages')
 
 
-def _get_last_user_message_timestamp(user_id, channel_id):
+def _get_last_user_message_timestamp(user_id, channel_id, bot):
     channel = bot._last_messages.get(channel_id)
     if channel is not None:
         if user_id in channel:
             return channel[user_id]
 
     return datetime.fromtimestamp(0)
-
-
-async def get_local_prefix(msg):
-    if msg.guild is not None:
-        guild_prefix = bot._guild_prefixes.get(msg.guild.id)
-        if guild_prefix is not None:
-            return guild_prefix
-    return bot._default_prefix
 
 
 async def request_reaction_confirmation(msg, user, emoji_accept='✅', emoji_cancel='❌', timeout=20):
@@ -427,5 +419,5 @@ def timedelta_from_string(string):
 
 
 def check_permission(permission, channel, user):
-	if not permission.check(channel, user):
-		raise permission
+    if not permission.check(channel, user):
+	    raise permission

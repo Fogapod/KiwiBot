@@ -10,6 +10,14 @@ class NSFWPermissionDenied(ModuleCallError):
     pass
 
 
+class ArgParseError(ModuleCallError):
+    pass
+
+
+class ArgCheckError(ArgParseError):
+    pass
+
+
 class NotEnoughArgs(ModuleCallError):
     pass
 
