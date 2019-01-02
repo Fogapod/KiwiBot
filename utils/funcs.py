@@ -263,11 +263,7 @@ async def find_image(pattern, ctx, *, limit=200, include_gif=True, timeout=5):
 
         # check if pattern is emoji
         # thanks NotSoSuper#0001 for the API
-        def to_string(c):
-            digit = f'{ord(c):x}'
-            return f'{digit:>04}'
-
-        code = '-'.join(map(to_string, pattern))
+        code = '-'.join(map(lambda c: f'{ord(c):x}', pattern))
         async with ctx.bot.sess.get(
                 f'https://bot.mods.nyc/twemoji/{code}.png',
                 timeout=timeout) as r:

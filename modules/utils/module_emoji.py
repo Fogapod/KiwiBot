@@ -42,11 +42,7 @@ class Module(ModuleBase):
                 emoji_name = groups['name']
 
         if emoji_id is None:
-            def to_string(c):
-                digit = f'{ord(c):x}'
-                return f'{digit:>04}'
-
-            code = '-'.join(map(to_string, text))
+            code = '-'.join(map(lambda c: f'{ord(c):x}', text))
             async with self.bot.sess.get(TWEMOJI_ENDPOINT.format(code)) as r:
                 if r.status != 200:
                     return await ctx.warn('Could not get emoji from input text')
