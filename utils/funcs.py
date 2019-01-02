@@ -241,14 +241,15 @@ async def find_image(pattern, ctx, *, limit=200, include_gif=True, timeout=5):
             emote_id = int(groups['id'])
             animated = bool(groups['animated'])
 
+            extension='gif' if animated and include_gif else 'png'  # emotes are either pngs or gifs
             emote = ctx.bot.get_emoji(emote_id)
+
             if emote:
                 return Image(
                     ctx, type='emote', url=emote.url, use_proxy=False,
-                    extension='gif' if emote.animated else 'png'  # emotes are either pngs or gifs
+                    extension=extension
                 )
 
-            extension = 'gif' if animated and include_gif else 'png'  # emotes are either pngs or gifs
             async with ctx.bot.sess.get(
                     f'https://cdn.discordapp.com/emojis/{emote_id}.{extension}',
                     timeout=timeout) as r:
