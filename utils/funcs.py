@@ -246,8 +246,9 @@ async def find_image(pattern, ctx, *, limit=200, include_gif=True, timeout=5):
 
             if emote:
                 return Image(
-                    ctx, type='emote', url=emote.url, use_proxy=False,
-                    extension=extension
+                    ctx, type='emote',
+                    url=f'https://cdn.discordapp.com/emojis/{emote_id}.{extension}',
+                    use_proxy=False, extension=extension
                 )
 
             async with ctx.bot.sess.get(
@@ -287,7 +288,10 @@ async def find_image(pattern, ctx, *, limit=200, include_gif=True, timeout=5):
             pattern = pattern[1:-1]
         if not pattern.startswith(('http://', 'https://')):
             return Image(
-                ctx, error='Was not able to find anything. If input is url, it must begin with http/https'
+                ctx, error=(
+                    f'Unable to match custom emote, emoji or user with `{pattern}`\n'
+                    f'If input is image url, it should begin with http or https'
+                )
             )
 
         return Image(ctx, type=f'url{"" if include_gif else "/static"}', url=pattern)
