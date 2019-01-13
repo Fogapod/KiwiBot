@@ -337,6 +337,12 @@ async def find_image(pattern, ctx, *, limit=200, include_gif=True, timeout=5):
             if not embed.thumbnail or (m.author.bot and embed.type == 'rich'):
                 continue
 
+            # avoid case when image embed was created from url that is
+            # used as argument or flag
+            if m.id == ctx.message.id:
+                if embed.thumbnail.url in m.content:
+                    continue
+
             extension = check_extension(embed.thumbnail.proxy_url)
             if not extension:
                 continue
