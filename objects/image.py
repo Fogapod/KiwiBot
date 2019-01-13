@@ -1,8 +1,13 @@
 from io import BytesIO
 from asyncio import TimeoutError
 
-import PIL
 
+try:
+    import PIL
+
+    PIL_INSTALLED = True
+except ImportError:
+    PIL_INSTALLED = False
 
 STATIC_FORMATS = ('png', 'jpg', 'jpeg', 'webp')
 DEFAULT_STATIC_FORMAT = 'png'
@@ -81,7 +86,13 @@ class Image:
         if self.error:
             return
 
+        if not PIL_INSTALLED:
+            self.error = 'Pillow library is not installed, can not process image'
+            return
+
         try:
             return PIL.Image.open(BytesIO(self.bytes))
         except PIL.Image.DecompressionBombError:
             self.error = f'Failed to open image, exceeds **{PIL.Image.MAX_IMAGE_PIXELS}** pixel limit'
+        except OSError as e:
+            self.error = f'Failed to open image: {e}'
