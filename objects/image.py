@@ -59,7 +59,7 @@ class Image:
                     self.error = f'Content is too big'
                     return self
 
-                extension = r.content_type.rpartition('/')[-1]
+                extension = r.content_type.rpartition('/')[-1].lower()
                 if extension == 'gif':
                     if self.type == 'url/static':
                         self.error = 'Found gif, gif images are not allowed'
