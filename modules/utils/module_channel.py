@@ -54,7 +54,7 @@ class Module(ModuleBase):
                 },
                 {
                     'name': 'Category',
-                    'value': channel.category.name
+                    'value': channel.category.name if channel.category else 'No category'
                 },
                 {
                     'name': 'NSFW',
@@ -80,7 +80,7 @@ class Module(ModuleBase):
                 },
                 {
                     'name': 'Category',
-                    'value': channel.category.name
+                    'value': channel.category.name if channel.category else 'No category'
                 }
             ]
         else:
