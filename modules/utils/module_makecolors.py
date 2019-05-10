@@ -15,7 +15,11 @@ DEFAULTS = {
     'lime':       0x00ff00,
     'pink':       0xff69b4,
     'yellow':     0xfbf606,
-    'darkblue':   0x71368a,
+    'darkblue':   0x206694,
+    'salmon':     0xffa07a,
+    'lavender':   0xd1d1ff,
+    'lightred':   0xff4c4c,
+    'orange':     0xe67e22,
     'darkpurple': 0x71368a,
     'gold':       0xf1c40f
 }
