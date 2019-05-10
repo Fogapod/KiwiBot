@@ -194,7 +194,7 @@ class FlyDrawer:
             append_images=self._frames[1:], loop=0 # disposal=2
         )
 
-        return result.getvalue()
+        return BytesIO(result.getvalue())
 
 
 class Module(ModuleBase):

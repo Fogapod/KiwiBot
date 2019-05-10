@@ -1,6 +1,8 @@
 from objects.modulebase import ModuleBase
 from objects.permissions import PermissionEmbedLinks, PermissionAttachFiles
 
+from io import BytesIO
+
 from discord import Embed, Colour, File
 
 from constants import ID_REGEX, EMOJI_REGEX
@@ -48,7 +50,7 @@ class Module(ModuleBase):
                     return await ctx.warn('Could not get emoji from input text')
                         
                 filename = 'emoji.png'
-                f = File(await r.read(), filename=filename)
+                f = File(BytesIO(await r.read()), filename=filename)
                 e.title = f'TWEmoji'
                 e.set_image(url=f'attachment://{filename}')
         else:
@@ -60,7 +62,7 @@ class Module(ModuleBase):
                         return await ctx.error('Emoji with given id not found')
                         
                     filename = f'emoji.{r.content_type[6:]}'
-                    f = File(await r.read(), filename=filename)
+                    f = File(BytesIO(await r.read()), filename=filename)
                     e.title = f'Emoji {emoji_name or ""}'
                     e.set_image(url=f'attachment://{filename}')
             else:

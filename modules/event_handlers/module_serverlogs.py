@@ -1,6 +1,8 @@
 from objects.modulebase import ModuleBase
 from objects.permissions import PermissionManageGuild
 
+from io import BytesIO
+
 from utils.formatters import replace_mass_mentions, trim_text
 
 from discord import File
@@ -82,7 +84,7 @@ class Module(ModuleBase):
 
         await self.log(
             channel, content, embed=msg.embeds[0] if msg.embeds else None,
-            files=[File(await (await self.bot.sess.get(a.url)).read(), filename=a.filename) for a in msg.attachments]
+            files=[File(BytesIO(await (await self.bot.sess.get(a.url)).read()), filename=a.filename) for a in msg.attachments]
         )
 
     async def on_message_edit(self, before, after):

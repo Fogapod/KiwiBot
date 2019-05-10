@@ -49,9 +49,11 @@ class Module(ModuleBase):
                 return await ctx.warn(f'Error getting second image: {image.error}')
         else:
             try:
-                async with self.bot.sess.get(
-                        ctx.author.avatar_url_as(format='png'), raise_for_status=True) as r:
-                    bat = Image.open(BytesIO(await r.read()))
+                bat = Image.open(
+                    BytesIO(
+                        await ctx.author.avatar_url_as(format='png').read()
+                    )
+                )
             except Exception:
                 return await ctx.error('Failed to download author\'s avatar')
 
@@ -61,6 +63,7 @@ class Module(ModuleBase):
         result = await self.bot.loop.run_in_executor(
             None, self.slap, robin, bat)
 
+        print(result)
         await ctx.send(file=discord.File(result, filename=f'slap.png'))
 
     def slap(self, robin, bat):
@@ -79,4 +82,4 @@ class Module(ModuleBase):
         result = BytesIO()
         template.save(result, format='PNG')
 
-        return result.getvalue()
+        return BytesIO(result.getvalue())

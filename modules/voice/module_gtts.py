@@ -2,6 +2,7 @@ from objects.modulebase import ModuleBase
 from objects.permissions import PermissionEmbedLinks
 from objects.paginators import Paginator
 
+from io import BytesIO
 from tempfile import TemporaryFile
 from functools import partial
 
@@ -128,6 +129,6 @@ class Module(ModuleBase):
             if flags.get('file', not voice_flag):
                 try:
                     tts_file.seek(0)
-                    await ctx.send(file=File(tts_file.read(), filename='tts.mp3'))
+                    await ctx.send(file=File(BytesIO(tts_file.read()), filename='tts.mp3'))
                 except Exception:
                     await ctx.warn('Failed to send file')

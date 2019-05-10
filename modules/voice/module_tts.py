@@ -4,6 +4,7 @@ from objects.paginators import Paginator
 
 import random
 
+from io import BytesIO
 from tempfile import TemporaryFile
 
 from discord import Embed, Colour, DMChannel, File, FFmpegPCMAudio, PCMVolumeTransformer
@@ -262,7 +263,7 @@ class Module(ModuleBase):
 
             if flags.get('file', not voice_flag):
                 try:
-                    await ctx.send(file=File(stdout, filename='tts.wav'))
+                    await ctx.send(file=File(BytesIO(stdout), filename='tts.wav'))
                 except Exception:
                     await ctx.warn('Failed to send file')
 

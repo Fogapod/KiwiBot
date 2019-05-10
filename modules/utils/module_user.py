@@ -35,7 +35,7 @@ class Module(ModuleBase):
         if user is None:
             return await ctx.warn('User not found')
 
-        e = Embed(title=str(user), url=user.avatar_url, colour=Colour.gold())
+        e = Embed(title=str(user), url=str(user.avatar_url), colour=Colour.gold())
         e.set_thumbnail(url=user.avatar_url)
         e.add_field(
             name='registered', inline=False,
