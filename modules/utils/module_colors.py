@@ -42,7 +42,7 @@ class Module(ModuleBase):
         if not guild_roles:
             return await ctx.info('No color roles')
 
-        guild_roles.sort(key=lambda x: x.position)
+        guild_roles.sort(key=lambda x: x.position, reverse=True)
 
         lines = [f'{r.color} | {r.name}' for r in guild_roles]
         lines_per_chunk = 30
