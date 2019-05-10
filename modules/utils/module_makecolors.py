@@ -46,6 +46,7 @@ class Module(ModuleBase):
 
         m = await ctx.info(f'Creating {len(to_create)} roles ...')
 
+        created_ids = []
         for name in to_create:
             created = await ctx.guild.create_role(
                 name=name,
@@ -55,9 +56,11 @@ class Module(ModuleBase):
 
             await created.edit(position=ctx.author.top_role.position - 1)
 
-            await ctx.bot.pg.fetch(
-                "INSERT INTO color_roles (guild_id, role_id) VALUES ($1, $2)",
-                ctx.guild.id, created.id
-            )
+            created_ids.append(created.id)
+
+        await ctx.bot.pg.executemany(
+            "INSERT INTO color_roles (guild_id, role_id) VALUES ($1, $2)",
+            [(ctx.guild.id, role_id) for role_id in created_ids]
+        )
 
         await ctx.bot.edit_message(m, f'Created roles: **{", ".join(to_create)}**')

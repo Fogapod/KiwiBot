@@ -21,11 +21,12 @@ class Module(ModuleBase):
 
     async def on_call(self, ctx, args, **flags):
         role = await find_role(args[1:], ctx.guild)
-        if role.is_default():
-            return await ctx.error('Unable to make @everyone a color role')
 
         if role is None:
             return await ctx.warn('Role not found')
+
+        if role.is_default():
+            return await ctx.error('Unable to make @everyone a color role')
 
         if ctx.author != ctx.guild.owner:
             if role >= ctx.author.top_role:
