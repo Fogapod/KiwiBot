@@ -46,7 +46,7 @@ class Module(ModuleBase):
 
         lines = [f'{r.color} | {r.name}' for r in guild_roles]
         lines_per_chunk = 30
-        chunks = [f'```"color" | role name\n{"-" * 53}\n' + '\n'.join(lines[i:i + lines_per_chunk]) + '```' for i in range(0, len(lines), lines_per_chunk)]
+        chunks = [f'```  color | role name\n{"-" * 53}\n' + '\n'.join(lines[i:i + lines_per_chunk]) + '```' for i in range(0, len(lines), lines_per_chunk)]
 
         p = Paginator(self.bot)
         for i, chunk in enumerate(chunks):
