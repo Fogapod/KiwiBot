@@ -17,6 +17,7 @@ class Module(ModuleBase):
     bot_perms = (PermissionManageRoles(), )
     user_perms = (PermissionManageRoles(), )
     min_args = 1
+    guild_only = True
 
     async def on_call(self, ctx, args, **flags):
         try:
