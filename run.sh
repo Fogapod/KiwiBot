@@ -1,7 +1,7 @@
 #!/bin/bash
 
 while true; do
-    python3.6 main.py
+    python3.7 main.py
     exit_code=$?
 
     if [ $exit_code == 2 ]

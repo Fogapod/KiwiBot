@@ -10,6 +10,7 @@ import time
 import random
 import sys
 
+import asyncpg
 import discord
 
 from objects.modulemanager import ModuleManager
@@ -143,6 +144,9 @@ class KiwiBot(discord.AutoShardedClient):
             logger.info(traceback.format_exc())
             self.stop(ERROR_EXIT_CODE, force=True)
         logger.info('Connected to redis db with %s keys' % await self.redis.get_db_size())
+
+        self.pg = await asyncpg.create_pool(**self.config["postgres"])
+        logger.debug('Postgres ............... connected')
 
         await self.mm.load_modules(strict_mode=False)
         logger.info('Loaded modules: [%s]' % ' '.join(self.mm.modules.keys()))
