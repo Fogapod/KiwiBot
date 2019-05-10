@@ -22,9 +22,6 @@ class Module(ModuleBase):
             ctx.guild.id
         )
 
-        if not colors:
-            return await ctx.info('No color roles')
-
         guild_roles = []
         missing_roles = []
 
@@ -41,6 +38,9 @@ class Module(ModuleBase):
                 "DELETE FROM color_roles WHERE guild_id = $1 AND role_id = ANY($2)",
                 ctx.guild.id, missing_roles
             )
+
+        if not guild_roles:
+            return await ctx.info('No color roles')
 
         guild_roles.sort(key=lambda x: x.position)
 
