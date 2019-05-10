@@ -12,12 +12,16 @@ Default prefix is `+`, you can also mention bot to use command.
 Use `help` command to get list of available commands.
 
 ## Running bot
-You can run bot with `bash run.sh` file from root directory.  
+You can run bot with `run.sh` file from root directory.  
 Requirements:
-* [python >= 3.6](https://www.python.org/downloads)
-* [discord.py python library, rewrite branch](https://github.com/Rapptz/discord.py/tree/rewrite)
+* [python 3.7](https://www.python.org/downloads)
+* [discord.py python library](https://github.com/Rapptz/discord.py)
 * [dateutil python library](https://dateutil.readthedocs.io/en/stable)
-* [aioredis python library](https://aioredis.readthedocs.io/en/v1.1.0)
-* [uvloop python library](https://uvloop.readthedocs.io)
+* [Pillow python library](https://github.com/python-pillow/Pillow)
+* [aioredis python library](https://aioredis.readthedocs.io/en/latest)
+* [uvloop python library](https://uvloop.readthedocs.io) (optional)
 * running [redis server](https://redis.io) on default port
-* And other libraries used in commands
+* running [postgresql server](https://www.postgresql.org)
+* good food and care
+* And many other libraries used in commands
+
