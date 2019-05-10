@@ -1,3 +1,5 @@
+import warnings
+
 from io import BytesIO
 from asyncio import TimeoutError
 
@@ -5,7 +7,11 @@ from asyncio import TimeoutError
 try:
     import PIL
 
+    from PIL.Image import DecompressionBombWarning
+
     PIL_INSTALLED = True
+
+    warnings.simplefilter('error', DecompressionBombWarning)
 except ImportError:
     PIL_INSTALLED = False
 
@@ -13,6 +19,7 @@ STATIC_FORMATS = ('png', 'jpg', 'jpeg', 'webp')
 DEFAULT_STATIC_FORMAT = 'png'
 
 MAX_CONTENT_LENGTH = 7000000
+MAX_DIMENSIONS = 10000
 
 class EmptyImage(Exception):
     def __str__(self):
@@ -82,6 +89,8 @@ class Image:
         return self
 
     async def to_pil_image(self):
+        '''Returns Pillow image created from bytes. Should be closed manually'''
+
         await self.ensure()
         if self.error:
             return
@@ -91,7 +100,13 @@ class Image:
             return
 
         try:
-            return PIL.Image.open(BytesIO(self.bytes))
+            img = PIL.Image.open(BytesIO(self.bytes))
+            if sum(img.size) > MAX_DIMENSIONS:
+                self.error = f'Image is too large {img.size} pixels'
+                img.close()
+                return
+
+            return img.copy()
         except PIL.Image.DecompressionBombError:
             self.error = f'Failed to open image, exceeds **{PIL.Image.MAX_IMAGE_PIXELS}** pixel limit'
         except OSError as e:
