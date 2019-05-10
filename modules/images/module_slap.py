@@ -10,8 +10,6 @@ from PIL.ImageOps import mirror
 from utils.funcs import find_image
 
 
-MAX_SIZE = 10000
-
 class Module(ModuleBase):
 
     usage_doc = '{prefix}{aliases} [image]'
@@ -38,9 +36,6 @@ class Module(ModuleBase):
         if image.error:
             return await ctx.warn(f'Error getting first image: {image.error}')
 
-        if sum(robin.size) > MAX_SIZE:
-            return await ctx.error('Robin is too large')
-
         batface_flag = flags.get('batface')
         if batface_flag is not None:
             image = await find_image(batface_flag, ctx, include_gif=False)
@@ -56,9 +51,6 @@ class Module(ModuleBase):
                 )
             except Exception:
                 return await ctx.error('Failed to download author\'s avatar')
-
-        if sum(bat.size) > MAX_SIZE:
-            return await ctx.error('Batman is too large')
 
         result = await self.bot.loop.run_in_executor(
             None, self.slap, robin, bat)
@@ -81,5 +73,9 @@ class Module(ModuleBase):
 
         result = BytesIO()
         template.save(result, format='PNG')
+
+        template.close()
+        bat.close()
+        robin.close()
 
         return BytesIO(result.getvalue())

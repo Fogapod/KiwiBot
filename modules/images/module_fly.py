@@ -1,15 +1,18 @@
+import psutil
+
 from objects.modulebase import ModuleBase
 
 import random
+import time
+import os
 
-from io import BytesIO
 from math import sin, cos, pi
 
 from PIL import Image
 
 import discord
 
-from utils.funcs import find_image
+from utils.funcs import find_image, create_subprocess_exec, execute_process
 
 
 DEG_TO_RAD_RATIO = pi / 180
@@ -33,7 +36,10 @@ DIRECTIONS = {
 FIRST_STATE = 1
 FINAL_STATE = 6
 
+# max allowed side of input image
 MAX_SIDE = 512
+
+GIFSICLE_ARGUMENTS = ['gifsicle', '--optimize=3', '--batch', '--careful']
 
 class ImageTooSmall(Exception):
     pass
@@ -126,9 +132,15 @@ class Fly:
 
 class FlyDrawer:
 
-    def __init__(self, source, flies, steps=100):
+    def __init__(self, source, flies, steps=100, fly_source=None):
         self.source = source.convert('RGBA')
         self.source.thumbnail((MAX_SIDE, MAX_SIDE), Image.ANTIALIAS)
+
+        if fly_source:
+            self.fly_source = fly_source.convert('RGBA')
+            self.fly_source.thumbnail((FLY_SIDE, FLY_SIDE), Image.ANTIALIAS)
+        else:
+            self.fly_source = None
 
         for coordinate in self.source.size:
             if FLY_SIDE > coordinate:
@@ -146,19 +158,18 @@ class FlyDrawer:
         self._frames = []
 
     def _get_fly_image(self, angle, state):
-        name = f'{DIRECTIONS[angle]}_{state}'
+        name = f'{DIRECTIONS[angle]}_{state if not self.fly_source else 0}'
         if name in self._cached_flies:
             img = self._cached_flies[name]
         else:
-            # with open(f'templates/flies/{name}', 'rb') as f:
-            #     img = Image.open(BytesIO(f.read()))
-
-            # method below leaks ... or maybe not
-            img = Image.open(f'templates/flies/{name}')
+            if self.fly_source:
+                img = self.fly_source.rotate(angle, expand=True)
+            else:
+                img = Image.open(f'templates/flies/{name}')
 
             self._cached_flies[name] = img
 
-        return img.copy()
+        return img
 
     def make_frame(self):
         modified = False
@@ -181,6 +192,17 @@ class FlyDrawer:
 
         self._frames.append(overlay)
 
+    def cleanup(self):
+        for frame in self._frames:
+            frame.close()
+
+        for image in self._cached_flies.values():
+            image.close()
+
+        self.source.close()
+        if self.fly_source:
+            self.fly_source.close()
+
     def run(self):
         for i in range(self.steps):
             for fly in self.flies:
@@ -188,13 +210,15 @@ class FlyDrawer:
 
             self.make_frame()
 
-        result = BytesIO()
+        filename = f'/tmp/fly_{time.time()}.gif'
         self._frames[0].save(
-            result, format='GIF', optimize=True, save_all=True,
-            append_images=self._frames[1:], loop=0 # disposal=2
+            filename, format='GIF', optimize=True, save_all=True,
+            append_images=self._frames[1:], loop=0 #, disposal=2 # currently broken in Pillow
         )
 
-        return BytesIO(result.getvalue())
+        self.cleanup()
+
+        return filename
 
 
 class Module(ModuleBase):
@@ -205,7 +229,8 @@ class Module(ModuleBase):
         'Flags:\n'
         '\t[--steps|-s]    <steps>:  amount of steps to simulate. Default is 100\n'
         '\t[--velocity|-v] <speed>:  speed of flies in pixels. Default is 10\n'
-        '\t[--amount|-a]   <amount>: number of flies on image'
+        '\t[--amount|-a]   <amount>: number of flies on imagei\n'
+        '\t[--image|-i]    <image>:  use this image instead of flies'
     )
 
     name = 'fly'
@@ -223,9 +248,13 @@ class Module(ModuleBase):
         'amount': {
             'alias': 'a',
             'bool': False
+        },
+        'image': {
+            'alias': 'i',
+            'bool': False
         }
     }
-    ratelimit = (1, 5)
+    ratelimit = (1, 7)
 
     async def on_call(self, ctx, args, **flags):
         image = await find_image(args[1:], ctx, include_gif=False)
@@ -233,8 +262,13 @@ class Module(ModuleBase):
         if image.error:
             return await ctx.warn(f'Error getting image: {image.error}')
 
-        if sum(source.size) > 10000:
-            return await ctx.error('Dood too strong')
+        fly_source = None
+        image_flag = flags.get('image')
+        if image_flag is not None:
+            fly_img = await find_image(image_flag, ctx, include_gif=False)
+            fly_source = await fly_img.to_pil_image()
+            if fly_img.error:
+                return await ctx.warn(f'Error getting fly image: {fly_img.error}')
 
         try:
             steps = int(flags.get('steps', 100))
@@ -257,21 +291,36 @@ class Module(ModuleBase):
         except ValueError:
             return await ctx.error('Failed to convert amount flag value to integer')
 
-        if not (1 <= amount <= 10):
-            return await ctx.error('Amount should be between 1 and 10')
+        if not (1 <= amount <= 20):
+            return await ctx.error('Amount should be between 1 and 20')
+
+        process = psutil.Process()
 
         async with ctx.channel.typing():
+            mem_start = process.memory_info().rss
             try:
-                 result = await self.bot.loop.run_in_executor(
-                    None, self.draw, source, steps, velocity, amount)
+                 filename = await self.bot.loop.run_in_executor(
+                    None, self.draw, source, steps, velocity, amount, fly_source)
             except ImageTooSmall:
                 return await ctx.warn('Image is too small')
 
-            await ctx.send(file=discord.File(result, filename=f'fly.gif'))
+            # optimize gif using gifsicle
+            proc, _ = await create_subprocess_exec(*GIFSICLE_ARGUMENTS + [filename])
+            await execute_process(proc)
 
-    def draw(self, source, steps, speed, amount):
+        mem_stats = f'Memory wasted: **{round(process.memory_info().rss - mem_start >> 20, 3)} MB**'
+        await ctx.send(mem_stats, file=discord.File(filename, filename='fly.gif'))
+
+        os.remove(filename)  # blocking
+
+    def draw(self, source, steps, speed, amount, fly_source):
         flies = []
         for i in range(amount):
             flies.append(Fly(speed=speed))
 
-        return FlyDrawer(source, flies, steps=steps).run()
+        filename = FlyDrawer(source, flies, steps=steps, fly_source=fly_source).run()
+        source.close()
+        if fly_source:
+            fly_source.close()
+
+        return filename
