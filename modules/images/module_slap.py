@@ -49,13 +49,12 @@ class Module(ModuleBase):
                         await ctx.author.avatar_url_as(format='png').read()
                     )
                 )
-            except Exception:
-                return await ctx.error('Failed to download author\'s avatar')
+            except Exception as e:
+                return await ctx.error(f'Failed to download author\'s avatar: {e}')
 
         result = await self.bot.loop.run_in_executor(
             None, self.slap, robin, bat)
 
-        print(result)
         await ctx.send(file=discord.File(result, filename=f'slap.png'))
 
     def slap(self, robin, bat):
