@@ -57,7 +57,7 @@ class Module(ModuleBase):
             channel = self.bot.get_channel(channel_id)
             author = self.bot.get_user(author_id)
             try:
-                vote = await channel.get_message(vote_id)
+                vote = await channel.fetch_message(vote_id)
             except NotFound:
                 vote = None
 
