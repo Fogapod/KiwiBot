@@ -54,13 +54,26 @@ class Module(ModuleBase):
                 reason=f'Makecolors by {ctx.author.id}'
             )
 
-            await created.edit(position=ctx.author.top_role.position - 1)
-
             created_ids.append(created.id)
 
         await ctx.bot.pg.executemany(
             "INSERT INTO color_roles (guild_id, role_id) VALUES ($1, $2)",
             [(ctx.guild.id, role_id) for role_id in created_ids]
         )
+
+        # low level solution for caching problem
+        # see https://github.com/Rapptz/discord.py/issues/2142
+        positions = []
+        for role in ctx.guild.roles:
+            if role.id in created_ids:
+                continue
+
+            if role == ctx.author.top_role:
+                positions.extend(created_ids)
+
+            positions.append(role.id)
+
+        payload = [{"id": r, "position": i} for i, r in enumerate(positions)]
+        await ctx.bot.http.move_role_position(ctx.guild.id, payload)
 
         await ctx.bot.edit_message(m, f'Created roles: **{", ".join(to_create)}**')
