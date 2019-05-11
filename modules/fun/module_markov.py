@@ -41,7 +41,7 @@ class Module(ModuleBase):
 
         try:
             messages = await channel.history(
-                limit=1000, reverse=True,
+                limit=1000, oldest_first=True,
                 before=ctx.message.edited_at or ctx.message.created_at
             ).flatten()
         except Exception:
