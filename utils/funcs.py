@@ -67,7 +67,7 @@ async def find_user(pattern, msg, strict_guild=False, max_count=1, global_search
 
         if user is None and not strict_guild:
             try:
-                user = await bot.get_user_info(user_id)
+                user = await bot.fetch_user_info(user_id)
             except discord.NotFound:
                 pass
 
