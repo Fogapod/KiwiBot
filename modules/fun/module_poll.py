@@ -92,7 +92,7 @@ class Module(ModuleBase):
             del self.polls[ctx.channel.id]
 
             try:
-                poll = await ctx.channel.get_message(poll_id)
+                poll = await ctx.channel.fetch_message(poll_id)
             except NotFound:
                 pass
             else:
@@ -162,7 +162,7 @@ class Module(ModuleBase):
         del self.polls[poll.channel.id]
 
         try:
-            poll = await poll.channel.get_message(poll.id)
+            poll = await poll.channel.fetch_message(poll.id)
             await poll.edit(content='[FINISHED]')
         except NotFound:
             return

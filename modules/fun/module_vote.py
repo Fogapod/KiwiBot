@@ -91,7 +91,7 @@ class Module(ModuleBase):
             del self.votes[ctx.channel.id]
 
             try:
-                vote = await ctx.channel.get_message(vote_id)
+                vote = await ctx.channel.fetch_message(vote_id)
             except NotFound:
                 pass
             else:
@@ -146,7 +146,7 @@ class Module(ModuleBase):
         del self.votes[vote.channel.id]
 
         try:
-            vote = await vote.channel.get_message(vote.id)
+            vote = await vote.channel.fetch_message(vote.id)
             await vote.edit(content='[FINISHED]')
         except NotFound:
             return
