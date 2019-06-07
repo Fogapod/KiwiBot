@@ -45,7 +45,7 @@ class Module(ModuleBase):
             try:
                 await ctx.author.remove_roles(
                     *[r for r in ctx.author.roles if r.id in color_roles_ids],
-                    reason='color add clenup'
+                    reason='color add cleanup'
                 )
 
                 await ctx.author.add_roles(role, reason='color add')
