@@ -30,6 +30,8 @@ class KiwiBot(discord.AutoShardedClient):
     def __init__(self, **kwargs):
         KiwiBot._bot = self
 
+        kwargs['fetch_offline_members'] = kwargs.get('fetch_offline_members', True)
+
         super().__init__(status='idle', **kwargs)
 
         # will be used as process exit code after stopping if not None
@@ -107,7 +109,7 @@ class KiwiBot(discord.AutoShardedClient):
         if token is None:
             token = input('Token not provided. Please, insert it into config file or paste here for single bot launch: ')
 
-        super().run(token, reconnect=True, fetch_offline_members=True)
+        super().run(token, reconnect=True)
 
     def restart(self):
         self.stop(RESTART_EXIT_CODE)
