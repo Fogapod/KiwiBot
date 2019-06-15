@@ -3,6 +3,7 @@ from objects.permissions import PermissionManageGuild
 
 from io import BytesIO
 
+from utils.funcs import find_channel
 from utils.formatters import replace_mass_mentions, trim_text
 
 from discord import File
@@ -117,7 +118,7 @@ class Module(ModuleBase):
             channel = ctx.channel
         else:
             channel = await find_channel(
-                args[1:], ctx.guild, self.bot,
+                args[1:], ctx.guild,
                 include_voice=False, include_category=False
             )
             if channel is None:
