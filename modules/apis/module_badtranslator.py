@@ -93,8 +93,7 @@ class Module(ModuleBase):
                     text = translation.text
             except Exception:
                 return await ctx.error(
-                    'Failed to translate. Please, try again later. '
-                    'If there are emojis in text, try removing them'
+                    'Failed to translate. Please, try again later.'
                 )
 
             e = Embed(colour=Colour.gold(), title='BadTranslator')
