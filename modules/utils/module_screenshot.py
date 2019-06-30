@@ -1,6 +1,7 @@
 from objects.modulebase import ModuleBase
 from objects.permissions import PermissionEmbedLinks, PermissionAttachFiles
 
+import re
 import time
 import asyncio
 import aiohttp
@@ -24,6 +25,8 @@ structlog.configure(logger_factory=lambda: logger)
 TIMEOUT = 15
 DEFAULT_WAIT_TIME = 2
 MAX_WAIT_TIME = 10
+
+FIX_SLASHES_REGEX = re.compile(r'(?<!:)/{2,}')
 
 class Module(ModuleBase):
 
@@ -91,6 +94,9 @@ class Module(ModuleBase):
         except aiohttp.ClientConnectionError as e:
             return await self.bot.edit_message(
                 m, f'Unknown connection error happened: {e}\nTry using http:// protocol')
+        except aiohttp.ClientResponseError as e:
+            return await self.bot.edit_message(
+                m, f'Client response error: {e}')
 
         await self._ratelimiter.increase_time(wait_time, ctx)
 
@@ -141,9 +147,14 @@ class Module(ModuleBase):
         except IndexError:
             title = "Screenshot"
 
+        # avoid discord error
+        url = FIX_SLASHES_REGEX.sub('/', opened_url)
+        if not (url.startswith('http://') or url.startswith('https://')):
+            url = None
+
         e = Embed(
             title=title[:256], colour=Colour.gold(),
-            url=url if len(url) <= 2048 else None
+            url=url if url and len(url) <= 2048 else None
         )
         e.set_image(url='attachment://screenshot.png')
 
