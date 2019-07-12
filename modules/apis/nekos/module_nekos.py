@@ -71,7 +71,7 @@ class Module(ModuleBase):
             TAG_NAME_REPLACEMENTS.get(tag, tag))
 
         if response is not None:
-            e = Embed(colour=Colour.gold(), title=f'Tag: {tag}', url=response['url'])
+            e = Embed(colour=Colour.gold(), title=f'Tag: {tag} [image URL]', url=response['url'])
             e.set_image(url=response['url'])
             e.set_footer(text='Click on 🆕 reaction to get new image')
             return {'embed': e}
