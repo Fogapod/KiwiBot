@@ -51,7 +51,7 @@ class Module(ModuleBase):
         p = Paginator(self.bot)
         for i, chunk in enumerate(chunks):
             e = Embed(
-                title=f'Matching users ({len(lines)})',
+                title=f'Available colors ({len(lines)})',
                 colour=Colour.gold(),
                 description=chunk
             )
