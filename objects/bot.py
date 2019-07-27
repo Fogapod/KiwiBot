@@ -134,7 +134,9 @@ class KiwiBot(discord.AutoShardedClient):
 
         self.is_first_on_ready_event = False
 
-        self.owner = (await self.application_info()).owner
+        app_info = await self.application_info()
+        self.owner = app_info.team.owner if app_info.team else app_info.owner
+
         self.proxies = self.config.get('proxies', {})
         self.sess = ClientSession()
 
@@ -363,10 +365,16 @@ class KiwiBot(discord.AutoShardedClient):
         except discord.Forbidden:
             if response_to is not None:
                 try:
+                    if isinstance(channel, discord.DMChannel):
+                        destination = channel.recipient
+                    else:
+                        destination = channel.mention
+
                     error_dm_message = await response_to.author.send(
-                        f'I was not able to send this message to channel '
-                        f'{channel.mention} in guild **{response_to.guild}**, result is below'
+                        f'I was not able to send this message to {destination}'
+                        f' in guild **{response_to.guild}**, result is below'
                     )
+
                     await self.register_response(response_to, error_dm_message)
                     dm_message = await response_to.author.send(**fields)
                     await self.register_response(response_to, dm_message)
