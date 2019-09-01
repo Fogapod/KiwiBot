@@ -5,6 +5,8 @@ import traceback
 
 from importlib import reload
 
+from sentry_sdk import capture_exception
+
 from objects.logger import Logger
 from objects.argparser import ArgParser
 from objects.permissions import Permission
@@ -35,6 +37,7 @@ class ModuleManager:
                 module = await self.load_module(module_path)
                 await self.init_module(module, from_reload=False)
             except Exception:
+                capture_exception()
                 logger.info(f'Failed to load module {module_name}')
                 logger.info(traceback.format_exc())
 
@@ -67,6 +70,7 @@ class ModuleManager:
             try:
                 await self.reload_module(module_name)
             except Exception:
+                capture_exception()
                 logger.info(
                     f'Failed reloading module {module_name} ({self._modules[module_name].__file__})')
                 logger.debug(traceback.format_exc())
@@ -77,6 +81,7 @@ class ModuleManager:
         try:
             await self.modules[name].on_unload()
         except Exception:
+            capture_exception()
             logger.debug('Exception occured calling on_unload')
             logger.debug(traceback.format_exc())
 
@@ -114,6 +119,7 @@ class ModuleManager:
             except Ratelimited as e:
                 return await module.on_ratelimit(ctx, e.time_left)
             except Exception:
+                capture_exception()
                 logger.info(f'Failed to check command, stopped on module {name}')
                 logger.info(traceback.format_exc())
                 return
@@ -129,6 +135,7 @@ class ModuleManager:
                 try:
                     self.bot.dispatch('command_use', module, ctx, args)
                 except Exception:
+                    capture_exception()
                     logger.debug(f'Error dispatching command_use event')
                     logger.debug(traceback.format_exc())
 
@@ -143,6 +150,7 @@ class ModuleManager:
             except asyncio.CancelledError:
                 logger.trace(f'Command {name} by {ctx.author} was cancelled')
             except Exception as e:
+                capture_exception()
                 module_tb = traceback.format_exc()
                 logger.info(f'Error occured calling {name}')
                 logger.info(module_tb)
@@ -150,6 +158,7 @@ class ModuleManager:
                 try:
                     command_output = await module.on_error(e, module_tb, ctx)
                 except Exception:
+                    capture_exception()
                     logger.debug(f'Error occured calling {name} on_error')
                     logger.debug(traceback.format_exc())
             finally:

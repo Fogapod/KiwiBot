@@ -12,6 +12,9 @@ import sys
 
 import asyncpg
 import discord
+import sentry_sdk
+
+from sentry_sdk.integrations.aiohttp import AioHttpIntegration
 
 from objects.modulemanager import ModuleManager
 from objects.config import Config
@@ -48,6 +51,14 @@ class KiwiBot(discord.AutoShardedClient):
         self.sess = None
 
         self.config = Config('config.json', loop=self.loop)
+
+        sentry_section = self.config.get("sentry")
+        if sentry_section:
+            sentry_sdk.init(
+                dsn=sentry_section["dsn"],
+                integrations=[AioHttpIntegration()],
+            )
+
         logger.verbosity = self.config.get('logger_verbosity', logger.VERBOSITY_INFO)
         logger.add_file(self.config.get('logs_file', None))
 
