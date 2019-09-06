@@ -5,7 +5,7 @@ import traceback
 
 from importlib import reload
 
-from sentry_sdk import capture_exception
+from sentry_sdk import capture_exception, configure_scope
 
 from objects.logger import Logger
 from objects.argparser import ArgParser
@@ -150,7 +150,19 @@ class ModuleManager:
             except asyncio.CancelledError:
                 logger.trace(f'Command {name} by {ctx.author} was cancelled')
             except Exception as e:
+                with configure_scope() as scope:
+                    scope.user = {"id": ctx.author.id, "tag": str(ctx.author)}
+                    scope.set_tag("message_id", ctx.message.id)
+
+                    if ctx.guild is None:
+                        scope.set_tag("channel_dm", True)
+                    else:
+                        scope.set_tag("channel_dm", False)
+                        scope.set_tag("guild_id", ctx.guild.id)
+                        scope.set_tag("channel_id", ctx.channel.id)
+
                 capture_exception()
+
                 module_tb = traceback.format_exc()
                 logger.info(f'Error occured calling {name}')
                 logger.info(module_tb)
