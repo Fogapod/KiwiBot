@@ -83,7 +83,7 @@ class Module(ModuleBase):
         channel_flag = flags.get('channel')
         if channel_flag:
             channel = await find_channel(
-                channel_flag, ctx.guild, self.bot,
+                channel_flag, ctx.guild,
                 include_voice=False, include_category=False
             )
             if channel is None:
