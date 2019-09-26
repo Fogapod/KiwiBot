@@ -96,7 +96,7 @@ class Module(ModuleBase):
             text = text.replace('@everyone', '@\u200beveryone')
             text = text.replace('@here', '@\u200bhere')
 
-        await self.bot.redis.set(f'join_message:{ctx.guild.id}', f'{ctx.channel.id}:{text}')
+        await self.bot.redis.set(f'join_message:{ctx.guild.id}', f'{channel.id}:{text}')
         await self.bot.delete_message(ctx.message)
         await ctx.send(
             f'Set welcome message in {channel.mention}', delete_after=7)
