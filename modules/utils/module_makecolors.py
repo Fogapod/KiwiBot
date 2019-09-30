@@ -63,17 +63,24 @@ class Module(ModuleBase):
 
         # low level solution for caching problem
         # see https://github.com/Rapptz/discord.py/issues/2142
+        top_role = ctx.author.top_role if ctx.me.top_role < ctx.author.top_role else ctx.author.top_role
+
         positions = []
         for role in ctx.guild.roles:
             if role.id in created_ids:
                 continue
 
-            if role == ctx.author.top_role:
+            if role == top_role:
                 positions.extend(created_ids)
 
             positions.append(role.id)
 
         payload = [{"id": r, "position": i} for i, r in enumerate(positions)]
-        await ctx.bot.http.move_role_position(ctx.guild.id, payload)
+        try:
+            await ctx.bot.http.move_role_position(ctx.guild.id, payload)
+        except discord.HTTPException:
+            return await ctx.bot.edit_message(
+                m, f'Created roles: **{", ".join(to_create)}**, encountered error moving them'
+            )
 
         await ctx.bot.edit_message(m, f'Created roles: **{", ".join(to_create)}**')
