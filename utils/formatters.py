@@ -14,6 +14,8 @@ def trim_text(text, max_len=2000):
 
 
 async def replace_mentions(content, channel, bot):
+    content = escape_special_chars(content)
+
     for mid in USER_MENTION_REGEX.findall(content):
         mid = int(mid)
         user = None
@@ -46,7 +48,10 @@ async def replace_mentions(content, channel, bot):
 
 
 def replace_mass_mentions(text):
-	return text.replace('@everyone', '@\u200beveryone').replace('@here', '@\u200bhere')
+	return escape_special_chars(text).replace('@everyone', '@\u200beveryone').replace('@here', '@\u200bhere')
+
+def escape_special_chars(text):
+    return text.replace("\N{RIGHT-TO-LEFT OVERRIDE}", "")
 
 
 def lazy_format(s, *args, **kwargs):
