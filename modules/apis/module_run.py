@@ -65,7 +65,8 @@ class Module(ModuleBase):
 
         async with self.bot.sess.post(f"{API_URL}/{language}", json={"code": cleaned}) as r:
             if r.status != 200:
-                return await ctx.error(f'Error connecting to IOMirea API. Please, try again later: {r.reason}')
+                message = (await r.json())["message"]
+                return await ctx.error(f'Error connecting to IOMirea API. Please, try again later: {message}')
 
             data = await r.json()
 
