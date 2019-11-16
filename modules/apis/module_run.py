@@ -63,7 +63,7 @@ class Module(ModuleBase):
         if not language:
             return await ctx.warn('Invalid language, try checking list of supported languages')
 
-        async with self.bot.sess.post(f"{API_URL}/{language}", json={"code": cleaned}) as r:
+        async with self.bot.sess.post(f"{API_URL}/{language}", json=dict(code=cleaned, merge_output=True)) as r:
             if r.status != 200:
                 message = (await r.json())["message"]
                 return await ctx.error(f'Error connecting to IOMirea API. Please, try again later: {message}')
@@ -71,7 +71,6 @@ class Module(ModuleBase):
             data = await r.json()
 
         result  = data['stdout']
-        result += data['stderr']
 
         if not result:
             result = 'Empty output'
