@@ -47,6 +47,8 @@ class Module(ModuleBase):
             return await self._on_call(ctx, args, **options)
 
     async def _on_call(self, ctx, args, **options):
+        result = ''
+
         if args[1].lower() == 'list':
             last_name = ""
             for k, v in sorted(self.langs.items(), key=lambda x: x[1]["name"]):
@@ -68,8 +70,6 @@ class Module(ModuleBase):
 
             nl = '\n'
             return f'```{language["name"]}{nl}{language["example"]}```'
-
-        result = ''
 
         cleaned, from_codeblock = cleanup_code(args[1:])
         if from_codeblock is None:
