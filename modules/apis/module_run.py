@@ -11,12 +11,21 @@ class Module(ModuleBase):
     long_doc = (
         'Subcommands:\n'
         '\tlist: show list of languages\n'
-        '\texample <language>: shows example program'
+        '\texample <language>: shows example program\n\n'
+        'Available flags:\n'
+        '\t [-i|--input] <text>: send text to stdin'
     )
 
     name = 'run'
     aliases = (name, )
     category = 'Services'
+    flags = {
+        'input': {
+            'alias': 'i',
+            'bool': False
+        }
+    }
+
     min_args = 1
 
     async def on_load(self, _):
@@ -89,6 +98,10 @@ class Module(ModuleBase):
         payload = {}
         if cleaned:
             payload['code'] = cleaned
+
+        inp = options.get('input')
+        if inp is not None:
+            payload['input'] = inp
 
         async with self.bot.sess.post(f"{API_URL}/{language['name']}", params=dict(merge="1"), json=payload) as r:
             if r.status != 200:
