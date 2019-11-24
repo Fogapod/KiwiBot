@@ -69,10 +69,10 @@ class Module(ModuleBase):
 
             return result
 
-        if len(args) < 2:
-            return await ctx.warn("Not enough arguments passed")
-
         if args[1].lower() == "example":
+            if len(args) < 3:
+                return await ctx.warn('No language argument provided')
+
             language = self._get_language(args[2])
             if not language:
                 return await ctx.warn("Unknown language, try checking list of supported languages")
