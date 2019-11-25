@@ -69,13 +69,15 @@ class Module(ModuleBase):
 
             return result
 
-        if args[1].lower() == "example":
+        if args[1].lower() == 'example':
             if len(args) < 3:
                 return await ctx.warn('No language argument provided')
 
             language = self._get_language(args[2])
             if not language:
-                return await ctx.warn("Unknown language, try checking list of supported languages")
+                return await ctx.warn(
+                    'Unknown language, try checking list of supported languages'
+                )
 
             nl = '\n'
             return f'```{language["name"]}{nl}{language["example"]}```'
@@ -93,7 +95,9 @@ class Module(ModuleBase):
         language = self._get_language(input_lang)
 
         if not language:
-            return await ctx.warn('Invalid language, try checking list of supported languages')
+            return await ctx.warn(
+                'Invalid language, try checking list of supported languages'
+            )
 
         payload = {}
         if cleaned:
@@ -103,16 +107,16 @@ class Module(ModuleBase):
         if inp is not None:
             payload['input'] = inp
 
-        async with self.bot.sess.post(f"{API_URL}/{language['name']}", params=dict(merge="1"), json=payload) as r:
+        async with self.bot.sess.post(
+                f'{API_URL}/{language["name"]}', params=dict(merge='1'),
+                json=payload
+        ) as r:
             if r.status != 200:
-                message = (await r.json())["message"]
-                return await ctx.error(f'Error connecting to IOMirea API. Please, try again later: {message}')
+                message = (await r.json())['message']
+                return await ctx.error(
+                    f'Error connecting to IOMirea API. Please, try again later: {message}'
+                )
 
             data = await r.json()
 
-        result  = data['stdout']
-
-        if not result:
-            result = 'Empty output'
-
-        return f'```\n{result}```'
+        return f'```\n{data["stdout"]}\n\nexit code: {data["exit_code"]} | ran for: {round(data["exec_time"], 3)}s```'
