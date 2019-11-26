@@ -105,8 +105,7 @@ class Module(ModuleBase):
 
         inp = options.get('input')
         if inp is not None:
-            # unicode_escape fixes newlines, but breaks unicode
-            payload['input'] = inp.encode().decode('unicode_escape')
+            payload['input'] = inp.encode("raw_unicode_escape").decode('unicode_escape')
 
         async with self.bot.sess.post(
                 f'{API_URL}/{language["name"]}', params=dict(merge='1'),
