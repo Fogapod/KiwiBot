@@ -5,6 +5,7 @@ arsenic
 emoji-data-python
 Pillow
 aioredis
+psutil
 sentry_sdk
 asyncpg
 uvloop
