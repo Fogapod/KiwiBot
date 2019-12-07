@@ -13,9 +13,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       git \
 # discord voice features
       ffmpeg \
-# espeak-ng deps
+# espeak-ng runtime deps
       libsonic-dev \
-      libpcaudio-dev && \
+      libpcaudio-dev \
+# screenshot command
+      chromium && \
     rm -rf /var/lib/apt/lists/*
 
 # espeak-ng for tts command
@@ -31,10 +33,9 @@ RUN espeak_deps='gcc make autoconf automake libtool pkg-config' && \
     apt-get purge -y --auto-remove $espeak_deps
 
 
-# chromium for screenshot command
+# chromedriver for screenshot command
 RUN arsenic_deps='unzip wget' && \
     apt-get update && apt-get install -y --no-install-recommends $arsenic_deps && \
-    apt-get update && apt-get install -y --no-install-recommends chromium && \
     rm -rf /var/lib/apt/lists/* && \
     wget -O chromedriver.zip https://chromedriver.storage.googleapis.com/79.0.3945.36/chromedriver_linux64.zip && \
     unzip chromedriver.zip && \
