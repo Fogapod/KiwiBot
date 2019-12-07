@@ -9,7 +9,7 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK=yes
 
 WORKDIR /code
 
-RUN apt-get update && apt-get install -y --no-install-recommends git && \
+RUN apt-get update && apt-get install -y --no-install-recommends git ffmpeg && \
     rm -rf /var/lib/apt/lists/*
 
 # espeak-ng for tts command
@@ -38,7 +38,7 @@ RUN arsenic_deps='unzip wget' && \
 
 COPY requirements.txt .
 
-RUN pip_deps='gcc make' && \
+RUN pip_deps='gcc make libc6-dev' && \
     apt-get update && apt-get install -y --no-install-recommends $pip_deps && \
     rm -rf /var/lib/apt/lists/* && \
     pip install -Ur requirements.txt && \
