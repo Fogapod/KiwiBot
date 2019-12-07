@@ -17,7 +17,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       libsonic-dev \
       libpcaudio-dev \
 # screenshot command
-      chromium && \
+      chromium \
+# ping command
+      iputils-ping && \
     rm -rf /var/lib/apt/lists/*
 
 # espeak-ng for tts command
