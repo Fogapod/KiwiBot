@@ -9,21 +9,8 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK=yes
 
 WORKDIR /code
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-      git \
-# discord voice features
-      ffmpeg \
-# espeak-ng runtime deps
-      libsonic-dev \
-      libpcaudio-dev \
-# screenshot command
-      chromium \
-# ping command
-      iputils-ping && \
-    rm -rf /var/lib/apt/lists/*
-
 # espeak-ng for tts command
-RUN espeak_deps='gcc make autoconf automake libtool pkg-config' && \
+RUN espeak_deps='git gcc make autoconf automake libtool pkg-config libsonic-dev libpcaudio-dev' && \
     apt-get update && apt-get install -y --no-install-recommends $espeak_deps && \
     rm -rf /var/lib/apt/lists/* && \
     git clone https://github.com/espeak-ng/espeak-ng.git --depth=1 && cd espeak-ng && \
@@ -45,6 +32,19 @@ RUN arsenic_deps='unzip wget' && \
     mv chromedriver /usr/local/bin && \
     rm -f chromedriver.zip && \
     apt-get purge -y --auto-remove $arsenic_deps
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      git \
+# discord voice features
+      ffmpeg \
+# espeak-ng runtime deps
+      libsonic-dev \
+      libpcaudio-dev \
+# screenshot command
+      chromium \
+# ping command
+      iputils-ping && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
 
