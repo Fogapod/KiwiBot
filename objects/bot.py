@@ -345,7 +345,7 @@ class KiwiBot(discord.AutoShardedClient):
         if vc.is_connected():
             await vc.disconnect()
 
-    async def send_message(self, target, content=None, *, response_to=None, replace_mass_mentions=True, replace_mentions=True, **fields):
+    async def send_message(self, target, content=None, *, response_to=None, replace_mass_mentions=True, replace_mentions=True, strict_replace=False, **fields):
         if isinstance(target, discord.Member) or isinstance(target, discord.User):
             if target.dm_channel is None:
                 channel = await target.create_dm()
@@ -362,9 +362,9 @@ class KiwiBot(discord.AutoShardedClient):
         content = content.replace(self.http.token, 'TOKEN_LEAKED')
 
         if replace_mentions:
-            content = await formatters.replace_mentions(content, channel, self)
+            content = await formatters.replace_mentions(content, channel, self, strict=strict_replace)
         if replace_mass_mentions:
-            content = formatters.replace_mass_mentions(content)
+            content = formatters.replace_mass_mentions(content, strict=strict_replace)
 
         fields['content'] = formatters.trim_text(content.strip())
 

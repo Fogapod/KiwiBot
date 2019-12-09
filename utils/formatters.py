@@ -13,8 +13,9 @@ def trim_text(text, max_len=2000):
     return text
 
 
-async def replace_mentions(content, channel, bot):
-    content = escape_special_chars(content)
+async def replace_mentions(content, channel, bot, strict=False):
+    if strict:
+        content = escape_special_chars(content)
 
     for mid in USER_MENTION_REGEX.findall(content):
         mid = int(mid)
@@ -47,11 +48,20 @@ async def replace_mentions(content, channel, bot):
     return content
 
 
-def replace_mass_mentions(text):
-	return escape_special_chars(text).replace('@everyone', '@\u200beveryone').replace('@here', '@\u200bhere')
+def replace_mass_mentions(content, strict=False):
+    if strict:
+        content = escape_special_chars(content)
 
-def escape_special_chars(text):
-    return text.replace("\N{RIGHT-TO-LEFT OVERRIDE}", "")
+    return content.replace('@everyone', '@\u200beveryone').replace('@here', '@\u200bhere')
+
+def escape_special_chars(content):
+    content = content.replace("\N{RIGHT-TO-LEFT OVERRIDE}", "")
+
+    if len(content) > 300:  # https://github.com/discordapp/discord-api-docs/issues/1241
+        content = content[:300] + content[300:].replace('@', '@ ')
+
+    return content
+
 
 
 def lazy_format(s, *args, **kwargs):
@@ -63,6 +73,7 @@ def lazy_format(s, *args, **kwargs):
             kwargs[key] = "{%s}" % key
         except (ValueError, AttributeError, IndexError, TypeError):
             return s
+
 
 def cleanup_code(text):
     lang = None

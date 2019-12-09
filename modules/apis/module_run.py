@@ -119,4 +119,7 @@ class Module(ModuleBase):
 
             data = await r.json()
 
-        return f'```\n{data["stdout"]}\n\nexit code: {data["exit_code"]} | ran for: {round(data["exec_time"], 3)}s```'
+        await ctx.send(
+            f'```\n{data["stdout"]}\n\nexit code: {data["exit_code"]} | ran for: {round(data["exec_time"], 3)}s```',
+            strict_replace=True
+        )
