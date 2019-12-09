@@ -17,7 +17,7 @@ class Module(ModuleBase):
     )
 
     name = 'run'
-    aliases = (name, )
+    aliases = (name, 'debug')
     category = 'Services'
     flags = {
         'input': {

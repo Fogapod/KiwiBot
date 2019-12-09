@@ -93,7 +93,7 @@ class Module(ModuleBase):
     )
 
     name = 'rex'
-    aliases = (name, 'rextester', 'debug')
+    aliases = (name, 'rextester', )
     category = 'Services'
     min_args = 1
 
