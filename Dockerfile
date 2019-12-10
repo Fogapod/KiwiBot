@@ -43,7 +43,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # screenshot command
       chromium \
 # ping command
-      iputils-ping && \
+      iputils-ping \
+# gif commands
+      gifsicle && \
     rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
