@@ -106,9 +106,10 @@ class Module(ModuleBase):
         browser = browsers.Chrome(
             chromeOptions={
                 'args': [
-                    '--headless', '--disable-gpu', f'proxy-server={proxy}', 'lang=en',
+                    '--no-sandbox', '--headless', '--disable-gpu',
+                    f'--proxy-server={proxy}', '--lang=en',
                     '--limit-fps=1', '--disable-mojo-local-storage',
-                    '--hide-scrollbars', '--ipc-connection-timeout=5'
+                    '--hide-scrollbars', '--ipc-connection-timeout=5',
                 ]
             }
         )
