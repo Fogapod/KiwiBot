@@ -100,7 +100,7 @@ class Module(ModuleBase):
             return await ctx.send(f'**{ctx.author}** cancelled vote.')
 
         if ctx.channel.id in self.votes:
-            return await ctx.warn('Channel already have active vote')
+            return await ctx.warn('Channel already has an active vote')
 
         try:
             wait_until = timedelta_from_string(flags.get('timeout', '60'))
