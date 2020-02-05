@@ -35,4 +35,8 @@ class Module(ModuleBase):
 
             json = await r.json()
 
-        return f'```\n{json["text"]}```'
+        text = json['text']
+        if not text:
+            return await ctx.warn('Unable to find text')
+
+        return f'```\n{text}```'
