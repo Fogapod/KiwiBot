@@ -72,7 +72,7 @@ class Module(ModuleBase):
             else:
                 e.add_field(
                     name='activity',
-                    value=(STATUS_EMOTES[str(user.status)] if external_emoji_perm else '') + f'**{user.activity.type.name}** {user.activity.name}'
+                    value=(STATUS_EMOTES[str(user.status)] if external_emoji_perm else '') + f'**{user.activity.type}** {user.activity.name}'
                 )
 
         e.add_field(name='robot', value='yes' if user.bot else 'no')
