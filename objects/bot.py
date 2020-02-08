@@ -26,6 +26,9 @@ from constants import *
 from utils import formatters
 
 
+FAKE_TOKEN = 'Mzk0NzkzNTc3MTYwMzc2MzIw.XiscfQ.7ghXs19Ss8PR6brPralUM_3lUs5'
+
+
 class KiwiBot(discord.AutoShardedClient):
 
     _bot = None
@@ -359,7 +362,10 @@ class KiwiBot(discord.AutoShardedClient):
             raise ValueError('Unknown target passed to send message')
 
         content = str(content) if content is not None else ''
-        content = content.replace(self.http.token, 'TOKEN_LEAKED')
+        content = content.replace(
+            self.http.token,
+            FAKE_TOKEN,
+        )
 
         if replace_mentions:
             content = await formatters.replace_mentions(content, channel, self, strict=strict_replace)
@@ -405,7 +411,10 @@ class KiwiBot(discord.AutoShardedClient):
 
     async def edit_message(self, msg, content=None, *, replace_mass_mentions=True, replace_mentions=True, **fields):
         content = str(content) if content is not None else ''
-        content = content.replace(self.http.token, 'TOKEN_LEAKED')
+        content = content.replace(
+            self.http.token,
+            FAKE_TOKEN,
+        )
 
         if replace_mentions:
             content = await formatters.replace_mentions(content, msg.channel, self)
