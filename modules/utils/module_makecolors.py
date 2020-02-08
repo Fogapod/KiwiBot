@@ -63,7 +63,7 @@ class Module(ModuleBase):
 
         # low level solution for caching problem
         # see https://github.com/Rapptz/discord.py/issues/2142
-        top_role = ctx.author.top_role if ctx.me.top_role < ctx.author.top_role else ctx.author.top_role
+        top_role = ctx.me.top_role if ctx.me.top_role < ctx.author.top_role else ctx.author.top_role
 
         positions = []
         for role in ctx.guild.roles:
