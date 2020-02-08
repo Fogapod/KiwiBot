@@ -38,7 +38,11 @@ class Module(ModuleBase):
             name=name, colour=color, reason=f'Createcolor by {ctx.author.id}'
         )
 
-        await created.edit(position=ctx.author.top_role.position - 1)
+        top_role = ctx.me.top_role if ctx.me.top_role < ctx.author.top_role else ctx.author.top_role
+        top_role_position = top_role.position
+
+        if top_role_position > 0:
+            await created.edit(position=top_role_position - 1)
 
         await ctx.bot.pg.fetch(
             "INSERT INTO color_roles (guild_id, role_id) VALUES ($1, $2)",
