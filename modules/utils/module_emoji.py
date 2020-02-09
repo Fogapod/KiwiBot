@@ -44,6 +44,9 @@ class Module(ModuleBase):
                 emoji_name = groups['name']
 
         if emoji_id is None:
+            # thanks discord for this nonsense
+            text = text.rstrip("\N{VARIATION SELECTOR-16}")
+
             code = '-'.join(map(lambda c: f'{ord(c):x}', text))
             async with self.bot.sess.get(TWEMOJI_ENDPOINT.format(code)) as r:
                 if r.status != 200:

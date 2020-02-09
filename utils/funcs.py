@@ -264,7 +264,11 @@ async def find_image(pattern, ctx, *, limit=200, include_gif=True, timeout=5):
 
         # check if pattern is emoji
         # thanks NotSoSuper#0001 for the API
-        code = '-'.join(map(lambda c: f'{ord(c):x}', pattern))
+
+        # thanks discord for this nonsense
+        pattern_no_selector_16 = pattern.rstrip("\N{VARIATION SELECTOR-16}")
+
+        code = '-'.join(map(lambda c: f'{ord(c):x}', pattern_no_selector_16))
         async with ctx.bot.sess.get(
                 f'https://bot.mods.nyc/twemoji/{code}.png',
                 timeout=timeout) as r:
@@ -434,5 +438,5 @@ def timedelta_from_string(string):
 
 
 def check_permission(permission, channel, user):
-	if not permission.check(channel, user):
-		raise permission
+    if not permission.check(channel, user):
+        raise permission
