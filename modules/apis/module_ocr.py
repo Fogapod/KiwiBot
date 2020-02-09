@@ -22,6 +22,12 @@ class Module(ModuleBase):
 
         async with ctx.session.get(API_URL, params=dict(q=image.url)) as r:
             if r.status != 200:
+                if r.content_type.lower() != 'application/json':
+                    # something went terribly wrong
+                    return await ctx.error(
+                        f'Somwthing really bad happened with underlying API: {r.status}'
+                    )
+
                 try:
                     json = await r.json()
                 except json.JSONDecodeError:
