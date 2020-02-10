@@ -25,7 +25,7 @@ class Module(ModuleBase):
                 if r.content_type.lower() != 'application/json':
                     # something went terribly wrong
                     return await ctx.error(
-                        f'Somwthing really bad happened with underlying API: {r.status}'
+                        f'Something really bad happened with underlying API: {r.status}'
                     )
 
                 try:
