@@ -27,6 +27,7 @@ class Module(ModuleBase):
     }
 
     min_args = 1
+    disabled = True
 
     async def on_load(self, _):
         self.langs = {}
