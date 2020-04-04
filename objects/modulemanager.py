@@ -35,6 +35,9 @@ class ModuleManager:
             module_name = module_path[module_path.rfind(os.sep) + 8:-3]
             try:
                 module = await self.load_module(module_path)
+                if module is None:
+                    continue
+
                 await self.init_module(module, from_reload=False)
             except Exception:
                 capture_exception()
@@ -51,6 +54,11 @@ class ModuleManager:
         imported = __import__(
             module_path.replace(os.sep, '.')[:-3], fromlist=['Module'])
         module = getattr(imported, 'Module')(self.bot)
+
+        if module.disabled:
+            log.info(f'skipping disabled midule {module_path}')
+
+            return None
 
         self.modules[module.name]  = module
         self._modules[module.name] = imported
