@@ -71,7 +71,7 @@ class Module(ModuleBase):
 
         chain_len = int(chain_len)
         if chain_len > MAX_CHAIN_LEN:
-            return await ctx.warning(f'Max chain len is {MAX_CHAIN_LEN}, you asked for {chain_len}')
+            return await ctx.warn(f'Max chain len is {MAX_CHAIN_LEN}, you asked for {chain_len}')
 
         if chain_len < 2:
             return await ctx.error('Chain len should not be shorter than 2. Use goodtranslator instead')
