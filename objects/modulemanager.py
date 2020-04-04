@@ -56,7 +56,7 @@ class ModuleManager:
         module = getattr(imported, 'Module')(self.bot)
 
         if module.disabled:
-            log.info(f'skipping disabled midule {module_path}')
+            logger.info(f'skipping disabled module {module_path}')
 
             return None
 
