@@ -48,13 +48,19 @@ class Module(ModuleBase):
         return 'not dogsong or notsosuper'
 
     async def on_load(self, from_reload):
+        return await self._change_precense(
+            0,
+            'Shutting down due to new verification: blog.discordapp.com/4e6e050ab52e',
+            'online'
+        )
+
         self.interval = int(
             await self.bot.redis.get('activity_interval', default=60))
         self._task = asyncio.ensure_future(
             self.update_presence_task(), loop=self.bot.loop)
 
     async def on_unload(self):
-        self._task.cancel()
+        pass  # self._task.cancel()
 
     async def on_call(self, ctx, args, **flags):
         interval = flags.get('interval', None)
