@@ -1,5 +1,5 @@
 ## Discontinued
-Due to [the new verification requirement from discord](https://blog.discordapp.com/the-future-of-bots-on-discord-4e6e050ab52e?gi=c224c24773b6) this bot is discontinued.  
+Due to [the new verification requirement from discord](https://blog.discordapp.com/the-future-of-bots-on-discord-4e6e050ab52e) this bot is discontinued.  
 I urge every bot developer out there to do the same. Quit making discord bots.  
 
 # KiwiBot
