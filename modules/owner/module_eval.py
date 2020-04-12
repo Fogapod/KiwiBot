@@ -109,16 +109,17 @@ class Module(ModuleBase):
                     result_json = await r.json()
                     result  = result_json['Result'] or ''
                     if result_json['Errors']:
-                        result += """
+                        error_lines = result_json['Errors'].split('\n')
+                        result += f"""
 Traceback (most recent call last):
   File "/home/kiwi/KiwiBot/modules/owner/module_eval.py", line 80, in on_call
     returned = await func()
   File "<string>", line 2, in func
-""" + result_json['Errors'].split("\n")[-2]
+{error_lines[-2] if len(error_lines) > 1 else error_lines[0]}"""
                 else:
                     return await ctx.error('Error. Please, try again later')
 
-            if not result:
+            if not result or result == '\n':
                 result = 'Empty output'
 
             return f'```python\n{result}```'
