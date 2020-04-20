@@ -26,7 +26,7 @@ RUN espeak_deps='git gcc make autoconf automake libtool pkg-config libsonic-dev 
 RUN arsenic_deps='unzip wget' && \
     apt-get update && apt-get install -y --no-install-recommends $arsenic_deps && \
     rm -rf /var/lib/apt/lists/* && \
-    wget -O chromedriver.zip https://chromedriver.storage.googleapis.com/78.0.3904.105/chromedriver_linux64.zip && \
+    wget -O chromedriver.zip https://chromedriver.storage.googleapis.com/80.0.3987.106/chromedriver_linux64.zip && \
     unzip chromedriver.zip && \
     chmod +x chromedriver && \
     mv chromedriver /usr/local/bin && \
