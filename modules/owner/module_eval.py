@@ -17,7 +17,7 @@ from utils.formatters import cleanup_code
 
 fake_data = '''
 class HTTP:
-    token = "Mzk0NzkzNTc3MTYwMzc2MzIw.CunGFQ.CZ7eHwhU97J0uKeDMOuaQQdeaUM"
+    token = "Mzk0NzkzNTc3MTYwMzc2MzIw.XqAy6g.CZ7eHwhU97J0uKeDMOuaQQdeaUM"
 
     def __repr__(self):
         return "<discord.http.HTTPClient object at 0x7f8b77633da0>"
