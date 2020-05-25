@@ -1,5 +1,5 @@
 from objects.modulebase import ModuleBase
-from objects.permissions import PermissionEmbedLinks
+from objects.permissions import PermissionEmbedLinks, PermissionBotOwner
 from objects.paginators import Paginator
 
 from discord import Embed, Colour
@@ -11,7 +11,8 @@ class Module(ModuleBase):
 
     name = 'guilds'
     aliases = (name, 'servers')
-    category = 'Bot'
+    category = 'Owner'
+    user_perms = (PermissionBotOwner(), )
     bot_perms = (PermissionEmbedLinks(), )
 
     async def on_call(self, ctx, args, **flags):
