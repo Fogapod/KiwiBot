@@ -36,7 +36,8 @@ class Module(ModuleBase):
                     )
 
                 return await ctx.error(
-                    f'Error in underlying API: {json.get("message", "[MISSING]")}'
+                    f'Error in underlying API[{r.status}]: '
+                    f'{json.get("message", "[MISSING]")}'
                 )
 
             json = await r.json()
