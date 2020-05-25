@@ -14,6 +14,7 @@ class Module(ModuleBase):
     category = 'Owner'
     user_perms = (PermissionBotOwner(), )
     bot_perms = (PermissionEmbedLinks(), )
+    hidden = True
 
     async def on_call(self, ctx, args, **flags):
         guilds = sorted(
