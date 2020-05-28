@@ -427,6 +427,7 @@ class KiwiBot(discord.AutoShardedClient):
         msg,
         content=None,
         *,
+        allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False),
         **fields
     ):
         try:
