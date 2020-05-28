@@ -80,7 +80,7 @@ class Module(ModuleBase):
         is_same_place = getattr(channel, 'guild', None) == ctx.guild
         if not is_same_place:
             if not PermissionBotOwner().check(ctx.channel, ctx.author):
-                return await ctx.warn('Only bot owner can send messages to other guilds or users')
+                return await ctx.warn('Cannot send messages to other guilds or users')
         elif not channel.permissions_for(ctx.author).send_messages:
             return await ctx.warn('You don\'t have permission to send messages to this channel')
 
@@ -96,4 +96,5 @@ class Module(ModuleBase):
                 destination = m.channel.recipient
             else:
                 destination = f'{channel.mention}** on **{m.guild}'
+
             return f'Sent message to **{destination}**'

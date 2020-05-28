@@ -4,7 +4,7 @@ from objects.permissions import PermissionManageGuild
 from utils.funcs import find_channel
 from utils.formatters import lazy_format
 
-from discord import Forbidden, NotFound
+from discord import Forbidden, NotFound, AllowedMentions
 
 
 class Module(ModuleBase):
@@ -57,7 +57,14 @@ class Module(ModuleBase):
                 id=member.id
             )
             try:
-                await member.guild.get_channel(int(channel)).send(leave_message)
+                await member.guild.get_channel(int(channel)).send(
+                    leave_message,
+                    allowed_mentions=AllowedMentions(
+                        everyone=False,
+                        roles=False,
+                        users=[member.id]
+                    )
+                )
             except NotFound:
                 await self.bot.redis.delete(f'leave_message:{member.guild.id}')
             except Forbidden:
