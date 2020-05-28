@@ -70,7 +70,8 @@ class Module(ModuleBase):
             )
         except Exception:
             return await ctx.error(
-                'Failed to translate. Please, try again later.'
+                'Failed to translate. Please, try again later.\n'
+                'While this is broken you could try using gt2.'
             )
 
         e = Embed(colour=Colour.gold(), title='GoodTranslator')
