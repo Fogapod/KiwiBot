@@ -35,7 +35,7 @@ RUN arsenic_deps='unzip wget' && \
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
       git \
-      openssh \
+      openssh-client \
 # discord voice features
       ffmpeg \
 # espeak-ng runtime deps
