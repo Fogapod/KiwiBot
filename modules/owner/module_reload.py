@@ -32,7 +32,7 @@ class Module(ModuleBase):
 
         try:
             await self.bot.http.edit_message(
-                int(message_id), int(channel_id), content='Bot restarted')
+                int(channel_id), int(message_id), content='Bot restarted')
         except Exception:
             pass
 
