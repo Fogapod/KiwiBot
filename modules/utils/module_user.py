@@ -3,9 +3,9 @@ from objects.permissions import PermissionEmbedLinks, PermissionExternalEmojis
 
 from utils.funcs import find_user, _get_last_user_message_timestamp
 
-from discord import Embed, Colour, Member
-
 from datetime import datetime
+
+import discord
 
 
 STATUS_EMOTES = {
@@ -15,6 +15,16 @@ STATUS_EMOTES = {
     'offline':   '<:offline:427209267687194625>',
     'invisible': '<:invisible:427209267687194625>'
 }
+
+ACTIVITY_MAP = {
+    discord.ActivityType.unknown: '',
+    discord.ActivityType.playing: 'Playing: ',
+    discord.ActivityType.streaming: 'Streaming: ',
+    discord.ActivityType.listening: 'Listening: ',
+    discord.ActivityType.watching: 'Watching: ',
+    discord.ActivityType.custom: '',
+}
+
 
 class Module(ModuleBase):
 
@@ -35,13 +45,17 @@ class Module(ModuleBase):
         if user is None:
             return await ctx.warn('User not found')
 
-        e = Embed(title=str(user), url=str(user.avatar_url), colour=Colour.gold())
+        e = discord.Embed(
+            title=str(user),
+            url=str(user.avatar_url),
+            colour=discord.Colour.gold()
+        )
         e.set_thumbnail(url=user.avatar_url)
         e.add_field(
             name='registered', inline=False,
             value=f'`{user.created_at.replace(microsecond=0)}` ({(datetime.now() - user.created_at).days} days ago)'
         )
-        if isinstance(user, Member):
+        if isinstance(user, discord.Member):
             # function can return members from different guild
             if user.guild == ctx.guild:
                 e.title += ' (member)'
@@ -64,15 +78,35 @@ class Module(ModuleBase):
 
             external_emoji_perm = PermissionExternalEmojis().check(ctx.channel, self.bot.user)
 
-            if user.activity is None:
+            activity = user.activity
+            if activity is None:
                 e.add_field(
                     name='status',
                     value=(STATUS_EMOTES[str(user.status)] if external_emoji_perm else '') + str(user.status)
                 )
             else:
+                activity_state = ACTIVITY_MAP.get(activity.type, '')
+
+                emoji = ''
+                if activity.emoji:
+                    # activity has emoji
+                    if activity.emoji.id:
+                        # emoji is custom
+                        if self.bot.get_emoji(activity.emoji.id):
+                            # bot has access to emoji
+                            emoji = activity.emoji
+                        else:
+                            # bot has no acces to emoji
+                            emoji = '\N{THINKING FACE}'
+                    else:
+                        # emoji is standard
+                        emoji = activity.emoji
+
+                activity_name = f'{emoji} {activity.name if activity.name else ""}'
+
                 e.add_field(
                     name='activity',
-                    value=(STATUS_EMOTES[str(user.status)] if external_emoji_perm else '') + f'**{user.activity.type}** {user.activity.name}'
+                    value=(STATUS_EMOTES[str(user.status)] if external_emoji_perm else '') + f'{activity_state}{activity_name}'
                 )
 
         e.add_field(name='robot', value='yes' if user.bot else 'no')
