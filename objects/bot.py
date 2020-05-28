@@ -349,6 +349,7 @@ class KiwiBot(discord.AutoShardedClient):
             await vc.disconnect()
 
     def _pre_process_send_fields(
+        self,
         fields,
         content,
         allowed_mentions,
