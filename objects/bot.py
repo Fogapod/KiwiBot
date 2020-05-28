@@ -348,8 +348,32 @@ class KiwiBot(discord.AutoShardedClient):
         if vc.is_connected():
             await vc.disconnect()
 
-    async def send_message(self, target, content=None, *, response_to=None, replace_mass_mentions=True, replace_mentions=True, strict_replace=False, **fields):
-        if isinstance(target, discord.Member) or isinstance(target, discord.User):
+    def _pre_process_send_fields(
+        fields,
+        content,
+        allowed_mentions,
+    ):
+        content = str(content) if content is not None else ''
+        content = content.replace(
+            self.http.token,
+            FAKE_TOKEN,
+        )
+
+        fields['content'] = formatters.trim_text(content.strip())
+        fields['allowed_mentions'] = allowed_mentions
+
+        return fields
+
+    async def send_message(
+        self,
+        target,
+        content=None,
+        *,
+        response_to=None,
+        allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False),
+        **fields
+    ):
+        if isinstance(target, (discord.Member, discord.User)):
             if target.dm_channel is None:
                 channel = await target.create_dm()
             else:
@@ -359,26 +383,15 @@ class KiwiBot(discord.AutoShardedClient):
         elif isinstance(target, (discord.DMChannel, discord.TextChannel, discord.Webhook)):
             channel = target
         else:
-            raise ValueError('Unknown target passed to send message')
-
-        content = str(content) if content is not None else ''
-        content = content.replace(
-            self.http.token,
-            FAKE_TOKEN,
-        )
-
-        if replace_mentions:
-            content = await formatters.replace_mentions(content, channel, self, strict=strict_replace)
-        if replace_mass_mentions:
-            content = formatters.replace_mass_mentions(content, strict=strict_replace)
-
-        fields['content'] = formatters.trim_text(content.strip())
+            raise ValueError('Unknown target passed to send_message')
 
         message = None
         dm_message = None
 
         try:
-            message = await channel.send(**fields)
+            message = await channel.send(
+                **self._pre_process_send_fields(fields, content, allowed_mentions)
+            )
         except discord.Forbidden:
             if response_to is not None:
                 try:
@@ -409,22 +422,17 @@ class KiwiBot(discord.AutoShardedClient):
 
         return message or dm_message
 
-    async def edit_message(self, msg, content=None, *, replace_mass_mentions=True, replace_mentions=True, **fields):
-        content = str(content) if content is not None else ''
-        content = content.replace(
-            self.http.token,
-            FAKE_TOKEN,
-        )
-
-        if replace_mentions:
-            content = await formatters.replace_mentions(content, msg.channel, self)
-        if replace_mass_mentions:
-            content = formatters.replace_mass_mentions(content)
-
-        fields['content'] = formatters.trim_text(content.strip())
-
+    async def edit_message(
+        self,
+        msg,
+        content=None,
+        *,
+        **fields
+    ):
         try:
-            return await msg.edit(**fields)
+            return await msg.edit(
+                **self._pre_process_send_fields(fields, content, allowed_mentions)
+            )
         except discord.errors.NotFound:
             return None
         except discord.HTTPException:

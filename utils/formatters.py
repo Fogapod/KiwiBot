@@ -14,8 +14,10 @@ def trim_text(text, max_len=2000):
 
 
 async def replace_mentions(content, channel, bot, strict=False):
+    """No longer used."""
+
     if strict:
-        content = escape_special_chars(content)
+        content = _escape_special_chars(content)
 
     for mid in USER_MENTION_REGEX.findall(content):
         mid = int(mid)
@@ -49,19 +51,23 @@ async def replace_mentions(content, channel, bot, strict=False):
 
 
 def replace_mass_mentions(content, strict=False):
+    """No longer used."""
+
     if strict:
-        content = escape_special_chars(content)
+        content = _escape_special_chars(content)
 
     return content.replace('@everyone', '@\u200beveryone').replace('@here', '@\u200bhere')
 
-def escape_special_chars(content):
+
+def _escape_special_chars(content):
+    """No longer used."""
+
     content = content.replace("\N{RIGHT-TO-LEFT OVERRIDE}", "")
 
     if len(content) > 300:  # https://github.com/discordapp/discord-api-docs/issues/1241
         content = content[:300] + content[300:].replace('@', '@ ')
 
     return content
-
 
 
 def lazy_format(s, *args, **kwargs):
