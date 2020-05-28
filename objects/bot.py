@@ -241,7 +241,7 @@ class KiwiBot(discord.AutoShardedClient):
         # )
 
         if msg.channel.id not in self._last_messages:
-            self._last_messages[msg.channel.id] = { msg.author.id: msg.edited_at or msg.created_at}
+            self._last_messages[msg.channel.id] = {msg.author.id: msg.edited_at or msg.created_at}
         else:
             self._last_messages[msg.channel.id][msg.author.id] = msg.edited_at or msg.created_at
 
@@ -304,8 +304,8 @@ class KiwiBot(discord.AutoShardedClient):
                     emoji = reaction
                 try:
                     await self.http.remove_own_reaction(
-                        int(message_id), int(channel_id), emoji)
-                except Exception as e:
+                        int(channel_id), int(message_id), emoji)
+                except Exception:
                     pass
 
         await self.redis.execute('LTRIM', f'tracked_message:{msg_id}', 0, 0)

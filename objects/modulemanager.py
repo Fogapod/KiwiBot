@@ -130,6 +130,7 @@ class ModuleManager:
                 capture_exception()
                 logger.info(f'Failed to check command, stopped on module {name}')
                 logger.info(traceback.format_exc())
+
                 return
 
             command_output = None
@@ -187,14 +188,21 @@ class ModuleManager:
             return command_output
 
     def get_all_modules(self, hidden=False, disabled=False):
-        return [m for m in self.modules.values() if m.hidden <= hidden and m.disabled <= disabled]
+        return [
+            m for m in self.modules.values()
+            if m.hidden <= hidden and m.disabled <= disabled
+        ]
 
     def get_modules_by_category(self, category):
-        return [m for m in self.modules.values() if not m.disabled and m.category.lower() == (category.lower() or 'uncategorized')]
+        return [
+            m for m in self.modules.values()
+            if not m.disabled and m.category.lower() == (category.lower() or 'uncategorized')
+        ]
 
     def get_module(self, alias):
         alias = alias.lower()
         for name, module in self.modules.items():
             if not module.disabled and alias in module.aliases or alias == module.name:
                 return module
+
         return None
