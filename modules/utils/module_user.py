@@ -88,7 +88,8 @@ class Module(ModuleBase):
                 activity_state = ACTIVITY_MAP.get(activity.type, '')
 
                 emoji = ''
-                if activity.emoji:
+                # thanks discord.py
+                if getattr(activity, 'emoji', None):
                     # activity has emoji
                     if activity.emoji.id:
                         # emoji is custom
