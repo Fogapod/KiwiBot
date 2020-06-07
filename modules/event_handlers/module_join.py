@@ -62,7 +62,7 @@ class Module(ModuleBase):
                     allowed_mentions=AllowedMentions(
                         everyone=False,
                         roles=False,
-                        users=[member.id]
+                        users=[member]
                     )
                 )
             except NotFound:
