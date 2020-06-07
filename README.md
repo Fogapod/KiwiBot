@@ -18,7 +18,7 @@ Use `help` command to get list of available commands.
 ## Running bot
 You can run bot with `run.sh` file from root directory.  
 Requirements:
-* [python 3.7](https://www.python.org/downloads)
+* [python 3.8](https://www.python.org/downloads)
 * [discord.py python library](https://github.com/Rapptz/discord.py)
 * [dateutil python library](https://dateutil.readthedocs.io/en/stable)
 * [Pillow python library](https://github.com/python-pillow/Pillow)
