@@ -1,0 +1,75 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kiwibot-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kiwibot
+  template:
+    metadata:
+      labels:
+        app: kiwibot
+    spec:
+      containers:
+      - name: kiwibot
+        image: fogapod/kiwibot
+        volumeMounts:
+          - name: config
+            mountPath: /code/config.json
+            subPath: config.json
+            readOnly: true
+          - name: testing-modules
+            mountPath: /code/modules/testing
+      volumes:
+        - name: config
+          secret:
+            secretName: kiwibot-config
+        # can be safely removed
+        - name: testing-modules
+          persistentVolumeClaim:
+            claimName: kiwibot-testing-modules-claim
+      # This is required because I hardcoded redis host to localhost
+      hostNetwork: true
+      nodeSelector:
+        type: kiwi
+
+# I only use these because I had old directory with modules.
+# Volume and Claim can be safely removed.
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: kiwibot-testing-modules
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: kiwibot-testing-modules-storage
+  local:
+    path: /home/kiwi/OldKiwiBot/modules/testing
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: type
+          operator: In
+          values:
+            - kiwi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kiwibot-testing-modules-claim
+spec:
+  storageClassName: kiwibot-testing-modules-storage
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

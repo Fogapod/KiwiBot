@@ -1,7 +1,6 @@
 __pycache__
-.dockerignore
-Dockerfile
 build
+k8s
 
 *.json
 *.rdb
@@ -10,6 +9,8 @@ build
 !requirements.txt
 *.in
 
+Dockerfile
+.dockerignore
 .github
 .flake8
 .isort.cfg
