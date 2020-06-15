@@ -16,6 +16,7 @@ spec:
       containers:
       - name: kiwibot
         image: fogapod/kiwibot
+        imagePullPolicy: Always
         volumeMounts:
           - name: config
             mountPath: /code/config.json
