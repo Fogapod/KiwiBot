@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: kiwibot-deployment
+  name: kiwibot
 spec:
   replicas: 1
   selector:
@@ -21,6 +21,7 @@ spec:
             mountPath: /code/config.json
             subPath: config.json
             readOnly: true
+          # see below
           - name: testing-modules
             mountPath: /code/modules/testing
       volumes:
