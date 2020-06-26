@@ -205,7 +205,7 @@ class Module(ModuleBase):
             if translations_count < TRANSLATE_CAP:
                 in_lang = text_data[0]["locale"]
                 # seems like "und" is an unknown language
-                if in_flag != "und" and in_lang != lang_flag:
+                if in_lang != "und" and in_lang != lang_flag:
                     translated_line = await self.translate(line, in_lang, lang_flag)
                     translations_count += 1
 
