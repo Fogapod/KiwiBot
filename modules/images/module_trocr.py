@@ -91,11 +91,11 @@ class TextField:
     def font_size(self):
         # either ratio is wrong or I am doing something wrong, but I have to substitude
         # a constant value for this to work
-        return max((1, round(PX_TO_PT_RATIO * self.height) - 5))
+        return max((1, round(PX_TO_PT_RATIO * self.height) - 6))
 
     @property
     def stroke_width(self):
-        return max((1, round(self.font_size / 20)))
+        return max((1, round(self.font_size / 30)))
 
 
 
@@ -251,7 +251,7 @@ class Module(ModuleBase):
             draw.text(
                 (
                     field.left - 2,  # - field.stroke_width * 2,
-                    field.upper - field.stroke_width * 2 - 2,
+                    field.upper - field.stroke_width * 5,
                 ),
                 text=field.text,
                 font=font.font_variant(size=field.font_size),
