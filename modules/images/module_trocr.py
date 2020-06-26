@@ -90,9 +90,7 @@ class TextField:
 
     @property
     def font_size(self):
-        # either ratio is wrong or I am doing something wrong, but I have to substitude
-        # a constant value for this to work
-        return max((1, round(PX_TO_PT_RATIO * self.height) - 6))
+        return max((1, int(PX_TO_PT_RATIO * self.height) - 2))
 
     @property
     def stroke_width(self):
