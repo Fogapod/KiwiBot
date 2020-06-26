@@ -36,13 +36,15 @@ BLUR_CAP = 40
 
 
 class TextField:
-    def __init__(self, full_text, padding=3):
+    def __init__(self, full_text, src, padding=3):
         self.text = full_text
 
         self.left = None
         self.upper = None
         self.right = None
         self.lower = None
+
+        self._src_width, self._src_height = src.size
 
         self._padding = padding
 
@@ -71,12 +73,11 @@ class TextField:
 
     @property
     def coords_padded(self):
-        # TODO: make sure this doesnt segfault with wrong coords?? Thanks Pillow
         return (
-            self.left - self._padding,
-            self.upper - self._padding,
-            self.right + self._padding,
-            self.lower + self._padding
+            max((0, self.left - self._padding)),
+            max((0, self.upper - self._padding)),
+            min((self._src_width, self.right + self._padding)),
+            min((self._src_height, self.lower + self._padding)),
         )
 
     @property
@@ -209,7 +210,7 @@ class Module(ModuleBase):
                     translated_line = await self.translate(line, in_lang, lang_flag)
                     translations_count += 1
 
-            field = TextField(translated_line)
+            field = TextField(translated_line, src)
             fields.append(field)
 
             for word in text_data[current_word:]:
