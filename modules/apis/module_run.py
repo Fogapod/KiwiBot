@@ -122,5 +122,4 @@ class Module(ModuleBase):
 
         await ctx.send(
             f'```\n{data["stdout"]}\n\nexit code: {data["exit_code"]} | ran for: {round(data["exec_time"], 3)}s```',
-            strict_replace=True
         )

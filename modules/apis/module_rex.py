@@ -150,4 +150,4 @@ class Module(ModuleBase):
         if not result:
             result = 'Empty output'
 
-        await ctx.send(f'```\n{result}```', strict_replace=True)
+        await ctx.send(f'```\n{result}```')
