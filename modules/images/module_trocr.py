@@ -48,7 +48,7 @@ class TextField:
 
         self._padding = padding
 
-    def merge(self, vertices):
+    def add_word(self, vertices):
         left, upper, right, lower = self._vertices_to_coords(vertices)
 
         self.left = left if self.left is None else min((self.left, left))
@@ -119,6 +119,8 @@ class Module(ModuleBase):
     ratelimit = (1, 15)
 
     async def on_load(self, from_reload):
+        self.font = ImageFont.truetype(FONT_PATH)
+
         # copied from module_goodtranslator2.py
         self.api_key = self.bot.config.get('yandex_api_key')
         if self.api_key:
@@ -216,28 +218,30 @@ class Module(ModuleBase):
                 if line.startswith(text):
                     current_word += 1
                     line = line[len(text):].lstrip()
-                    field.merge(word["boundingPoly"]["vertices"])
+                    # TODO: merge multiple lines into box
+                    field.add_word(word["boundingPoly"]["vertices"])
                 else:
                     break
 
         result = await self.bot.loop.run_in_executor(
-            None, self.blocking, src, fields
+            None, self.draw, src, fields
         )
 
         await ctx.send(file=discord.File(result, filename=f'trocr.png'))
 
-    def blocking(self, src, fields):
-        draw = ImageDraw.Draw(src)
-        font = ImageFont.truetype(FONT_PATH)
+    def draw(self, src, fields):
+        src = src.convert("RGBA")
 
         fields = fields[:BLUR_CAP]
 
         for field in fields:
             cropped = src.crop(field.coords_padded)
             blurred = cropped.filter(ImageFilter.GaussianBlur(10))
-            field.inverted_avg_color = ImageOps.invert(
-                blurred.resize((1, 1)).convert("L")
-            ).getpixel((0, 0))  # ugly!!!
+
+            # Does not work anymore for some reason, black stroke is good anyway
+            # field.inverted_avg_color = ImageOps.invert(
+            #     blurred.resize((1, 1)).convert("L")
+            # ).getpixel((0, 0))  # ugly!!!
 
             src.paste(blurred, field.coords_padded)
 
@@ -246,18 +250,31 @@ class Module(ModuleBase):
             blurred.close()
 
         for field in fields:
-            # TODO: figure out how to fit text into boxes with Pillow
+            # TODO: figure out how to fit text into boxes with Pillow without creating
+            # extra images
+            font = self.font.font_variant(size=field.font_size)
+
+            text_im = Image.new(
+                "RGBA",
+                size=font.getsize(field.text, stroke_width=field.stroke_width),
+            )
+            draw = ImageDraw.Draw(text_im)
+
             draw.text(
-                (
-                    field.left - 2,  # - field.stroke_width * 2,
-                    field.upper - field.stroke_width * 5,
-                ),
+                (0, 0),
                 text=field.text,
-                font=font.font_variant(size=field.font_size),
+                font=font,
                 spacing=0,
                 stroke_width=field.stroke_width,
-                stroke_fill=field.inverted_avg_color,  # ugly!!!
+                stroke_fill=(0, 0, 0),
             )
+
+            src.alpha_composite(
+                text_im.resize((field.width, field.height)),
+                field.coords_padded[:2],
+            )
+
+            text_im.close()
 
         result = BytesIO()
         src.save(result, format='PNG')
