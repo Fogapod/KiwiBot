@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# TODO: remove
+# this is no longer used
+
 while true; do
     python3.8 main.py
     exit_code=$?

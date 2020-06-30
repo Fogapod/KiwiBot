@@ -65,4 +65,4 @@ RUN addgroup kiwi && \
 
 USER kiwi
 
-ENTRYPOINT ["./run.sh"]
+ENTRYPOINT ["python3.8", "main.py"]
