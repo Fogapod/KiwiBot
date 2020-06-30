@@ -94,7 +94,7 @@ class TextField:
 
     @property
     def stroke_width(self):
-        return max((1, round(self.font_size / 30)))
+        return max((1, round(self.font_size / 12)))
 
 
 
@@ -270,7 +270,12 @@ class Module(ModuleBase):
             )
 
             src.alpha_composite(
-                text_im.resize((field.width, field.height)),
+                text_im.resize(
+                    (
+                        min((text_im.width, field.width)),
+                        min((text_im.height, field.height)),
+                    )
+                ),
                 field.coords_padded[:2],
             )
 
