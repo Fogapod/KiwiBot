@@ -48,8 +48,8 @@ class TextField:
 
         self._padding = padding
 
-    def add_word(self, vertices):
-        left, upper, right, lower = self._vertices_to_coords(vertices)
+    def add_word(self, vertices, src_size):
+        left, upper, right, lower = self._vertices_to_coords(vertices, src_size)
 
         self.left = left if self.left is None else min((self.left, left))
         self.upper = upper if self.upper is None else min((self.upper, upper))
@@ -57,15 +57,36 @@ class TextField:
         self.lower = lower if self.lower is None else max((self.lower, lower))
 
     @staticmethod
-    def _vertices_to_coords(vertices):
+    def _vertices_to_coords(vertices, src_size):
         """Returns Pillow style coordinates (left, upper, right, lower)."""
 
-        return (
-            vertices[0].get("x", 0),
-            vertices[0].get("y", 0),  # was missing from response once
-            vertices[1]["x"],
-            vertices[3]["y"],
-        )
+        # NOTE: coords can be missing if outside of frame sometimes
+        left = vertices[0].get("x")
+        upper = vertices[0].get("y")
+        right = vertices[2].get("x")
+        lower = vertices[2].get("y")
+
+        # NOTE: there might be a super edge-case where 2 sides of box are missing
+        # (text in corner) lets hope it never happens...
+        if None not in (left, right) and left > right or \
+                None not in (upper, lower) and upper > lower:
+            # box is upside-down ... thanks Google
+            # TODO: add support for rotated boxes. Angle can be determined by checking
+            # individual letters in fullTextAnnotation
+            left, right = right, left
+            upper, lower = lower, upper
+
+            # NOTE: these have to be done here, after transformation
+            if left is None:
+                left = 0
+            if upper is None:
+                upper = 0
+            if right is None:
+                right = src_size[0]
+            if lower is None:
+                lower = src_size[1]
+
+        return (left, upper, right, lower)
 
     @property
     def coords(self):
@@ -219,7 +240,7 @@ class Module(ModuleBase):
                     current_word += 1
                     line = line[len(text):].lstrip()
                     # TODO: merge multiple lines into box
-                    field.add_word(word["boundingPoly"]["vertices"])
+                    field.add_word(word["boundingPoly"]["vertices"], src.size)
                 else:
                     break
 
@@ -236,6 +257,8 @@ class Module(ModuleBase):
 
         for field in fields:
             cropped = src.crop(field.coords_padded)
+
+            # NOTE: next line causes segfaults if coords are wrong, debug from here
             blurred = cropped.filter(ImageFilter.GaussianBlur(10))
 
             # Does not work anymore for some reason, black stroke is good anyway
