@@ -29,6 +29,10 @@ spec:
             mountPath: /code/config.json
             subPath: config.json
             readOnly: true
+          - name: ssh-key
+            mountPath: /home/kiwi/.ssh/id_ed25519
+            subPath: id_ed25519
+            readOnly: true
           # see below
           - name: testing-modules
             mountPath: /code/modules/testing
@@ -36,6 +40,9 @@ spec:
         - name: config
           secret:
             secretName: kiwibot-config
+        - name: ssh-key
+          secret:
+            secretName: kiwibot-repo-key
         # can be safely removed
         - name: testing-modules
           persistentVolumeClaim:

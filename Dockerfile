@@ -60,9 +60,11 @@ RUN pip_deps='gcc make libc6-dev' && \
 COPY . .
 
 RUN addgroup kiwi && \
-    useradd -g kiwi kiwi && \
+    useradd -mg kiwi kiwi && \
     chown -R kiwi:kiwi /code
 
 USER kiwi
+
+RUN git config --global url.ssh://git@github.com/.insteadOf https://github.com/
 
 ENTRYPOINT ["python3.8", "main.py"]
