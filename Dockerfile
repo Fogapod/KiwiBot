@@ -66,6 +66,7 @@ RUN addgroup kiwi && \
 USER kiwi
 
 RUN git config --global url.ssh://git@github.com/.insteadOf https://github.com/ && \
-    mkdir ~/.ssh
+    mkdir ~/.ssh && \
+    ssh-keyscan -H github.com >> ~/.ssh/known_hosts
 
 ENTRYPOINT ["python3.8", "main.py"]
