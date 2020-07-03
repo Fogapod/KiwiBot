@@ -16,6 +16,7 @@ import textwrap
 import discord
 
 from io import BytesIO
+from collections import deque
 
 from PIL import Image, ImageFilter, ImageDraw, ImageFont, ImageOps
 
@@ -33,6 +34,14 @@ PX_TO_PT_RATIO = 1.3333333
 
 TRANSLATE_CAP = 6
 BLUR_CAP = 40
+
+
+class TROCRException(Exception):
+    pass
+
+
+class RotatedBoxException(TROCRException):
+    pass
 
 
 class TextField:
@@ -65,6 +74,24 @@ class TextField:
         upper = vertices[0].get("y")
         right = vertices[2].get("x")
         lower = vertices[2].get("y")
+
+        # In rare cases API returns rotated images. These are not supported 
+        # by existing code. Implementation can be problematic because API does
+        # not return angle
+        # TODO: make sure this works properly with missing coordinates
+        rotatable = deque(vertices)
+        for i in range(4):
+            axis = "x" if i % 2 == 1 else "y"
+
+            pos, next_pos = rotatable[0].get(axis), rotatable[1].get(axis)
+
+            if None not in (pos, next_pos) and pos != next_pos:
+                raise RotatedBoxException(
+                    "Some vertices are misaligned. "
+                    "Rotated text boxes are not supported yet."
+                )
+
+            rotatable.rotate(1)
 
         # NOTE: there might be a super edge-case where 2 sides of box are missing
         # (text in corner) lets hope it never happens...
@@ -116,6 +143,13 @@ class TextField:
     @property
     def stroke_width(self):
         return max((1, round(self.font_size / 12)))
+
+    @property
+    def initialized(self):
+        return None not in self.coords
+
+    def __repr__(self):
+        return f"<TextField coords={self.coords}>"
 
 
 
@@ -211,44 +245,57 @@ class Module(ModuleBase):
 
         # everything above is copied from module_ocr.py
 
-        text_data = json["responses"][0].get("textAnnotations")
-        if not text_data:
+        text_annotations = json["responses"][0].get("textAnnotations")
+        if not text_annotations:
             return await ctx.warn("No text detected")
+
+        # Used for error reporting
+        notes = ""
 
         # Google OCR API returns entry for each word separately, but they can be joined
         # by checking full image description. In description words are combined into
         # blocks, blocks are separated by newlines, there is a trailing newline.
         # Coordinates from words in the same block can be merged
-        current_word = 1 # 1st annotation is entire text
+        current_word = 1  # 1st annotation is entire text
         translations_count = 0
         fields = []
-        for line in text_data[0]["description"].split("\n")[:-1]:
+        for line in text_annotations[0]["description"].split("\n")[:-1]:
             translated_line = line
             if translations_count < TRANSLATE_CAP:
-                in_lang = text_data[0]["locale"]
+                in_lang = text_annotations[0]["locale"]
                 # seems like "und" is an unknown language
                 if in_lang != "und" and in_lang != lang_flag:
                     translated_line = await self.translate(line, in_lang, lang_flag)
                     translations_count += 1
 
             field = TextField(translated_line, src)
-            fields.append(field)
 
-            for word in text_data[current_word:]:
+            for word in text_annotations[current_word:]:
                 text = word["description"]
                 if line.startswith(text):
                     current_word += 1
                     line = line[len(text):].lstrip()
                     # TODO: merge multiple lines into box
-                    field.add_word(word["boundingPoly"]["vertices"], src.size)
+                    try:
+                        field.add_word(word["boundingPoly"]["vertices"], src.size)
+                    except TROCRException as e:
+                        notes += f"{e}\n"
+
+                        # Stop line proceessing at this point
+                        break
                 else:
                     break
+
+            if field.initialized:
+                fields.append(field)
 
         result = await self.bot.loop.run_in_executor(
             None, self.draw, src, fields
         )
 
-        await ctx.send(file=discord.File(result, filename=f'trocr.png'))
+        send_fn = ctx.warn if notes else ctx.send
+
+        await send_fn(notes, file=discord.File(result, filename=f'trocr.png'))
 
     def draw(self, src, fields):
         src = src.convert("RGBA")
