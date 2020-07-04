@@ -143,6 +143,15 @@ class TextField:
             right = vertices[1].get("x")
             lower = vertices[2].get("y")
 
+        if left is None:
+            left = 0
+        if upper is None:
+            upper = 0
+        if right is None:
+            right = src_size[0]
+        if lower is None:
+            lower = src_size[1]
+
         return (left, upper, right, lower)
 
     @staticmethod
