@@ -11,6 +11,7 @@ these will be implemented. Please see README.md for details.
 
 from objects.modulebase import ModuleBase
 
+import math
 import json
 import textwrap
 import discord
@@ -40,7 +41,7 @@ class TROCRException(Exception):
     pass
 
 
-class RotatedBoxException(TROCRException):
+class AngleUndetectable(TROCRException):
     pass
 
 
@@ -53,12 +54,20 @@ class TextField:
         self.right = None
         self.lower = None
 
+        self.angle = 0
+
         self._src_width, self._src_height = src.size
 
         self._padding = padding
 
     def add_word(self, vertices, src_size):
-        left, upper, right, lower = self._vertices_to_coords(vertices, src_size)
+        if not self.initialized:
+            # Get angle from first word
+            self.angle = self._get_angle(vertices)
+
+        left, upper, right, lower = self._vertices_to_coords(
+            vertices, src_size, self.angle
+        )
 
         self.left = left if self.left is None else min((self.left, left))
         self.upper = upper if self.upper is None else min((self.upper, upper))
@@ -66,54 +75,107 @@ class TextField:
         self.lower = lower if self.lower is None else max((self.lower, lower))
 
     @staticmethod
-    def _vertices_to_coords(vertices, src_size):
+    def _vertices_to_coords(vertices, src_size, angle):
         """Returns Pillow style coordinates (left, upper, right, lower)."""
 
-        # NOTE: coords can be missing if outside of frame sometimes
-        left = vertices[0].get("x")
-        upper = vertices[0].get("y")
-        right = vertices[2].get("x")
-        lower = vertices[2].get("y")
-
-        # In rare cases API returns rotated images. These are not supported 
-        # by existing code. Implementation can be problematic because API does
-        # not return angle
-        # TODO: make sure this works properly with missing coordinates
-        rotatable = deque(vertices)
-        for i in range(4):
-            axis = "x" if i % 2 == 1 else "y"
-
-            pos, next_pos = rotatable[0].get(axis), rotatable[1].get(axis)
-
-            if None not in (pos, next_pos) and pos != next_pos:
-                raise RotatedBoxException(
-                    "Some vertices are misaligned. "
-                    "Rotated text boxes are not supported yet."
-                )
-
-            rotatable.rotate(1)
-
-        # NOTE: there might be a super edge-case where 2 sides of box are missing
-        # (text in corner) lets hope it never happens...
-        if None not in (left, right) and left > right or \
-                None not in (upper, lower) and upper > lower:
-            # box is upside-down ... thanks Google
-            # TODO: add support for rotated boxes. Angle can be determined by checking
-            # individual letters in fullTextAnnotation
-            left, right = right, left
-            upper, lower = lower, upper
-
-            # NOTE: these have to be done here, after transformation
-            if left is None:
-                left = 0
-            if upper is None:
-                upper = 0
-            if right is None:
-                right = src_size[0]
-            if lower is None:
-                lower = src_size[1]
+        # A - 0
+        # B - 1
+        # C - 2
+        # D - 3
+        #
+        # A----B
+        # |    |  angle = 360/0
+        # D----C
+        #
+        #    A
+        #  /   \
+        # D     B  angle = 315
+        #  \   /
+        #    C
+        #
+        # D----A
+        # |    |  angle = 270
+        # C----B
+        #
+        #    D
+        #  /   \
+        # C     A  angle = 225
+        #  \   /
+        #    B
+        #
+        # C---D
+        # |   | angle = 180
+        # B---A
+        #
+        #    C
+        #  /   \
+        # B     D angle = 135
+        #  \   /
+        #    A
+        #
+        # B---C
+        # |   | angle = 90
+        # A---D
+        #
+        #    B
+        #  /   \
+        # A     C  angle = 45
+        #  \   /
+        #    D
+        if 0 <= angle <= 90:
+            left  = vertices[0].get("x")
+            upper = vertices[1].get("y")
+            right = vertices[2].get("x")
+            lower = vertices[3].get("y")
+        elif 90 < angle <= 180:
+            left  = vertices[1].get("x")
+            upper = vertices[2].get("y")
+            right = vertices[3].get("x")
+            lower = vertices[0].get("y")
+        elif 180 < angle <= 270:
+            left  = vertices[2].get("x")
+            upper = vertices[3].get("y")
+            right = vertices[0].get("x")
+            lower = vertices[1].get("y")
+        elif 270 < angle <= 360:
+            left  = vertices[3].get("x")
+            upper = vertices[0].get("y")
+            right = vertices[1].get("x")
+            lower = vertices[2].get("y")
 
         return (left, upper, right, lower)
+
+    @staticmethod
+    def _get_angle(vertices):
+        # https://stackoverflow.com/a/27481611
+        def get_coords(vertex):
+            return vertex.get("x"), vertex.get("y")
+
+        rotatable = deque(vertices)
+        for i in range(4):
+            x, y = get_coords(rotatable[0])
+            next_x, next_y = get_coords(rotatable[1])
+
+            # Any vertex coordinate can be missing
+            if None not in (x, y, next_x, next_y):
+                x_diff, y_diff = next_x - x, y - next_y
+                degrees = math.degrees(math.atan2(y_diff, x_diff))
+
+                # compensate missing vertices
+                degrees += 90 * i
+
+                break
+
+            rotatable.rotate(1)
+        else:
+            raise AngleUndetectable
+
+        if degrees < 0:
+            degrees += 360
+        elif degrees > 360:
+            degreees -= 360
+
+        return degrees
 
     @property
     def coords(self):
@@ -149,7 +211,7 @@ class TextField:
         return None not in self.coords
 
     def __repr__(self):
-        return f"<TextField coords={self.coords}>"
+        return f"<TextField text='{self.text}' coords={self.coords} angle={self.angle}>"
 
 
 
@@ -278,11 +340,8 @@ class Module(ModuleBase):
                     # TODO: merge multiple lines into box
                     try:
                         field.add_word(word["boundingPoly"]["vertices"], src.size)
-                    except TROCRException as e:
-                        notes += f"{e}\n"
-
-                        # Stop line proceessing at this point
-                        break
+                    except AngleUndetectable:
+                        notes += f"angle for `{word}` is undetectable\n"
                 else:
                     break
 
@@ -345,7 +404,7 @@ class Module(ModuleBase):
                         min((text_im.width, field.width)),
                         min((text_im.height, field.height)),
                     )
-                ),
+                ).rotate(field.angle, expand=True, resample=Image.BICUBIC),
                 field.coords_padded[:2],
             )
 
