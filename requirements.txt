@@ -1,4 +1,4 @@
-discord.py[voice]>=1.3.4
+git+https://github.com/Rapptz/discord.py@4de01212a49e3957319e769622bc8f2da10494bb#egg=discord.py[voice]
 git+https://github.com/Fogapod/aiogoogletrans
 gTTS
 lxml
