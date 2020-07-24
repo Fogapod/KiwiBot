@@ -9,31 +9,17 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK=yes
 
 WORKDIR /code
 
-# espeak-ng for tts command
-RUN espeak_deps='git gcc make autoconf automake libtool pkg-config libsonic-dev libpcaudio-dev' && \
-    apt-get update && apt-get install -y --no-install-recommends $espeak_deps && \
-    rm -rf /var/lib/apt/lists/* && \
-    git clone https://github.com/espeak-ng/espeak-ng.git --depth=1 && cd espeak-ng && \
-    ./autogen.sh && \
-    ./configure --with-extdict-ru && \
-    make && \
-    make install && \
-    cd .. && rm -rf espeak-ng && \
-    apt-get purge -y --auto-remove $espeak_deps
-
-
-# chromedriver for screenshot command
-RUN arsenic_deps='unzip wget' \
-    && apt-get update && apt-get install -y --no-install-recommends $arsenic_deps \
-    && rm -rf /var/lib/apt/lists/* \
-    && CHROMIUM_VERSION=$(chromium --version | cut -d' ' -f2); wget -O chromedriver.zip https://chromedriver.storage.googleapis.com/${CHROMIUM_VERSION}/chromedriver_linux64.zip \
-    && unzip chromedriver.zip \
-    && chmod +x chromedriver \
-    && mv chromedriver /usr/local/bin \
-    && rm -f chromedriver.zip \
-    && apt-get purge -y --auto-remove $arsenic_deps
 
 RUN apt-get update \
+# espeak-ng for tts command
+    && espeak_deps='git gcc make autoconf automake libtool pkg-config libsonic-dev libpcaudio-dev' \
+    && apt-get install -y --no-install-recommends $espeak_deps \
+    && git clone https://github.com/espeak-ng/espeak-ng.git --depth=1 && cd espeak-ng \
+    && ./autogen.sh \
+    && ./configure --with-extdict-ru \
+    && make \
+    && make install \
+    && cd .. && rm -rf espeak-ng \
     && apt-get install -y --no-install-recommends \
       git \
       openssh-client \
@@ -48,6 +34,16 @@ RUN apt-get update \
       iputils-ping \
 # gif commands
       gifsicle \
+# screenshot command
+    && arsenic_deps='unzip wget' \
+    && apt-get install -y --no-install-recommends $arsenic_deps \
+    && CHROMIUM_VERSION=$(chromium --version | cut -d' ' -f2); wget -O chromedriver.zip https://chromedriver.storage.googleapis.com/${CHROMIUM_VERSION}/chromedriver_linux64.zip \
+    && unzip chromedriver.zip \
+    && chmod +x chromedriver \
+    && mv chromedriver /usr/local/bin \
+    && rm -f chromedriver.zip \
+# cleanup
+    && apt-get purge -y --auto-remove $espeak_deps $arsenic_deps \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
@@ -66,8 +62,8 @@ RUN addgroup kiwi \
 
 USER kiwi
 
-RUN git config --global url.ssh://git@github.com/.insteadOf https://github.com/ && \
-    mkdir ~/.ssh && \
-    ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+RUN git config --global url.ssh://git@github.com/.insteadOf https://github.com/ \
+    && mkdir ~/.ssh \
+    && ssh-keyscan -H github.com >> ~/.ssh/known_hosts
 
 ENTRYPOINT ["python3.8", "main.py"]
