@@ -23,17 +23,18 @@ RUN espeak_deps='git gcc make autoconf automake libtool pkg-config libsonic-dev 
 
 
 # chromedriver for screenshot command
-RUN arsenic_deps='unzip wget' && \
-    apt-get update && apt-get install -y --no-install-recommends $arsenic_deps && \
-    rm -rf /var/lib/apt/lists/* && \
-    wget -O chromedriver.zip https://chromedriver.storage.googleapis.com/80.0.3987.106/chromedriver_linux64.zip && \
-    unzip chromedriver.zip && \
-    chmod +x chromedriver && \
-    mv chromedriver /usr/local/bin && \
-    rm -f chromedriver.zip && \
-    apt-get purge -y --auto-remove $arsenic_deps
+RUN arsenic_deps='unzip wget' \
+    && apt-get update && apt-get install -y --no-install-recommends $arsenic_deps \
+    && rm -rf /var/lib/apt/lists/* \
+    && CHROMIUM_VERSION=$(chromium --version | cut -d' ' -f2); wget -O chromedriver.zip https://chromedriver.storage.googleapis.com/${CHROMIUM_VERSION}/chromedriver_linux64.zip \
+    && unzip chromedriver.zip \
+    && chmod +x chromedriver \
+    && mv chromedriver /usr/local/bin \
+    && rm -f chromedriver.zip \
+    && apt-get purge -y --auto-remove $arsenic_deps
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
       git \
       openssh-client \
 # discord voice features
@@ -46,22 +47,22 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # ping command
       iputils-ping \
 # gif commands
-      gifsicle && \
-    rm -rf /var/lib/apt/lists/*
+      gifsicle \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
 
-RUN pip_deps='gcc make libc6-dev' && \
-    apt-get update && apt-get install -y --no-install-recommends $pip_deps && \
-    rm -rf /var/lib/apt/lists/* && \
-    pip install -Ur requirements.txt && \
-    apt-get purge -y --auto-remove $pip_deps
+RUN pip_deps='gcc make libc6-dev' \
+    && apt-get update && apt-get install -y --no-install-recommends $pip_deps \
+    && rm -rf /var/lib/apt/lists/* \
+    && pip install -Ur requirements.txt \
+    && apt-get purge -y --auto-remove $pip_deps
 
 COPY . .
 
-RUN addgroup kiwi && \
-    useradd -mg kiwi kiwi && \
-    chown -R kiwi:kiwi /code
+RUN addgroup kiwi \
+    && useradd -mg kiwi kiwi \
+    && chown -R kiwi:kiwi /code
 
 USER kiwi
 
