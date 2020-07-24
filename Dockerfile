@@ -11,15 +11,6 @@ WORKDIR /code
 
 
 RUN apt-get update \
-# espeak-ng for tts command
-    && espeak_deps='git gcc make autoconf automake libtool pkg-config libsonic-dev libpcaudio-dev' \
-    && apt-get install -y --no-install-recommends $espeak_deps \
-    && git clone https://github.com/espeak-ng/espeak-ng.git --depth=1 && cd espeak-ng \
-    && ./autogen.sh \
-    && ./configure --with-extdict-ru \
-    && make \
-    && make install \
-    && cd .. && rm -rf espeak-ng \
     && apt-get install -y --no-install-recommends \
       git \
       openssh-client \
@@ -34,6 +25,15 @@ RUN apt-get update \
       iputils-ping \
 # gif commands
       gifsicle \
+# espeak-ng for tts command
+    && espeak_deps='gcc make autoconf automake libtool pkg-config' \
+    && apt-get install -y --no-install-recommends $espeak_deps \
+    && git clone https://github.com/espeak-ng/espeak-ng.git --depth=1 && cd espeak-ng \
+    && ./autogen.sh \
+    && ./configure --with-extdict-ru \
+    && make \
+    && make install \
+    && cd .. && rm -rf espeak-ng \
 # screenshot command
     && arsenic_deps='unzip wget' \
     && apt-get install -y --no-install-recommends $arsenic_deps \
