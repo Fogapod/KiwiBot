@@ -38,7 +38,7 @@ RUN apt-get update \
     && arsenic_deps='unzip wget' \
     && apt-get install -y --no-install-recommends $arsenic_deps \
     && CHROMIUM_VERSION=$(chromium --version | cut -d' ' -f2 | rev | cut -d. -f2- | rev) \
-    && CHROMEDRIVER_VERSION=$(wget -qO - https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROMIUM_VERSION})
+    && CHROMEDRIVER_VERSION=$(wget -qO - https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROMIUM_VERSION}) \
     && wget -qO chromedriver.zip https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip \
     && unzip chromedriver.zip \
     && chmod +x chromedriver \
