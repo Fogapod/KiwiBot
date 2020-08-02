@@ -18,6 +18,7 @@ import discord
 
 from io import BytesIO
 from collections import deque
+from functools import lru_cache
 
 from PIL import Image, ImageFilter, ImageDraw, ImageFont, ImageOps
 
@@ -33,7 +34,7 @@ FONT_PATH = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
 
 PX_TO_PT_RATIO = 1.3333333
 
-TRANSLATE_CAP = 6
+TRANSLATE_CAP = 10
 BLUR_CAP = 40
 
 
@@ -262,6 +263,7 @@ class Module(ModuleBase):
 
         raise Exception('No yandex api key in config or key is invalid')
 
+    @lru_cache(maxsize=1024)
     async def translate(self, text, in_lang, out_lang):
         params = {
             'key': self.api_key,
@@ -325,8 +327,8 @@ class Module(ModuleBase):
 
         # Google OCR API returns entry for each word separately, but they can be joined
         # by checking full image description. In description words are combined into
-        # blocks, blocks are separated by newlines, there is a trailing newline.
-        # Coordinates from words in the same block can be merged
+        # lines, lines are separated by newlines, there is a trailing newline.
+        # Coordinates from words in the same line can be merged
         current_word = 1  # 1st annotation is entire text
         translations_count = 0
         fields = []
