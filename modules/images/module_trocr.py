@@ -18,7 +18,6 @@ import discord
 
 from io import BytesIO
 from collections import deque
-from functools import lru_cache
 
 from PIL import Image, ImageFilter, ImageDraw, ImageFont, ImageOps
 
@@ -263,7 +262,6 @@ class Module(ModuleBase):
 
         raise Exception('No yandex api key in config or key is invalid')
 
-    @lru_cache(maxsize=1024)
     async def translate(self, text, in_lang, out_lang):
         params = {
             'key': self.api_key,
