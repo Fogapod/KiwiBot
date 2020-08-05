@@ -320,7 +320,7 @@ class Module(ModuleBase):
         if not text_annotations:
             return await ctx.warn("No text detected")
 
-        # Used for error reporting
+        # error reporting
         notes = ""
 
         # Google OCR API returns entry for each word separately, but they can be joined
@@ -363,7 +363,11 @@ class Module(ModuleBase):
 
         send_fn = ctx.warn if notes else ctx.send
 
-        await send_fn(notes, file=discord.File(result, filename=f'trocr.png'))
+        stats = f'Fields: {current_word - 1}\nLines: {len(fields)}\nTranslated: {translations_count}'
+        if notes:
+            stats += f'\nNotes: {notes}'
+
+        await send_fn(stats, file=discord.File(result, filename=f'trocr.png'))
 
     def draw(self, src, fields):
         src = src.convert("RGBA")
