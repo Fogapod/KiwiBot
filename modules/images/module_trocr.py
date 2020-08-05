@@ -363,7 +363,7 @@ class Module(ModuleBase):
 
         send_fn = ctx.warn if notes else ctx.send
 
-        stats = f'Fields: {current_word - 1}\nLines: {len(fields)}\nTranslated: {translations_count}'
+        stats = f'Words: {current_word - 1}\nLines: {len(fields)}\nTranslated: {translations_count}'
         if notes:
             stats += f'\nNotes: {notes}'
 
