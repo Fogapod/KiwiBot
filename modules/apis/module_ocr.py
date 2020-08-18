@@ -20,7 +20,11 @@ class Module(ModuleBase):
         if image.error:
             return await ctx.warn(f'Error getting image: {image.error}')
 
-        async with ctx.session.get(API_URL, params=dict(q=image.url)) as r:
+        async with ctx.session.get(
+            API_URL,
+            params=dict(q=image.url),
+            headers={'User-Agent': 'KiwiBot'},
+        ) as r:
             if r.status != 200:
                 if r.content_type.lower() != 'application/json':
                     # something went terribly wrong

@@ -293,7 +293,11 @@ class Module(ModuleBase):
             return await ctx.warn('Invalid input language. Try using `list` subcommand')
 
         # everything below is copied from module_ocr.py
-        async with ctx.session.get(OCR_API_URL, params=dict(q=image.url, raw=1)) as r:
+        async with ctx.session.get(
+            OCR_API_URL,
+            params=dict(q=image.url, raw=1),
+            headers={'User-Agent': 'KiwiBot'},
+        ) as r:
             if r.status != 200:
                 if r.content_type.lower() != 'application/json':
                     # something went terribly wrong
