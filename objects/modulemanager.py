@@ -46,6 +46,8 @@ class ModuleManager:
 
                 if strict_mode:
                     raise
+
+                module.disabled = True
                     
         logger.trace(f'Loaded {len(self.modules)} modules')
 
