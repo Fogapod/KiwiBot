@@ -106,7 +106,7 @@ class Image:
                 img.close()
                 return
 
-            return img.copy()
+            return img
         except PIL.Image.DecompressionBombError:
             self.error = f'Failed to open image, exceeds **{PIL.Image.MAX_IMAGE_PIXELS}** pixel limit'
         except OSError as e:
