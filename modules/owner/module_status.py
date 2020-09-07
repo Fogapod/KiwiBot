@@ -50,7 +50,7 @@ class Module(ModuleBase):
     async def on_load(self, from_reload):
         return await self._change_precense(
             0,
-            'Shutting down due to new verification: blog.discordapp.com/4e6e050ab52e',
+            'change da world... my final message Goodb ye',
             'online'
         )
 
