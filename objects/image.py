@@ -76,7 +76,7 @@ class Image:
                     return self
 
                 self.bytes = await r.read()
-                seld.extension = extension
+                self.extension = extension
         except (Exception, TimeoutError) as e:
             if raise_on_error:
                 raise
